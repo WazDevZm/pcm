@@ -1,6 +1,6 @@
 "use client"
 
-import { Lock, Sparkles, ShieldCheck, Wallet, Leaf, Plus, Minus, Mail } from "lucide-react"
+import { Lock, Sparkles, ShieldCheck, Wallet, Leaf, Plus, Minus, Mail, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -8,6 +8,7 @@ import Link from "next/link"
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const sliderImages = [
     "/Slider/KCM_0549.jpg",
@@ -51,9 +52,9 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80" />
         </div>
 
-        <nav className="relative z-10 flex items-center justify-between p-6">
-          <div className="flex items-center gap-4 px-6 py-3 bg-black/60 ring-1 ring-white/30 backdrop-blur rounded-full">
-            <img src="/logo (2).png" alt="Logo 2" className="w-12 h-12 object-contain" />
+        <nav className="relative z-10 flex items-center justify-between p-4 md:p-6">
+          <div className="flex items-center gap-4 px-4 py-2 md:px-6 md:py-3 bg-black/60 ring-1 ring-white/30 backdrop-blur rounded-full">
+            <img src="/logo (2).png" alt="Logo 2" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
           </div>
 
           <div className="hidden md:flex items-center gap-1">
@@ -72,20 +73,59 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <a href="#" className="px-4 py-2 bg-black/40 ring-1 ring-white/20 backdrop-blur rounded-full hover:bg-black/50 transition-colors">
               Member Login
             </a>
             <Button className="bg-white text-black hover:bg-white/90 rounded-full px-6">Get Involved</Button>
           </div>
+
+          <button
+            className="md:hidden p-2 bg-black/60 ring-1 ring-white/30 backdrop-blur rounded-full text-white"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </nav>
+
+        {menuOpen && (
+          <div className="absolute inset-0 z-20 bg-black/95 flex flex-col pt-24 pb-8 px-6 md:hidden">
+            <div className="flex flex-col gap-3 flex-1">
+              {[
+                { name: "Committees", href: "/committees" },
+                { name: "Events", href: "/events" },
+                { name: "Resources", href: "/resources" },
+                { name: "News", href: "/news" },
+                { name: "Support", href: "/support" },
+                { name: "Gallery", href: "/gallery" },
+                { name: "Counseling", href: "/counseling" }
+              ].map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="px-6 py-4 bg-white/10 ring-1 ring-white/20 rounded-xl text-white text-lg font-medium hover:bg-white/20 transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+            <div className="flex flex-col gap-3 mt-6">
+              <a href="#" className="px-6 py-4 bg-white/10 ring-1 ring-white/20 rounded-xl text-white text-center text-lg font-medium">
+                Member Login
+              </a>
+              <Button className="bg-white text-black hover:bg-white/90 rounded-xl py-4 text-lg">Get Involved</Button>
+            </div>
+          </div>
+        )}
 
         <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-6 text-center">
           <div className="mb-6 px-4 py-2 bg-black/40 ring-1 ring-white/20 backdrop-blur rounded-full">
             <span className="text-sm font-medium">Faith • Community • Service</span>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6 text-balance"><strong>Find Your Purpose.</strong></h1>
+          <h1 className="text-4xl sm:text-5xl md:text-8xl font-bold tracking-tight mb-6 text-balance"><strong>Find Your Purpose.</strong></h1>
 
           <p className="text-xl md:text-2xl text-white/90 max-w-4xl mb-12 leading-relaxed text-pretty">
             Join CBU SDA Public Campus Ministries for spiritual growth, community outreach, biblical studies, and meaningful fellowship with fellow believers.
@@ -106,8 +146,8 @@ export default function HomePage() {
           </div>
 
           {/* Logo 2 in bottom right of hero */}
-          <div className="absolute bottom-8 right-8">
-            <img src="/logo (1).png" alt="Logo 2" className="w-24 h-24 object-contain opacity-80" />
+          <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8">
+            <img src="/logo (1).png" alt="Logo 2" className="w-14 h-14 md:w-24 md:h-24 object-contain opacity-80" />
           </div>
         </div>
       </div>
@@ -152,7 +192,7 @@ export default function HomePage() {
 
       <section className="relative z-10 py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="rounded-3xl bg-gray-50 ring-1 ring-gray-200 p-12">
+          <div className="rounded-3xl bg-gray-50 ring-1 ring-gray-200 p-6 md:p-12">
             <div className="text-center mb-16">
               <h2 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 text-balance text-gray-900">Your Faith Journey</h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
@@ -213,7 +253,7 @@ export default function HomePage() {
 
       <section className="relative z-10 py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="rounded-3xl bg-gray-50 ring-1 ring-gray-200 p-12">
+          <div className="rounded-3xl bg-gray-50 ring-1 ring-gray-200 p-6 md:p-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
               <div>
                 <h2 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 text-balance text-gray-900">
@@ -253,7 +293,7 @@ export default function HomePage() {
 
       <section className="relative z-10 py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="rounded-3xl bg-gray-50 ring-1 ring-gray-200 p-12">
+          <div className="rounded-3xl bg-gray-50 ring-1 ring-gray-200 p-6 md:p-12">
             <div className="text-center mb-16">
               <h2 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 text-balance text-gray-900">Connect With Us</h2>
             </div>
@@ -389,7 +429,7 @@ export default function HomePage() {
             <div className="border-t border-gray-800 pt-12 mb-12">
               <div className="max-w-md">
                 <h3 className="text-lg font-semibold mb-4 text-white">Ministry Updates</h3>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="email"
                     placeholder="Enter your email"
