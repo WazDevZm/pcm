@@ -80,10 +80,10 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="animate-pulse">
           <div className="h-8 bg-white/10 rounded w-64 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="h-32 bg-white/10 rounded-lg"></div>
             ))}
@@ -94,29 +94,29 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-white/70">Welcome back! Here's what's happening with your ministry.</p>
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
+        <p className="text-white/70 text-sm md:text-base">Welcome back! Here's what's happening with your ministry.</p>
       </div>
 
       {/* Quick Actions */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <h2 className="text-lg md:text-xl font-semibold mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {quickActions.map((action) => {
             const IconComponent = action.icon
             return (
               <Link
                 key={action.name}
                 href={action.href}
-                className="flex items-center gap-3 p-4 bg-white/5 ring-1 ring-white/10 rounded-lg hover:bg-white/10 transition-colors"
+                className="flex items-center gap-2 md:gap-3 p-3 md:p-4 bg-white/5 ring-1 ring-white/10 rounded-lg hover:bg-white/10 transition-colors"
               >
-                <div className={`p-2 rounded-lg ${action.color}`}>
-                  <IconComponent className="w-5 h-5 text-white" />
+                <div className={`p-2 rounded-lg ${action.color} shrink-0`}>
+                  <IconComponent className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </div>
-                <span className="font-medium">{action.name}</span>
+                <span className="font-medium text-sm md:text-base">{action.name}</span>
               </Link>
             )
           })}
@@ -125,30 +125,30 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="text-lg md:text-xl font-semibold mb-4">Overview</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
           {statCards.map((stat) => {
             const IconComponent = stat.icon
             return (
-              <div key={stat.name} className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-2 rounded-lg bg-white/10`}>
-                    <IconComponent className={`w-6 h-6 ${stat.color}`} />
+              <div key={stat.name} className="bg-white/5 ring-1 ring-white/10 rounded-lg p-4 md:p-6">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <div className="p-2 rounded-lg bg-white/10">
+                    <IconComponent className={`w-5 h-5 md:w-6 md:h-6 ${stat.color}`} />
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-green-400">
-                    <TrendingUp className="w-4 h-4" />
+                  <div className="flex items-center gap-1 text-xs md:text-sm text-green-400">
+                    <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
                     {stat.change}
                   </div>
                 </div>
-                <div className="text-2xl font-bold mb-1">{stat.value}</div>
-                <div className="text-white/70 text-sm">{stat.name}</div>
+                <div className="text-xl md:text-2xl font-bold mb-1">{stat.value}</div>
+                <div className="text-white/70 text-xs md:text-sm">{stat.name}</div>
               </div>
             )
           })}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         {/* Recent Activity */}
         <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
@@ -215,20 +215,20 @@ export default function AdminDashboard() {
       </div>
 
       {/* System Status */}
-      <div className="mt-8 bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
+      <div className="mt-6 md:mt-8 bg-white/5 ring-1 ring-white/10 rounded-lg p-4 md:p-6">
         <h3 className="text-lg font-semibold mb-4">System Status</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-            <span className="text-white/90">Database: Online</span>
+            <div className="w-3 h-3 bg-green-400 rounded-full shrink-0"></div>
+            <span className="text-white/90 text-sm">Database: Online</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-            <span className="text-white/90">Storage: Online</span>
+            <div className="w-3 h-3 bg-green-400 rounded-full shrink-0"></div>
+            <span className="text-white/90 text-sm">Storage: Online</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-            <span className="text-white/90">Email: Online</span>
+            <div className="w-3 h-3 bg-green-400 rounded-full shrink-0"></div>
+            <span className="text-white/90 text-sm">Email: Online</span>
           </div>
         </div>
       </div>

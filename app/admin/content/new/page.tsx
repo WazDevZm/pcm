@@ -79,36 +79,36 @@ export default function NewPostPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Button
             asChild
             variant="outline"
             size="sm"
-            className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"
+            className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50 self-start"
           >
             <Link href="/admin/content">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Content
+              Back
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Create New Post</h1>
-            <p className="text-white/70">Share news, testimonies, and ministry updates</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Create New Post</h1>
+            <p className="text-white/70 text-sm">Share news, testimonies, and ministry updates</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button
             type="button"
             onClick={handlePreview}
             variant="outline"
             className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"
           >
-            <Eye className="w-4 h-4 mr-2" />
-            Preview
+            <Eye className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Preview</span>
           </Button>
           <Button
             form="post-form"
@@ -117,12 +117,12 @@ export default function NewPostPage() {
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Save className="w-4 h-4 mr-2" />
-            {loading ? 'Publishing...' : 'Publish Post'}
+            {loading ? 'Publishing...' : 'Publish'}
           </Button>
         </div>
       </div>
 
-      <form id="post-form" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form id="post-form" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Title */}

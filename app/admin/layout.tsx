@@ -2,12 +2,12 @@
 
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { 
   LayoutDashboard, FileText, Calendar, Users, Image, BookOpen, 
   Heart, HandHeart, MessageCircle, UserCheck, BarChart3, Settings,
-  LogOut, Home
+  LogOut, Home, Menu, X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -33,6 +33,7 @@ export default function AdminLayout({
 }) {
   const { user, profile, loading, signOut } = useAuth()
   const router = useRouter()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && (!user || !profile || !['admin', 'leader'].includes(profile.role))) {
@@ -43,7 +44,10 @@ export default function AdminLayout({
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0B0F12] flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="animate-pulse space-y-4 w-full max-w-md px-8">
+          <div className="h-8 bg-white/10 rounded w-48 mx-auto" />
+          <div className="h-4 bg-white/10 rounded w-32 mx-auto" />
+        </div>
       </div>
     )
   }
@@ -52,70 +56,105 @@ export default function AdminLayout({
     return null
   }
 
-  return (
-    <div className="min-h-screen bg-[#0B0F12] text-white">
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-black/40 backdrop-blur border-r border-white/10 min-h-screen">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-8">
-              <img src="/logo (2).png" alt="Logo" className="w-10 h-10 object-contain" />
-              <div>
-                <h2 className="font-bold text-lg">Admin Panel</h2>
-                <p className="text-white/60 text-sm">CBU SDA Ministry</p>
-              </div>
-            </div>
-
-            <nav className="space-y-2">
-              {adminNavItems.map((item) => {
-                const IconComponent = item.icon
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors group"
-                  >
-                    <IconComponent className="w-5 h-5 text-white/70 group-hover:text-white" />
-                    <span className="text-white/70 group-hover:text-white">{item.name}</span>
-                  </Link>
-                )
-              })}
-            </nav>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10">
-            <div className="mb-4">
-              <p className="text-white/90 font-medium">{profile.name}</p>
-              <p className="text-white/60 text-sm capitalize">{profile.role}</p>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="flex-1 bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"
-              >
-                <Link href="/">
-                  <Home className="w-4 h-4 mr-2" />
-                  Site
-                </Link>
-              </Button>
-              
-              <Button
-                onClick={signOut}
-                variant="outline"
-                size="sm"
-                className="bg-red-500/20 ring-1 ring-red-500/30 backdrop-blur border-0 text-red-200 hover:bg-red-500/30"
-              >
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
+  const SidebarContent = () => (
+    <>
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-8">
+          <img src="/logo (2).png" alt="Logo" className="w-10 h-10 object-contain" />
+          <div>
+            <h2 className="font-bold text-lg">Admin Panel</h2>
+            <p className="text-white/60 text-sm">CBU SDA Ministry</p>
           </div>
         </div>
 
+        <nav className="space-y-1">
+          {adminNavItems.map((item) => {
+            const IconComponent = item.icon
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors group"
+              >
+                <IconComponent className="w-5 h-5 text-white/70 group-hover:text-white" />
+                <span className="text-white/70 group-hover:text-white text-sm">{item.name}</span>
+              </Link>
+            )
+          })}
+        </nav>
+      </div>
+
+      <div className="p-6 border-t border-white/10 mt-auto">
+        <div className="mb-4">
+          <p className="text-white/90 font-medium">{profile.name}</p>
+          <p className="text-white/60 text-sm capitalize">{profile.role}</p>
+        </div>
+        
+        <div className="flex gap-2">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="flex-1 bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"
+          >
+            <Link href="/">
+              <Home className="w-4 h-4 mr-2" />
+              Site
+            </Link>
+          </Button>
+          
+          <Button
+            onClick={signOut}
+            variant="outline"
+            size="sm"
+            className="bg-red-500/20 ring-1 ring-red-500/30 backdrop-blur border-0 text-red-200 hover:bg-red-500/30"
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </>
+  )
+
+  return (
+    <div className="min-h-screen bg-[#0B0F12] text-white">
+      {/* Mobile top bar */}
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-black/60 border-b border-white/10 sticky top-0 z-30">
+        <div className="flex items-center gap-2">
+          <img src="/logo (2).png" alt="Logo" className="w-8 h-8 object-contain" />
+          <span className="font-semibold text-sm">Admin Panel</span>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+          aria-label="Toggle sidebar"
+        >
+          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-20 bg-black/60"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <div className="flex">
+        {/* Desktop sidebar */}
+        <div className="hidden md:flex md:flex-col w-64 bg-black/40 backdrop-blur border-r border-white/10 min-h-screen sticky top-0 h-screen overflow-y-auto">
+          <SidebarContent />
+        </div>
+
+        {/* Mobile sidebar drawer */}
+        <div className={`md:hidden fixed top-0 left-0 z-30 h-full w-64 bg-[#0B0F12] border-r border-white/10 flex flex-col overflow-y-auto transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <SidebarContent />
+        </div>
+
         {/* Main Content */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {children}
         </div>
       </div>

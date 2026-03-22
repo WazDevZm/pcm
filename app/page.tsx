@@ -57,7 +57,7 @@ export default function HomePage() {
             <img src="/logo (2).png" alt="Logo 2" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
           </div>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1 flex-wrap">
             {[
               { name: "Committees", href: "/committees" },
               { name: "Events", href: "/events" },
@@ -65,9 +65,18 @@ export default function HomePage() {
               { name: "News", href: "/news" },
               { name: "Support", href: "/support" },
               { name: "Gallery", href: "/gallery" },
-              { name: "Counseling", href: "/counseling" }
+              { name: "Counseling", href: "/counseling" },
+              { name: "Impact CBU", href: "/impact" },
             ].map((item) => (
-              <Link key={item.name} href={item.href} className="px-4 py-2 bg-black/40 ring-1 ring-white/20 backdrop-blur rounded-full hover:bg-black/50 transition-colors">
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`px-4 py-2 backdrop-blur rounded-full transition-colors text-sm ${
+                  item.name === "Impact CBU"
+                    ? "bg-[#0f2d6e] text-white hover:bg-[#1a3a8f] font-semibold ring-1 ring-sky-400/30"
+                    : "bg-black/40 ring-1 ring-white/20 hover:bg-black/50"
+                }`}
+              >
                 {item.name}
               </Link>
             ))}
@@ -99,12 +108,17 @@ export default function HomePage() {
                 { name: "News", href: "/news" },
                 { name: "Support", href: "/support" },
                 { name: "Gallery", href: "/gallery" },
-                { name: "Counseling", href: "/counseling" }
+                { name: "Counseling", href: "/counseling" },
+                { name: "Impact CBU", href: "/impact" },
               ].map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="px-6 py-4 bg-white/10 ring-1 ring-white/20 rounded-xl text-white text-lg font-medium hover:bg-white/20 transition-colors"
+                  className={`px-6 py-4 rounded-xl text-white text-lg font-medium transition-colors ${
+                    item.name === "Impact CBU"
+                      ? "bg-[#0f2d6e] ring-1 ring-sky-400/30 hover:bg-[#1a3a8f]"
+                      : "bg-white/10 ring-1 ring-white/20 hover:bg-white/20"
+                  }`}
                   onClick={() => setMenuOpen(false)}
                 >
                   {item.name}
@@ -125,9 +139,9 @@ export default function HomePage() {
             <span className="text-sm font-medium">Faith • Community • Service</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-8xl font-bold tracking-tight mb-6 text-balance"><strong>Find Your Purpose.</strong></h1>
+          <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-balance"><strong>Find Your Purpose.</strong></h1>
 
-          <p className="text-xl md:text-2xl text-white/90 max-w-4xl mb-12 leading-relaxed text-pretty">
+          <p className="text-base sm:text-xl md:text-2xl text-white/90 max-w-4xl mb-10 md:mb-12 leading-relaxed text-pretty px-2">
             Join CBU SDA Public Campus Ministries for spiritual growth, community outreach, biblical studies, and meaningful fellowship with fellow believers.
           </p>
 
@@ -254,9 +268,9 @@ export default function HomePage() {
       <section className="relative z-10 py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="rounded-3xl bg-gray-50 ring-1 ring-gray-200 p-6 md:p-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-start">
               <div>
-                <h2 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 text-balance text-gray-900">
+                <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6 text-balance text-gray-900">
                   Frequently Asked Questions
                 </h2>
                 <p className="text-xl text-gray-600 leading-relaxed text-pretty">
@@ -298,8 +312,8 @@ export default function HomePage() {
               <h2 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 text-balance text-gray-900">Connect With Us</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-              <div className="rounded-2xl bg-white text-black p-8 shadow-lg ring-1 ring-gray-200">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-start">
+              <div className="rounded-2xl bg-white text-black p-6 md:p-8 shadow-lg ring-1 ring-gray-200">
                 <h3 className="text-2xl font-bold mb-6">Send an Inquiry</h3>
                 <form className="space-y-6">
                   <div>
