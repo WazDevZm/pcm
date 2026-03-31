@@ -248,7 +248,7 @@ export default function ImpactPage() {
 
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#0f2d6e]/50 ring-1 ring-sky-400/30 rounded-full mb-8">
             <Flame className="w-4 h-4 text-sky-300" />
-            <span className="text-sky-300 text-sm font-semibold tracking-widest uppercase">CBU SDA Campus Ministries</span>
+            <span className="text-sky-300 text-sm font-semibold tracking-widest uppercase">CBU SDA Public Campus Ministries</span>
           </div>
 
           <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight mb-4 leading-none">
@@ -280,11 +280,15 @@ export default function ImpactPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
-            <Button size="lg" className="bg-[#0f2d6e] hover:bg-[#1a3a8f] text-white rounded-full px-10 text-lg font-semibold ring-1 ring-sky-400/30 shadow-lg shadow-[#0f2d6e]/50">
-              Register Now
+            <Button size="lg" className="bg-[#0f2d6e] hover:bg-[#1a3a8f] text-white rounded-full px-10 text-lg font-semibold ring-1 ring-sky-400/30 shadow-lg shadow-[#0f2d6e]/50" asChild>
+              <a href="https://forms.gle/F8CZ42LMRQG4LyC86" target="_blank" rel="noopener noreferrer">
+                Register Now
+              </a>
             </Button>
-            <Button size="lg" variant="outline" className="bg-white/5 border-white/20 text-white hover:bg-white/10 rounded-full px-10 text-lg">
-              Learn More
+            <Button size="lg" className="bg-white/5 border-white/20 text-white hover:bg-white/10 rounded-full px-10 text-lg border" asChild>
+              <Link href="/impact/schedule">
+                Program Schedule
+              </Link>
             </Button>
           </div>
 
@@ -359,9 +363,19 @@ export default function ImpactPage() {
           <Flame className="w-12 h-12 text-sky-300 mx-auto mb-6" />
           <h2 className="text-3xl md:text-5xl font-black mb-4">Your Light Has Come.</h2>
           <p className="text-sky-300/80 text-lg mb-8">April 12–19, 2026 · Copperbelt University</p>
-          <Button size="lg" className="bg-white text-[#0f2d6e] hover:bg-sky-50 rounded-full px-12 text-lg font-bold shadow-xl">
-            Register for Free
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="bg-white text-[#0f2d6e] hover:bg-sky-50 rounded-full px-12 text-lg font-bold shadow-xl">
+              Register for Free
+            </Button>
+            <Button 
+              size="lg" 
+              className="bg-[#0f2d6e] hover:bg-[#1a3a8f] text-white rounded-full px-12 text-lg font-bold shadow-xl ring-1 ring-sky-400/30" asChild
+            >
+              <Link href="/impact/schedule">
+                Program Schedule
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 

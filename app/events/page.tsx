@@ -130,8 +130,10 @@ export default function EventsPage() {
                   </div>
                 </div>
 
-                <Button className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6">
-                  Register Now
+                <Button className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6" asChild>
+                  <a href="https://forms.gle/F8CZ42LMRQG4LyC86" target="_blank" rel="noopener noreferrer">
+                    Register Now
+                  </a>
                 </Button>
               </div>
             ))}
