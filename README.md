@@ -91,7 +91,6 @@ Official repository for the Copperbelt University Seventh-day Adventist Public C
 
 ### Public Features
 - ✅ **Homepage** - Hero section, features, testimonials, newsletter signup
-- ✅ **Impact CBU 2026** - Event landing page with countdown timer and registration
 - 🚧 **Events** - Browse, filter, and register for campus events
 - 🚧 **News & Articles** - Latest ministry updates and blog posts
 - 🚧 **Gallery** - Photo galleries from events and activities
@@ -269,7 +268,6 @@ pcm-website/
 │   ├── counseling/
 │   ├── events/
 │   ├── gallery/
-│   ├── impact/                   # Impact CBU 2026 page
 │   ├── magazines/
 │   ├── news/
 │   ├── prayer-request/

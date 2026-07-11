@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <rect x="50" y="100" width="120" height="12" rx="6" transform="rotate(-25 50 100)" fill="#0f2d6e"/>
+  <rect x="70" y="110" width="120" height="12" rx="6" transform="rotate(-15 70 110)" fill="#1e40af"/>
+  <rect x="90" y="95" width="120" height="12" rx="6" transform="rotate(-5 90 95)" fill="#334155"/>
+  <text x="120" y="200" text-anchor="middle" fill="#64748b" font-size="11" font-family="system-ui">3-pack pens</text>
+</svg>

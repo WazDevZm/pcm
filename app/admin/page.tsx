@@ -7,7 +7,9 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { getPosts, getEvents, getPrayerRequests, getGalleryItems } from '@/lib/database'
+import { ScrollToBottom } from '@/components/ui/scroll-to-bottom'
+import { getPosts, getEvents, getPrayerRequests, getGalleryItems, getVolunteers } from '@/lib/database'
+import { getBands } from '@/lib/bands'
 
 interface DashboardStats {
   totalUsers: number
@@ -15,6 +17,8 @@ interface DashboardStats {
   upcomingEvents: number
   activePrayers: number
   galleryItems: number
+  totalBands: number
+  totalVolunteers: number
   recentActivity: any[]
 }
 
@@ -25,6 +29,8 @@ export default function AdminDashboard() {
     upcomingEvents: 0,
     activePrayers: 0,
     galleryItems: 0,
+    totalBands: 0,
+    totalVolunteers: 0,
     recentActivity: []
   })
   const [loading, setLoading] = useState(true)
@@ -39,17 +45,24 @@ export default function AdminDashboard() {
           getGalleryItems()
         ])
 
+        const bands = await getBands()
+        const volunteers = await getVolunteers()
+        
         setStats({
           totalUsers: 156, // This would come from a user count query
           totalPosts: posts.length,
           upcomingEvents: events.length,
           activePrayers: prayers.length,
           galleryItems: gallery.length,
+          totalBands: bands.length,
+          totalVolunteers: volunteers.length,
           recentActivity: [
             { type: 'post', title: 'New testimony published', time: '2 hours ago' },
             { type: 'event', title: 'Bible Study event created', time: '4 hours ago' },
             { type: 'prayer', title: 'New prayer request submitted', time: '6 hours ago' },
-            { type: 'user', title: 'New user registered', time: '1 day ago' }
+            { type: 'user', title: 'New user registered', time: '1 day ago' },
+            { type: 'volunteer', title: 'New volunteer application', time: '8 hours ago' },
+            { type: 'band', title: 'Welfare Band updated', time: '12 hours ago' }
           ]
         })
       } catch (error) {
@@ -75,7 +88,9 @@ export default function AdminDashboard() {
     { name: 'Upcoming Events', value: stats.upcomingEvents, icon: Calendar, color: 'text-purple-400', change: '+15%' },
     { name: 'Active Prayers', value: stats.activePrayers, icon: Heart, color: 'text-red-400', change: '+5%' },
     { name: 'Gallery Items', value: stats.galleryItems, icon: Image, color: 'text-yellow-400', change: '+20%' },
-    { name: 'Resources', value: 24, icon: BookOpen, color: 'text-indigo-400', change: '+3%' }
+    { name: 'Bands & Committees', value: stats.totalBands, icon: BookOpen, color: 'text-indigo-400', change: '+2%' },
+    { name: 'Volunteers', value: stats.totalVolunteers, icon: Users, color: 'text-pink-400', change: '+18%' },
+    { name: 'Resources', value: 24, icon: BookOpen, color: 'text-cyan-400', change: '+3%' }
   ]
 
   if (loading) {
@@ -94,9 +109,11 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 relative min-h-screen">
+      <ScrollToBottom targetId="dashboard-content" label="Scroll down" />
+      
       {/* Header */}
-      <div className="mb-8">
+      <div id="dashboard-content" className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
         <p className="text-white/70 text-sm md:text-base">Welcome back! Here's what's happening with your ministry.</p>
       </div>
@@ -126,7 +143,7 @@ export default function AdminDashboard() {
       {/* Stats Grid */}
       <div className="mb-8">
         <h2 className="text-lg md:text-xl font-semibold mb-4">Overview</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {statCards.map((stat) => {
             const IconComponent = stat.icon
             return (

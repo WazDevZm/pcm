@@ -1,14 +1,23 @@
-"use client"
+'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
-import { getUser } from '@/lib/database'
-import type { User as UserProfile } from '@/lib/supabase'
+import { createContext, useContext } from 'react'
+import { FRONTEND_ONLY } from '@/lib/config'
+
+export type AuthUser = { id: string; email?: string } | null
+
+export type UserProfile = {
+  id: string
+  email: string
+  name: string
+  role: 'student' | 'leader' | 'admin'
+  phone?: string
+  created_at: string
+  updated_at: string
+} | null
 
 interface AuthContextType {
-  user: User | null
-  profile: UserProfile | null
+  user: AuthUser
+  profile: UserProfile
   loading: boolean
   signOut: () => Promise<void>
 }
@@ -16,8 +25,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
-  loading: true,
-  signOut: async () => {}
+  loading: false,
+  signOut: async () => {},
 })
 
 export const useAuth = () => {
@@ -28,69 +37,19 @@ export const useAuth = () => {
   return context
 }
 
+/** Frontend-only auth stub — no Supabase */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        try {
-          const userProfile = await getUser(session.user.id)
-          setProfile(userProfile)
-        } catch (error) {
-          console.error('Error fetching user profile:', error)
-        }
-      }
-      
-      setLoading(false)
-    }
-
-    getInitialSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null)
-        
-        if (session?.user) {
-          try {
-            const userProfile = await getUser(session.user.id)
-            setProfile(userProfile)
-          } catch (error) {
-            console.error('Error fetching user profile:', error)
-            setProfile(null)
-          }
-        } else {
-          setProfile(null)
-        }
-        
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const signOut = async () => {
-    await supabase.auth.signOut()
+  const value: AuthContextType = {
+    user: null,
+    profile: null,
+    loading: false,
+    signOut: async () => {},
   }
 
-  const value = {
-    user,
-    profile,
-    loading,
-    signOut
+  if (!FRONTEND_ONLY) {
+    // Supabase auth can be re-enabled by setting FRONTEND_ONLY = false
+    // and restoring the previous AuthProvider implementation.
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

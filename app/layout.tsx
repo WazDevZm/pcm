@@ -4,6 +4,8 @@ import { Inter, JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { AuthProvider } from "@/components/auth/AuthProvider"
+import { MerchGlobal } from "@/components/merch/MerchGlobal"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const inter = Inter({
@@ -33,7 +35,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${inter.variable} ${jetbrainsMono.variable}`}>
         <AuthProvider>
-          <Suspense fallback={null}>{children}</Suspense>
+          <MerchGlobal>
+            <Suspense fallback={null}>{children}</Suspense>
+          </MerchGlobal>
+          <Toaster theme="dark" richColors position="top-center" />
         </AuthProvider>
         <Analytics />
       </body>

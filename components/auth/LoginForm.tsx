@@ -3,14 +3,19 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { signIn, signUp } from '@/lib/auth'
-import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
+import { FRONTEND_ONLY } from '@/lib/config'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Mail, Lock, User, Eye, EyeOff, Users, Crown } from 'lucide-react'
 
 interface LoginFormProps {
   onClose?: () => void
 }
 
 export function LoginForm({ onClose }: LoginFormProps) {
+  const router = useRouter()
   const [isLogin, setIsLogin] = useState(true)
+  const [loginType, setLoginType] = useState<'member' | 'leader'>('member')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -33,9 +38,18 @@ export function LoginForm({ onClose }: LoginFormProps) {
       if (isLogin) {
         await signIn(formData.email, formData.password)
         setSuccess('Successfully signed in!')
+        
+        // Redirect based on login type
+        if (loginType === 'leader') {
+          router.push('/band-admin')
+        } else {
+          router.push('/member-dashboard')
+        }
+        
         onClose?.()
       } else {
-        await signUp(formData.email, formData.password, formData.name, formData.role)
+        const role = loginType === 'leader' ? 'leader' : 'student'
+        await signUp(formData.email, formData.password, formData.name, role)
         setSuccess('Account created! Please check your email to verify your account.')
       }
     } catch (err: any) {
@@ -52,6 +66,21 @@ export function LoginForm({ onClose }: LoginFormProps) {
     }))
   }
 
+  if (FRONTEND_ONLY) {
+    return (
+      <div className="w-full max-w-md mx-auto text-center rounded-2xl bg-white/5 ring-1 ring-white/10 p-8">
+        <h2 className="text-2xl font-bold text-white mb-3">Login unavailable</h2>
+        <p className="text-white/70 text-sm mb-6 leading-relaxed">
+          The site is running in frontend-only mode. Member login and admin auth are
+          turned off until Supabase is connected.
+        </p>
+        <Button asChild className="rounded-full bg-white text-black">
+          <Link href="/">Back to home</Link>
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="text-center mb-8">
@@ -62,6 +91,36 @@ export function LoginForm({ onClose }: LoginFormProps) {
           {isLogin ? 'Sign in to your account' : 'Create your account to get started'}
         </p>
       </div>
+
+      {/* Login Type Toggle */}
+      {isLogin && (
+        <div className="flex gap-2 mb-6 p-1 bg-white/5 rounded-lg">
+          <button
+            type="button"
+            onClick={() => setLoginType('member')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
+              loginType === 'member'
+                ? 'bg-white text-black'
+                : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Member Login
+          </button>
+          <button
+            type="button"
+            onClick={() => setLoginType('leader')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
+              loginType === 'leader'
+                ? 'bg-white text-black'
+                : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Crown className="w-4 h-4" />
+            Leader Login
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {!isLogin && (
@@ -130,24 +189,6 @@ export function LoginForm({ onClose }: LoginFormProps) {
           </div>
         </div>
 
-        {!isLogin && (
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-white/90 mb-2">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
-            >
-              <option value="student" className="bg-gray-800">Student</option>
-              <option value="leader" className="bg-gray-800">Ministry Leader</option>
-            </select>
-          </div>
-        )}
-
         {error && (
           <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm">
             {error}
@@ -165,7 +206,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
           disabled={loading}
           className="w-full bg-white text-black hover:bg-white/90 rounded-lg py-3 font-semibold"
         >
-          {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+          {loading ? 'Please wait...' : (isLogin ? `${loginType === 'leader' ? 'Leader' : 'Member'} Sign In` : 'Create Account')}
         </Button>
       </form>
 

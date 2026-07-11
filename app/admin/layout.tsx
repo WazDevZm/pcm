@@ -10,12 +10,13 @@ import {
   LogOut, Home, Menu, X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { FRONTEND_ONLY } from '@/lib/config'
 
 const adminNavItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Content', href: '/admin/content', icon: FileText },
   { name: 'Events', href: '/admin/events', icon: Calendar },
-  { name: 'Committees', href: '/admin/committees', icon: Users },
+  { name: 'Bands', href: '/admin/bands', icon: Users },
   { name: 'Gallery', href: '/admin/gallery', icon: Image },
   { name: 'Resources', href: '/admin/resources', icon: BookOpen },
   { name: 'Prayer Requests', href: '/admin/prayers', icon: Heart },
@@ -36,12 +37,17 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
+    if (FRONTEND_ONLY) return
     if (!loading && (!user || !profile || !['admin', 'leader'].includes(profile.role))) {
       router.push('/')
     }
   }, [user, profile, loading, router])
 
-  if (loading) {
+  const demoProfile = FRONTEND_ONLY
+    ? { name: 'Demo Admin', role: 'admin' as const, email: 'demo@cbusda.org' }
+    : profile
+
+  if (!FRONTEND_ONLY && loading) {
     return (
       <div className="min-h-screen bg-[#0B0F12] flex items-center justify-center">
         <div className="animate-pulse space-y-4 w-full max-w-md px-8">
@@ -52,7 +58,10 @@ export default function AdminLayout({
     )
   }
 
-  if (!user || !profile || !['admin', 'leader'].includes(profile.role)) {
+  if (
+    !FRONTEND_ONLY &&
+    (!user || !profile || !['admin', 'leader'].includes(profile.role))
+  ) {
     return null
   }
 
@@ -86,9 +95,14 @@ export default function AdminLayout({
       </div>
 
       <div className="p-6 border-t border-white/10 mt-auto">
+        {FRONTEND_ONLY && (
+          <p className="mb-3 text-xs text-amber-400/90 rounded-lg bg-amber-500/10 px-3 py-2 ring-1 ring-amber-500/20">
+            Frontend-only mode — changes are not saved to a database.
+          </p>
+        )}
         <div className="mb-4">
-          <p className="text-white/90 font-medium">{profile.name}</p>
-          <p className="text-white/60 text-sm capitalize">{profile.role}</p>
+          <p className="text-white/90 font-medium">{demoProfile?.name ?? 'Admin'}</p>
+          <p className="text-white/60 text-sm capitalize">{demoProfile?.role ?? 'admin'}</p>
         </div>
         
         <div className="flex gap-2">

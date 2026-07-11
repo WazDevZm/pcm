@@ -6,6 +6,7 @@ import type {
 
 // Posts/News/Blog functions
 export const getPosts = async (category?: string, limit?: number) => {
+  if (!supabase) return []
   try {
     let query = supabase
       .from('posts')
@@ -33,6 +34,7 @@ export const getPosts = async (category?: string, limit?: number) => {
 }
 
 export const getPost = async (id: string) => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('posts')
     .select(`
@@ -47,6 +49,7 @@ export const getPost = async (id: string) => {
 }
 
 export const createPost = async (post: Omit<Post, 'id' | 'created_at' | 'updated_at'>) => {
+  if (!supabase) throw new Error('Database disabled in frontend-only mode')
   const { data, error } = await supabase
     .from('posts')
     .insert(post)
@@ -59,6 +62,7 @@ export const createPost = async (post: Omit<Post, 'id' | 'created_at' | 'updated
 
 // Events functions
 export const getEvents = async (category?: string, upcoming?: boolean) => {
+  if (!supabase) return []
   try {
     let query = supabase
       .from('events')
@@ -83,6 +87,7 @@ export const getEvents = async (category?: string, upcoming?: boolean) => {
 }
 
 export const getEvent = async (id: string) => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('events')
     .select('*')
@@ -94,6 +99,7 @@ export const getEvent = async (id: string) => {
 }
 
 export const createEvent = async (event: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'current_attendees'>) => {
+  if (!supabase) throw new Error('Database disabled in frontend-only mode')
   const { data, error } = await supabase
     .from('events')
     .insert({ ...event, current_attendees: 0 })
@@ -105,6 +111,7 @@ export const createEvent = async (event: Omit<Event, 'id' | 'created_at' | 'upda
 }
 
 export const registerForEvent = async (eventId: string, userId: string) => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('event_attendees')
     .insert({ event_id: eventId, user_id: userId })
@@ -121,6 +128,7 @@ export const registerForEvent = async (eventId: string, userId: string) => {
 
 // Committees functions
 export const getCommittees = async () => {
+  if (!supabase) return []
   const { data, error } = await supabase
     .from('committees')
     .select(`
@@ -134,6 +142,7 @@ export const getCommittees = async () => {
 }
 
 export const getCommittee = async (id: string) => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('committees')
     .select(`
@@ -153,6 +162,7 @@ export const getCommittee = async (id: string) => {
 }
 
 export const joinCommittee = async (committeeId: string, userId: string, role: string = 'member') => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('committee_members')
     .insert({ committee_id: committeeId, user_id: userId, role })
@@ -165,6 +175,7 @@ export const joinCommittee = async (committeeId: string, userId: string, role: s
 
 // Prayer requests functions
 export const getPrayerRequests = async (status?: string) => {
+  if (!supabase) return []
   try {
     let query = supabase
       .from('prayer_requests')
@@ -185,6 +196,7 @@ export const getPrayerRequests = async (status?: string) => {
 }
 
 export const createPrayerRequest = async (request: Omit<PrayerRequest, 'id' | 'created_at' | 'updated_at' | 'status'>) => {
+  if (!supabase) throw new Error('Database disabled in frontend-only mode')
   const { data, error } = await supabase
     .from('prayer_requests')
     .insert({ ...request, status: 'active' })
@@ -197,6 +209,7 @@ export const createPrayerRequest = async (request: Omit<PrayerRequest, 'id' | 'c
 
 // Gallery functions
 export const getGalleryItems = async (category?: string) => {
+  if (!supabase) return []
   try {
     let query = supabase
       .from('gallery_items')
@@ -217,6 +230,7 @@ export const getGalleryItems = async (category?: string) => {
 }
 
 export const createGalleryItem = async (item: Omit<GalleryItem, 'id' | 'created_at'>) => {
+  if (!supabase) throw new Error('Database disabled in frontend-only mode')
   const { data, error } = await supabase
     .from('gallery_items')
     .insert(item)
@@ -229,6 +243,7 @@ export const createGalleryItem = async (item: Omit<GalleryItem, 'id' | 'created_
 
 // Resources functions
 export const getResources = async (type?: string) => {
+  if (!supabase) return []
   let query = supabase
     .from('resources')
     .select('*')
@@ -244,6 +259,7 @@ export const getResources = async (type?: string) => {
 }
 
 export const getResource = async (id: string) => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('resources')
     .select('*')
@@ -256,6 +272,7 @@ export const getResource = async (id: string) => {
 
 // Volunteers functions
 export const getVolunteers = async (committeeId?: string) => {
+  if (!supabase) return []
   let query = supabase
     .from('volunteers')
     .select(`
@@ -275,6 +292,7 @@ export const getVolunteers = async (committeeId?: string) => {
 }
 
 export const createVolunteerApplication = async (volunteer: Omit<Volunteer, 'id' | 'created_at' | 'updated_at' | 'status'>) => {
+  if (!supabase) throw new Error('Database disabled in frontend-only mode')
   const { data, error } = await supabase
     .from('volunteers')
     .insert({ ...volunteer, status: 'pending' })
@@ -287,6 +305,7 @@ export const createVolunteerApplication = async (volunteer: Omit<Volunteer, 'id'
 
 // Counseling functions
 export const getCounselingRequests = async (status?: string) => {
+  if (!supabase) return []
   let query = supabase
     .from('counseling_requests')
     .select('*')
@@ -302,6 +321,7 @@ export const getCounselingRequests = async (status?: string) => {
 }
 
 export const createCounselingRequest = async (request: Omit<Counseling, 'id' | 'created_at' | 'updated_at' | 'status'>) => {
+  if (!supabase) throw new Error('Database disabled in frontend-only mode')
   const { data, error } = await supabase
     .from('counseling_requests')
     .insert({ ...request, status: 'pending' })
@@ -314,6 +334,7 @@ export const createCounselingRequest = async (request: Omit<Counseling, 'id' | '
 
 // Donations functions
 export const createDonation = async (donation: Omit<Donation, 'id' | 'created_at' | 'status'>) => {
+  if (!supabase) throw new Error('Database disabled in frontend-only mode')
   const { data, error } = await supabase
     .from('donations')
     .insert({ ...donation, status: 'pending' })
@@ -326,6 +347,7 @@ export const createDonation = async (donation: Omit<Donation, 'id' | 'created_at
 
 // User functions
 export const getUser = async (id: string) => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('users')
     .select('*')
@@ -337,6 +359,7 @@ export const getUser = async (id: string) => {
 }
 
 export const updateUser = async (id: string, updates: Partial<User>) => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('users')
     .update(updates)
@@ -349,6 +372,7 @@ export const updateUser = async (id: string, updates: Partial<User>) => {
 }
 
 export const createUser = async (user: Omit<User, 'created_at' | 'updated_at'>) => {
+  if (!supabase) throw new Error('Database disabled')
   const { data, error } = await supabase
     .from('users')
     .insert(user)

@@ -1,9 +1,13 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { FRONTEND_ONLY } from './config'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+/** Null when FRONTEND_ONLY — avoids loading Supabase on the server */
+export const supabase: SupabaseClient | null = FRONTEND_ONLY
+  ? null
+  : createClient(supabaseUrl, supabaseKey)
 
 // Database Types
 export interface User {
@@ -41,6 +45,7 @@ export interface Event {
   current_attendees: number
   category: 'worship' | 'outreach' | 'study' | 'fellowship' | 'special'
   image_url?: string
+  committee_id?: string | null
   created_by: string
   created_at: string
   updated_at: string
@@ -49,15 +54,51 @@ export interface Event {
 export interface Committee {
   id: string
   name: string
+  slug?: string
   description: string
   focus_area: string
   meeting_time: string
   meeting_location: string
-  leader_id: string
+  leader_id: string | null
   leader?: User
   activities: string[]
+  mission?: string
+  responsibilities?: string
+  how_to_join?: string
+  important_info?: string
+  hero_image_url?: string
+  leader_name?: string
+  leader_position?: string
+  leader_tenure?: string
+  leader_image_url?: string
+  leader_email?: string
+  leader_phone?: string
+  is_band?: boolean
+  sort_order?: number
   created_at: string
   updated_at: string
+}
+
+export type Band = Committee
+
+export interface BandAnnouncement {
+  id: string
+  committee_id: string
+  title: string
+  content: string
+  type: 'announcement' | 'meeting' | 'update'
+  image_url?: string | null
+  author_id?: string | null
+  published_at: string
+  created_at: string
+  updated_at: string
+}
+
+export interface BandAdmin {
+  id: string
+  committee_id: string
+  user_id: string
+  created_at: string
 }
 
 export interface PrayerRequest {

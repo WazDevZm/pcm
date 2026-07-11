@@ -1,80 +1,95 @@
-import { supabase } from './supabase'
-import { createUser } from './database'
+import { FRONTEND_ONLY } from './config'
 
-// Sign up new user
-export const signUp = async (email: string, password: string, name: string, role: 'student' | 'leader' = 'student') => {
+export const signUp = async (
+  email: string,
+  password: string,
+  name: string,
+  role: 'student' | 'leader' = 'student'
+) => {
+  if (FRONTEND_ONLY) throw new Error('Sign up is disabled in frontend-only mode.')
+
+  const { supabase } = await import('./supabase')
+  const { createUser } = await import('./database')
+  if (!supabase) throw new Error('Database not configured')
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      data: {
-        name,
-        role
-      }
-    }
+    options: { data: { name, role } },
   })
 
   if (error) throw error
 
-  // Create user profile in public.users table
   if (data.user) {
     await createUser({
       id: data.user.id,
       email,
       name,
-      role
+      role,
     })
   }
 
   return data
 }
 
-// Sign in user
 export const signIn = async (email: string, password: string) => {
+  if (FRONTEND_ONLY) throw new Error('Login is disabled in frontend-only mode.')
+
+  const { supabase } = await import('./supabase')
+  if (!supabase) throw new Error('Database not configured')
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password
+    password,
   })
-
   if (error) throw error
   return data
 }
 
-// Sign out user
 export const signOut = async () => {
+  if (FRONTEND_ONLY) return
+  const { supabase } = await import('./supabase')
+  if (!supabase) return
   const { error } = await supabase.auth.signOut()
   if (error) throw error
 }
 
-// Get current user
 export const getCurrentUser = async () => {
+  if (FRONTEND_ONLY) return null
+  const { supabase } = await import('./supabase')
+  if (!supabase) return null
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error) throw error
   return user
 }
 
-// Get current session
 export const getCurrentSession = async () => {
+  if (FRONTEND_ONLY) return null
+  const { supabase } = await import('./supabase')
+  if (!supabase) return null
   const { data: { session }, error } = await supabase.auth.getSession()
   if (error) throw error
   return session
 }
 
-// Reset password
 export const resetPassword = async (email: string) => {
+  if (FRONTEND_ONLY) throw new Error('Password reset is disabled in frontend-only mode.')
+  const { supabase } = await import('./supabase')
+  if (!supabase) throw new Error('Database not configured')
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/reset-password`
+    redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/reset-password`,
   })
   if (error) throw error
 }
 
-// Update password
 export const updatePassword = async (password: string) => {
+  if (FRONTEND_ONLY) throw new Error('Password update is disabled in frontend-only mode.')
+  const { supabase } = await import('./supabase')
+  if (!supabase) throw new Error('Database not configured')
   const { error } = await supabase.auth.updateUser({ password })
   if (error) throw error
 }
 
-// Auth state change listener
-export const onAuthStateChange = (callback: (event: string, session: any) => void) => {
-  return supabase.auth.onAuthStateChange(callback)
+export const onAuthStateChange = () => {
+  return { data: { subscription: { unsubscribe: () => {} } } }
 }

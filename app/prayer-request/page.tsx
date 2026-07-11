@@ -1,9 +1,11 @@
 "use client"
 
-import { ArrowLeft, Heart, Send, Shield, Users } from "lucide-react"
+import { Heart, Send, Shield, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { useState } from "react"
+import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
+import { MinistryContent } from "@/components/layout/MinistryContent"
+import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 
 export default function PrayerRequestPage() {
   const [formData, setFormData] = useState({
@@ -14,10 +16,33 @@ export default function PrayerRequestPage() {
     anonymous: false
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
-    console.log('Prayer request submitted:', formData)
+    setSubmitting(true)
+    setError('')
+    try {
+      const categoryMap: Record<string, string> = {
+        health: 'health',
+        academic: 'academic',
+        family: 'family',
+        spiritual: 'ministry',
+        financial: 'personal',
+        career: 'academic',
+        other: 'personal',
+      }
+      // Frontend-only: no API/Supabase — acknowledge locally
+      await new Promise((r) => setTimeout(r, 400))
+      setSubmitted(true)
+      setFormData({ name: '', email: '', requestType: '', message: '', anonymous: false })
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Could not submit request')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const prayerCategories = [
@@ -30,66 +55,18 @@ export default function PrayerRequestPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#0B0F12] text-white">
-      <div className="relative min-h-screen">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url(/Features/KCM_0729.jpg)" }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80" />
-        </div>
-
-        <nav className="relative z-10 flex items-center justify-between p-6">
-          <div className="flex items-center gap-4 px-6 py-3 bg-black/60 ring-1 ring-white/30 backdrop-blur rounded-full">
-            <img src="/logo (2).png" alt="Logo 2" className="w-12 h-12 object-contain" />
-          </div>
-
-          <div className="hidden md:flex items-center gap-1">
-            {[
-              { name: "Programs", href: "/programs" },
-              { name: "Events", href: "/events" },
-              { name: "Magazines", href: "/magazines" },
-              { name: "News", href: "/news" },
-              { name: "Prayer Request", href: "/prayer-request" }
-            ].map((item) => (
-              <Link key={item.name} href={item.href} className="px-4 py-2 bg-black/40 ring-1 ring-white/20 backdrop-blur rounded-full hover:bg-black/50 transition-colors">
-                {item.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link href="/" className="px-4 py-2 bg-black/40 ring-1 ring-white/20 backdrop-blur rounded-full hover:bg-black/50 transition-colors">
-              <ArrowLeft className="w-4 h-4 inline mr-2" />
-              Back to Home
-            </Link>
-          </div>
-        </nav>
-
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-6 text-center">
-          <div className="mb-6 px-4 py-2 bg-black/40 ring-1 ring-white/20 backdrop-blur rounded-full">
-            <span className="text-sm font-medium">Prayer Ministry</span>
-          </div>
-
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6 text-balance"><strong>Prayer Requests</strong></h1>
-
-          <p className="text-xl md:text-2xl text-white/90 max-w-4xl mb-12 leading-relaxed text-pretty">
-            Submit your prayer requests and join our community in lifting each other up in prayer and faith.
-          </p>
-
-          {/* Logo 2 in bottom right of hero */}
-          <div className="absolute bottom-8 right-8">
-            <img src="/logo (2).png" alt="Logo 2" className="w-24 h-24 object-contain opacity-80" />
-          </div>
-        </div>
-      </div>
-
-      {/* Prayer Request Form Section */}
-      <section className="relative z-10 py-24 px-6 bg-white">
+    <MinistryPageShell
+      heroImage="/Features/KCM_0729.jpg"
+      title="Prayer Requests"
+      subtitle="Submit your prayer requests and join our community in lifting each other up in prayer and faith."
+    >
+      <ScrollToBottom targetId="prayer-content" label="Scroll" />
+      <MinistryContent>
+      <section id="prayer-content" className="py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 text-balance text-gray-900">Submit Prayer Request</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-balance text-gray-900">Submit Prayer Request</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto text-pretty">
               Our prayer team is committed to praying for your needs. All requests are kept confidential.
             </p>
           </div>
@@ -108,7 +85,7 @@ export default function PrayerRequestPage() {
                         id="name"
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent"
                         placeholder="Your name"
                       />
                     </div>
@@ -121,7 +98,7 @@ export default function PrayerRequestPage() {
                         id="email"
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent"
                         placeholder="your.email@example.com"
                       />
                     </div>
@@ -135,7 +112,7 @@ export default function PrayerRequestPage() {
                       id="requestType"
                       value={formData.requestType}
                       onChange={(e) => setFormData({...formData, requestType: e.target.value})}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent"
                     >
                       <option value="">Select a category</option>
                       <option value="health">Health & Healing</option>
@@ -157,7 +134,7 @@ export default function PrayerRequestPage() {
                       rows={6}
                       value={formData.message}
                       onChange={(e) => setFormData({...formData, message: e.target.value})}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent resize-none"
                       placeholder="Please share your prayer request..."
                       required
                     />
@@ -169,16 +146,20 @@ export default function PrayerRequestPage() {
                       id="anonymous"
                       checked={formData.anonymous}
                       onChange={(e) => setFormData({...formData, anonymous: e.target.checked})}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-[#0f2d6e] border-gray-300 rounded focus:ring-[#0f2d6e]"
                     />
                     <label htmlFor="anonymous" className="text-sm text-gray-700">
                       Submit this request anonymously
                     </label>
                   </div>
 
-                  <Button type="submit" className="w-full bg-gray-900 text-white hover:bg-gray-800 rounded-lg py-3 font-normal text-base">
+                  {submitted && (
+                    <p className="text-green-700 text-sm text-center">Thank you. Your prayer request has been received.</p>
+                  )}
+                  {error && <p className="text-red-600 text-sm text-center">{error}</p>}
+                  <Button type="submit" disabled={submitting} className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-lg py-3 font-normal text-base">
                     <Send className="w-4 h-4 mr-2" />
-                    Submit Prayer Request
+                    {submitting ? 'Submitting...' : 'Submit Prayer Request'}
                   </Button>
                 </form>
               </div>
@@ -192,7 +173,7 @@ export default function PrayerRequestPage() {
                     const IconComponent = category.icon
                     return (
                       <div key={index} className="flex items-center gap-3 text-gray-700">
-                        <IconComponent className="w-5 h-5" />
+                        <IconComponent className="w-5 h-5 text-[#0f2d6e]" />
                         <span className="text-sm">{category.name}</span>
                       </div>
                     )
@@ -217,22 +198,7 @@ export default function PrayerRequestPage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="relative z-10 py-24 px-6 bg-black">
-        <div className="max-w-7xl mx-auto">
-          <div className="rounded-3xl bg-black ring-1 ring-gray-800 p-12">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-4 mb-6">
-                <img src="/logo (1).png" alt="Logo 1" className="w-8 h-8 object-contain" />
-                <img src="/logo (2).png" alt="Logo 2" className="w-8 h-8 object-contain" />
-                <span className="text-xl font-semibold text-white">CBU SDA Public Campus Ministries</span>
-              </div>
-              <p className="text-gray-400 text-sm">© 2025 CBU SDA Public Campus Ministries</p>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+      </MinistryContent>
+    </MinistryPageShell>
   )
 }
