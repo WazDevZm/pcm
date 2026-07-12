@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props) {
   const band = await getBandBySlug(params.slug)
   if (!band) return { title: 'Band Not Found' }
   return {
-    title: `${band.name} | CBU SDA PCM`,
+    title: `${band.name} | FaithLink`,
     description: band.description,
   }
 }

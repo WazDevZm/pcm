@@ -332,14 +332,14 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
             <OptimizedImage
               src="/logo.png"
-              alt="CBU SDA PCM"
+              alt="FaithLink"
               width={36}
               height={36}
               className="h-9 w-9 rounded-full"
               objectFit="contain"
               priority
             />
-            <span className="hidden sm:inline text-sm font-semibold text-white">CBU SDA PCM</span>
+            <span className="hidden sm:inline text-sm font-semibold text-white">FaithLink</span>
           </Link>
           <Button
             asChild
@@ -363,7 +363,7 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
         >
           <OptimizedImage
             src="/logo.png"
-            alt="CBU SDA PCM"
+            alt="FaithLink"
             width={38}
             height={38}
             className="h-[38px] w-[38px] shrink-0 rounded-full"
@@ -372,10 +372,10 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
           />
           <div className="hidden lg:block min-w-0">
             <span className="block text-sm font-semibold text-white leading-tight truncate">
-              CBU SDA PCM
+              FaithLink
             </span>
             <span className="block text-[10px] text-white/45 leading-tight truncate tracking-wide">
-              Campus Ministries
+              Connecting Faith
             </span>
           </div>
         </Link>
@@ -479,7 +479,7 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
                     className="h-7 w-7 rounded-full"
                     objectFit="contain"
                   />
-                  CBU SDA PCM
+                  FaithLink
                 </SheetTitle>
                 <div className="grid grid-cols-2 gap-2">
                   <Link

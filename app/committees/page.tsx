@@ -15,8 +15,8 @@ const iconMap: Record<string, typeof Users> = {
 }
 
 export const metadata = {
-  title: "Committees & Bands | CBU SDA PCM",
-  description: "Explore ministry committees and bands at CBU SDA Public Campus Ministries.",
+  title: "Committees & Bands | FaithLink",
+  description: "Explore ministry committees and bands at FaithLink.",
 }
 
 export default async function CommitteesPage() {

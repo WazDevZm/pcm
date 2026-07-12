@@ -82,7 +82,7 @@ const stats = [
 
 const faqs = [
   {
-    question: "What ministries does CBU SDA PCM offer?",
+    question: "What ministries does FaithLink offer?",
     answer:
       "We offer Sabbath worship, Bible studies, prayer ministry, evangelism training, counseling, and specialized bands including Bible Study, Welfare, Health, Witnessing, and Publicity.",
   },
@@ -135,12 +135,12 @@ export default function HomePage() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-balance mb-6">
               Find your purpose at{" "}
               <span className="bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
-                CBU Campus Ministries
+                FaithLink
               </span>
             </h1>
 
             <p className="text-lg md:text-xl text-white/75 leading-relaxed max-w-2xl mb-10 text-pretty">
-              Join CBU SDA Public Campus Ministries for spiritual growth, biblical studies,
+              Join FaithLink for spiritual growth, biblical studies,
               meaningful fellowship, and outreach that transforms lives on campus.
             </p>
 
@@ -306,7 +306,7 @@ export default function HomePage() {
               Common questions
             </h2>
             <p className="text-gray-600 leading-relaxed">
-              Everything you need to know about CBU SDA Public Campus Ministries.
+              Everything you need to know about FaithLink.
             </p>
           </div>
 
@@ -376,7 +376,7 @@ export default function HomePage() {
               <p className="text-sm text-gray-600 mb-2">Pastoral care & guidance</p>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <MapPin className="w-4 h-4 shrink-0" />
-                CBU Campus, Kitwe
+                Campus Location
               </div>
             </div>
           </div>

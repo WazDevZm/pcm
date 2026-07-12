@@ -16,8 +16,8 @@ const iconMap: Record<string, typeof BookOpen> = {
 }
 
 export const metadata = {
-  title: 'Bands & Committees | CBU SDA PCM',
-  description: 'Explore ministry bands and committees at CBU SDA Public Campus Ministries.',
+  title: 'Bands & Committees | FaithLink',
+  description: 'Explore ministry bands and committees at FaithLink.',
 }
 
 export default async function BandsPage() {

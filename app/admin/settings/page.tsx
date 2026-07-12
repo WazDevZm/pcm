@@ -11,14 +11,14 @@ import { toast } from 'sonner'
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(false)
   const [settings, setSettings] = useState({
-    siteName: 'CBU SDA PCM',
-    siteDescription: 'Campus Public Campus Ministries',
-    contactEmail: 'info@cbusda.org',
+    siteName: 'FaithLink',
+    siteDescription: 'Connecting faith, community, and service',
+    contactEmail: 'info@faithlink.org',
     contactPhone: '(555) 123-4567',
     socialFacebook: '',
     socialTwitter: '',
     socialInstagram: '',
-    notificationEmail: 'admin@cbusda.org',
+    notificationEmail: 'admin@faithlink.org',
     maintenanceMode: false,
     allowRegistrations: true
   })
