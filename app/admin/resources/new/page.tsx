@@ -20,18 +20,19 @@ export default function NewResourcePage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    type: 'bible_study' as 'bible_study' | 'sermon' | 'devotional' | 'ministry_material',
+    type: 'bible_study' as 'bible_study' | 'sermon' | 'devotional' | 'manual',
     author: '',
     file_url: '',
     external_link: '',
-    category: 'general'
+    category: 'general',
+    level: 'beginner' as 'beginner' | 'intermediate' | 'advanced'
   })
 
   const resourceTypes = [
     { value: 'bible_study', label: 'Bible Study', icon: BookOpen },
     { value: 'sermon', label: 'Sermon', icon: FileText },
     { value: 'devotional', label: 'Devotional', icon: BookOpen },
-    { value: 'ministry_material', label: 'Ministry Material', icon: Video }
+    { value: 'manual', label: 'Ministry Manual', icon: Video }
   ]
 
   const categories = [
@@ -78,7 +79,8 @@ export default function NewResourcePage() {
         author: formData.author,
         file_url: formData.file_url || formData.external_link,
         category: formData.category,
-        created_by: user.id
+        level: formData.level,
+        updated_at: new Date().toISOString()
       })
       
       toast.success('Resource created successfully')

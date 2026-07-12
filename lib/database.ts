@@ -270,6 +270,18 @@ export const getResource = async (id: string) => {
   return data as Resource
 }
 
+export const createResource = async (resource: Omit<Resource, 'id' | 'created_at'>) => {
+  if (!supabase) throw new Error('Database disabled in frontend-only mode')
+  const { data, error } = await supabase
+    .from('resources')
+    .insert(resource)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Resource
+}
+
 // Volunteers functions
 export const getVolunteers = async (committeeId?: string) => {
   if (!supabase) return []
