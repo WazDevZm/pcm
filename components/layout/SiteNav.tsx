@@ -335,7 +335,7 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
               alt="FaithLink"
               width={36}
               height={36}
-              className="h-9 w-9 rounded-full"
+              className="h-9 w-9"
               objectFit="contain"
               priority
             />
@@ -366,7 +366,7 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
             alt="FaithLink"
             width={38}
             height={38}
-            className="h-[38px] w-[38px] shrink-0 rounded-full"
+            className="h-[38px] w-[38px] shrink-0"
             objectFit="contain"
             priority
           />
@@ -476,7 +476,7 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
                     alt=""
                     width={28}
                     height={28}
-                    className="h-7 w-7 rounded-full"
+                    className="h-7 w-7"
                     objectFit="contain"
                   />
                   FaithLink
