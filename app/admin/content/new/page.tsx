@@ -2,17 +2,21 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react'
+import { ArrowLeft, Save, Eye, EyeOff, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { createPost } from '@/lib/database'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { uploadMedia } from '@/lib/data/admin'
+import { toast } from 'sonner'
 
 export default function NewPostPage() {
   const router = useRouter()
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   
   const [formData, setFormData] = useState({
     title: '',
@@ -34,16 +38,24 @@ export default function NewPostPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const result = e.target?.result as string
-        setImagePreview(result)
-        setFormData(prev => ({ ...prev, image_url: result }))
-      }
-      reader.readAsDataURL(file)
+    e.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file')
+      return
+    }
+    setUploading(true)
+    try {
+      const url = await uploadMedia(file, 'posts')
+      setImagePreview(url)
+      setFormData(prev => ({ ...prev, image_url: url }))
+      toast.success('Image uploaded')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? `Upload failed: ${err.message}` : 'Upload failed')
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -60,6 +72,7 @@ export default function NewPostPage() {
     try {
       await createPost({
         ...formData,
+        image_url: formData.image_url || undefined,
         author_id: user.id,
         published_at: new Date().toISOString()
       })
@@ -67,16 +80,12 @@ export default function NewPostPage() {
       router.push('/admin/content')
     } catch (error) {
       console.error('Error creating post:', error)
-      alert('Error creating post. Please try again.')
+      toast.error(error instanceof Error ? error.message : 'Error creating post. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  const handlePreview = () => {
-    // Open preview in new tab/modal
-    console.log('Preview:', formData)
-  }
 
   return (
     <div className="p-4 md:p-8">
@@ -103,17 +112,18 @@ export default function NewPostPage() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Button
             type="button"
-            onClick={handlePreview}
+            onClick={() => setShowPreview(v => !v)}
             variant="outline"
+            aria-pressed={showPreview}
             className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"
           >
-            <Eye className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Preview</span>
+            {showPreview ? <EyeOff className="w-4 h-4 sm:mr-2" /> : <Eye className="w-4 h-4 sm:mr-2" />}
+            <span className="hidden sm:inline">{showPreview ? 'Hide Preview' : 'Preview'}</span>
           </Button>
           <Button
             form="post-form"
             type="submit"
-            disabled={loading}
+            disabled={loading || uploading}
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Save className="w-4 h-4 mr-2" />
@@ -121,6 +131,24 @@ export default function NewPostPage() {
           </Button>
         </div>
       </div>
+
+      {showPreview && (
+        <article className="mb-8 bg-white/5 ring-1 ring-white/10 rounded-lg overflow-hidden">
+          {formData.image_url && (
+            <img src={formData.image_url} alt="" className="w-full max-h-80 object-cover" />
+          )}
+          <div className="p-6 md:p-8">
+            <span className="inline-block px-2 py-1 mb-3 rounded-full text-xs font-medium bg-white/10 text-white/80 capitalize">
+              {formData.category}
+            </span>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">{formData.title || 'Untitled post'}</h2>
+            {formData.excerpt && <p className="text-white/70 mb-6">{formData.excerpt}</p>}
+            <div className="text-white/90 whitespace-pre-wrap leading-relaxed">
+              {formData.content || <span className="text-white/40">No content yet.</span>}
+            </div>
+          </div>
+        </article>
+      )}
 
       <form id="post-form" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Main Content */}
@@ -230,7 +258,7 @@ export default function NewPostPage() {
             ) : (
               <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center">
                 <Upload className="w-8 h-8 text-white/50 mx-auto mb-2" />
-                <p className="text-white/70 text-sm mb-2">Upload an image</p>
+                <p className="text-white/70 text-sm mb-2">{uploading ? 'Uploading...' : 'Upload an image'}</p>
                 <input
                   type="file"
                   accept="image/*"
@@ -241,6 +269,7 @@ export default function NewPostPage() {
                 <Button
                   type="button"
                   onClick={() => document.getElementById('image-upload')?.click()}
+                  disabled={uploading}
                   variant="outline"
                   size="sm"
                   className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"

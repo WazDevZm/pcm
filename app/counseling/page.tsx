@@ -6,19 +6,103 @@ import {
   Shield,
   Phone,
   Mail,
-  MessageCircle,
   User,
   Calendar,
+  Send,
 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/components/auth/AuthProvider"
+import {
+  friendlyError,
+  submitCounselingRequest,
+  type CounselingService,
+} from "@/lib/data/forms"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
 import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 
+const inputClass =
+  "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent"
+
+const SERVICE_OPTIONS: { value: CounselingService; label: string }[] = [
+  { value: "personal", label: "Personal Counseling" },
+  { value: "relationship", label: "Relationship Counseling" },
+  { value: "academic", label: "Academic Stress Support" },
+  { value: "crisis", label: "Crisis Intervention" },
+]
+
 export default function CounselingPage() {
+  const { user, profile } = useAuth()
+  const formRef = useRef<HTMLElement>(null)
+  const emptyForm = {
+    name: "",
+    email: "",
+    phone: "",
+    service_type: "" as CounselingService | "",
+    preferred_counselor: "",
+    message: "",
+  }
+  const [form, setForm] = useState(emptyForm)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState("")
+
+  // Prefill contact details for signed-in members
+  useEffect(() => {
+    if (!profile) return
+    setForm((f) => ({
+      ...f,
+      name: f.name || profile.name || "",
+      email: f.email || profile.email || "",
+      phone: f.phone || profile.phone || "",
+    }))
+  }, [profile])
+
+  const openForm = (preset: Partial<typeof emptyForm> = {}) => {
+    setForm((f) => ({ ...f, ...preset }))
+    setSubmitted(false)
+    setError("")
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.service_type) {
+      setError("Please choose the kind of support you need.")
+      return
+    }
+    setSubmitting(true)
+    setError("")
+    setSubmitted(false)
+    try {
+      await submitCounselingRequest({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || null,
+        service_type: form.service_type,
+        preferred_counselor: form.preferred_counselor || null,
+        message: form.message.trim(),
+        user_id: user?.id ?? null,
+      })
+      setSubmitted(true)
+      setForm({
+        ...emptyForm,
+        name: profile?.name ?? "",
+        email: profile?.email ?? "",
+        phone: profile?.phone ?? "",
+      })
+    } catch (err: unknown) {
+      setError(friendlyError(err))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const counselingServices = [
     {
       title: "Personal Counseling",
+      type: "personal" as CounselingService,
       icon: User,
       description:
         "One-on-one sessions addressing personal struggles, anxiety, depression, and life transitions.",
@@ -28,6 +112,7 @@ export default function CounselingPage() {
     },
     {
       title: "Relationship Counseling",
+      type: "relationship" as CounselingService,
       icon: Heart,
       description:
         "Guidance for dating relationships, friendships, and family conflicts from a Christian perspective.",
@@ -37,6 +122,7 @@ export default function CounselingPage() {
     },
     {
       title: "Academic Stress Support",
+      type: "academic" as CounselingService,
       icon: Shield,
       description:
         "Help managing academic pressure, study habits, and balancing faith with educational goals.",
@@ -46,6 +132,7 @@ export default function CounselingPage() {
     },
     {
       title: "Crisis Intervention",
+      type: "crisis" as CounselingService,
       icon: Phone,
       description:
         "Immediate support for students facing crisis situations or emergency mental health needs.",
@@ -85,24 +172,28 @@ export default function CounselingPage() {
       schedule: "Wednesdays 7:00 PM",
       description: "Peer support group for students dealing with anxiety and depression.",
       facilitator: "Dr. Sarah Johnson",
+      type: "personal" as CounselingService,
     },
     {
       name: "Grief & Loss Support",
       schedule: "Thursdays 6:30 PM",
       description: "Support for students processing loss of loved ones or significant life changes.",
       facilitator: "Pastor Michael Rodriguez",
+      type: "personal" as CounselingService,
     },
     {
       name: "Addiction Recovery",
       schedule: "Fridays 7:00 PM",
       description: "Christ-centered recovery support for various addictions and dependencies.",
       facilitator: "Dr. Emily Chen",
+      type: "personal" as CounselingService,
     },
     {
       name: "Academic Stress Management",
       schedule: "Tuesdays 5:00 PM",
       description: "Strategies for managing academic pressure and maintaining mental health.",
       facilitator: "Dr. Sarah Johnson",
+      type: "academic" as CounselingService,
     },
   ]
 
@@ -117,7 +208,7 @@ export default function CounselingPage() {
         <div className="max-w-4xl mx-auto mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 ring-1 ring-red-200 text-red-800 text-sm font-medium">
             <Phone className="w-4 h-4" />
-            Crisis Hotline: (555) 123-HELP
+            In immediate danger? Contact campus security or local emergency services right away.
           </div>
         </div>
 
@@ -156,7 +247,13 @@ export default function CounselingPage() {
                       <dd className="text-gray-800 text-right">{service.approach}</dd>
                     </div>
                   </dl>
-                  <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">Schedule Appointment</Button>
+                  <Button
+                    type="button"
+                    onClick={() => openForm({ service_type: service.type })}
+                    className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                  >
+                    Schedule Appointment
+                  </Button>
                 </div>
               )
             })}
@@ -189,7 +286,11 @@ export default function CounselingPage() {
                   ))}
                 </div>
                 <p className="text-sm text-gray-600 mb-4">{counselor.education}</p>
-                <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">
+                <Button
+                  type="button"
+                  onClick={() => openForm({ preferred_counselor: counselor.name })}
+                  className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                >
                   Book with {counselor.name.split(" ")[1]}
                 </Button>
               </div>
@@ -219,9 +320,142 @@ export default function CounselingPage() {
                     <dd className="text-gray-800">{group.facilitator}</dd>
                   </div>
                 </dl>
-                <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">Join Group</Button>
+                <Button
+                  type="button"
+                  onClick={() =>
+                    openForm({
+                      service_type: group.type,
+                      preferred_counselor: group.facilitator,
+                      message: `I'd like to join the ${group.name} group (${group.schedule}).`,
+                    })
+                  }
+                  className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                >
+                  Join Group
+                </Button>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section
+          ref={formRef}
+          id="request-form"
+          className="max-w-4xl mx-auto py-12 border-t border-gray-200 scroll-mt-24"
+        >
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Request a Session</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Tell us a little about what you need. A counselor will contact you to arrange a time.
+              Your request is seen only by our counseling team.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="c-name" className="block text-sm font-medium mb-2 text-gray-700">Name</label>
+                  <input
+                    id="c-name"
+                    type="text"
+                    required
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className={inputClass}
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="c-email" className="block text-sm font-medium mb-2 text-gray-700">Email</label>
+                  <input
+                    id="c-email"
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className={inputClass}
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="c-phone" className="block text-sm font-medium mb-2 text-gray-700">Phone (Optional)</label>
+                  <input
+                    id="c-phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className={inputClass}
+                    placeholder="+260 ..."
+                  />
+                </div>
+                <div>
+                  <label htmlFor="c-service" className="block text-sm font-medium mb-2 text-gray-700">Type of Support</label>
+                  <select
+                    id="c-service"
+                    required
+                    value={form.service_type}
+                    onChange={(e) => setForm({ ...form, service_type: e.target.value as CounselingService | "" })}
+                    className={inputClass}
+                  >
+                    <option value="">Select a service</option>
+                    {SERVICE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="c-counselor" className="block text-sm font-medium mb-2 text-gray-700">
+                  Preferred Counselor (Optional)
+                </label>
+                <select
+                  id="c-counselor"
+                  value={form.preferred_counselor}
+                  onChange={(e) => setForm({ ...form, preferred_counselor: e.target.value })}
+                  className={inputClass}
+                >
+                  <option value="">No preference</option>
+                  {counselors.map((c) => (
+                    <option key={c.name} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="c-message" className="block text-sm font-medium mb-2 text-gray-700">How can we help?</label>
+                <textarea
+                  id="c-message"
+                  rows={5}
+                  required
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  className={`${inputClass} resize-none`}
+                  placeholder="Share as much or as little as you're comfortable with..."
+                />
+              </div>
+              {form.service_type === "crisis" && (
+                <p className="rounded-lg bg-red-50 ring-1 ring-red-200 px-4 py-3 text-red-800 text-sm">
+                  If you are in immediate danger, please call the crisis line now rather than waiting for a reply.
+                </p>
+              )}
+              {submitted && (
+                <p role="status" className="rounded-lg bg-green-50 ring-1 ring-green-200 px-4 py-3 text-green-800 text-sm text-center">
+                  Thank you. Your request has been received — our counseling team will be in touch soon.
+                </p>
+              )}
+              {error && (
+                <p role="alert" className="rounded-lg bg-red-50 ring-1 ring-red-200 px-4 py-3 text-red-700 text-sm text-center">
+                  {error}
+                </p>
+              )}
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-lg py-3 font-normal text-base"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {submitting ? "Sending..." : "Send Request"}
+              </Button>
+            </form>
           </div>
         </section>
 
@@ -242,11 +476,9 @@ export default function CounselingPage() {
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
               Taking the first step toward healing and growth is courageous. We&apos;re here to support you.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 max-w-xs mx-auto gap-4 mb-8">
               {[
-                { icon: Phone, label: "Call", value: "(555) 123-CARE" },
                 { icon: Mail, label: "Email", value: "counseling@cbusda.org" },
-                { icon: MessageCircle, label: "Text", value: "(555) 123-TEXT" },
               ].map((item) => (
                 <div key={item.label} className="p-4 rounded-xl bg-[#fafbfc] ring-1 ring-gray-200">
                   <item.icon className="w-7 h-7 text-[#0f2d6e] mx-auto mb-2" />
@@ -256,11 +488,24 @@ export default function CounselingPage() {
               ))}
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full px-8 font-semibold">
+              <Button
+                size="lg"
+                type="button"
+                onClick={() => openForm()}
+                className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full px-8 font-semibold"
+              >
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedule Appointment
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 border-gray-300">
+              <Button
+                size="lg"
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  document.getElementById("counseling-content")?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="rounded-full px-8 border-gray-300"
+              >
                 Learn More
               </Button>
             </div>

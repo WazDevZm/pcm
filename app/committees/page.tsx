@@ -5,6 +5,105 @@ import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
 import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 import { getBands } from "@/lib/bands"
+import { getCommittees } from "@/lib/data/content"
+import { createServerSupabase } from "@/lib/supabase-server"
+import type { Committee } from "@/lib/supabase"
+
+type CommitteeCard = {
+  name: string
+  icon: typeof Users
+  description: string
+  focus: string
+  activities: string[]
+  leader: string
+  meetingTime: string
+}
+
+const FALLBACK: CommitteeCard[] = [
+  {
+    name: "Worship Committee",
+    icon: Music,
+    description:
+      "Leading praise and worship services, organizing music ministry, and coordinating special musical events.",
+    focus: "Music Ministry & Worship",
+    activities: ["Weekly worship services", "Special music events", "Choir coordination"],
+    leader: "Music Director",
+    meetingTime: "Sundays 2:00 PM",
+  },
+  {
+    name: "Bible Study Committee",
+    icon: BookOpen,
+    description:
+      "Organizing Bible study groups, developing curriculum, and facilitating small group discussions.",
+    focus: "Biblical Education & Growth",
+    activities: ["Weekly Bible studies", "Curriculum development", "Small group facilitation"],
+    leader: "Bible Study Coordinator",
+    meetingTime: "Wednesdays 7:00 PM",
+  },
+  {
+    name: "Evangelism Committee",
+    icon: Globe,
+    description:
+      "Campus outreach, community service projects, and sharing the gospel with fellow students.",
+    focus: "Outreach & Mission",
+    activities: ["Campus evangelism", "Community service", "Mission trips"],
+    leader: "Evangelism Director",
+    meetingTime: "Fridays 6:00 PM",
+  },
+  {
+    name: "Fellowship Committee",
+    icon: Users,
+    description:
+      "Building community through social events, welcoming new members, and fostering relationships.",
+    focus: "Community & Relationships",
+    activities: ["Social events", "New member orientation", "Game nights"],
+    leader: "Fellowship Coordinator",
+    meetingTime: "Saturdays 4:00 PM",
+  },
+  {
+    name: "Prayer Ministry",
+    icon: Heart,
+    description:
+      "Coordinating prayer groups, maintaining prayer chains, and providing spiritual support.",
+    focus: "Prayer & Spiritual Support",
+    activities: ["Prayer meetings", "Prayer chains", "Intercessory prayer"],
+    leader: "Prayer Coordinator",
+    meetingTime: "Daily 6:00 AM",
+  },
+  {
+    name: "Media Committee",
+    icon: Mic,
+    description:
+      "Managing digital content, live streaming services, and maintaining online presence.",
+    focus: "Digital Ministry & Communication",
+    activities: ["Live streaming", "Social media management", "Website updates"],
+    leader: "Media Director",
+    meetingTime: "Thursdays 5:00 PM",
+  },
+]
+
+const keywordIcons: [RegExp, typeof Users][] = [
+  [/music|worship|choir|praise/i, Music],
+  [/bible|study/i, BookOpen],
+  [/evangel|outreach|mission/i, Globe],
+  [/prayer|welfare/i, Heart],
+  [/media|tech|sound/i, Mic],
+  [/publicity|communication/i, Megaphone],
+  [/health/i, Activity],
+]
+
+function toCard(c: Committee): CommitteeCard {
+  const icon = keywordIcons.find(([re]) => re.test(c.name))?.[1] ?? Users
+  return {
+    name: c.name,
+    icon,
+    description: c.description,
+    focus: c.focus_area,
+    activities: c.activities ?? [],
+    leader: c.leader_name ?? "",
+    meetingTime: [c.meeting_time, c.meeting_location].filter(Boolean).join(" · "),
+  }
+}
 
 const iconMap: Record<string, typeof Users> = {
   "bible-study-band": BookOpen,
@@ -19,70 +118,12 @@ export const metadata = {
   description: "Explore ministry committees and bands at FaithLink.",
 }
 
+export const revalidate = 60
+
 export default async function CommitteesPage() {
   const bands = await getBands()
-  const legacyCommittees = [
-    {
-      name: "Worship Committee",
-      icon: Music,
-      description:
-        "Leading praise and worship services, organizing music ministry, and coordinating special musical events.",
-      focus: "Music Ministry & Worship",
-      activities: ["Weekly worship services", "Special music events", "Choir coordination"],
-      leader: "Music Director",
-      meetingTime: "Sundays 2:00 PM",
-    },
-    {
-      name: "Bible Study Committee",
-      icon: BookOpen,
-      description:
-        "Organizing Bible study groups, developing curriculum, and facilitating small group discussions.",
-      focus: "Biblical Education & Growth",
-      activities: ["Weekly Bible studies", "Curriculum development", "Small group facilitation"],
-      leader: "Bible Study Coordinator",
-      meetingTime: "Wednesdays 7:00 PM",
-    },
-    {
-      name: "Evangelism Committee",
-      icon: Globe,
-      description:
-        "Campus outreach, community service projects, and sharing the gospel with fellow students.",
-      focus: "Outreach & Mission",
-      activities: ["Campus evangelism", "Community service", "Mission trips"],
-      leader: "Evangelism Director",
-      meetingTime: "Fridays 6:00 PM",
-    },
-    {
-      name: "Fellowship Committee",
-      icon: Users,
-      description:
-        "Building community through social events, welcoming new members, and fostering relationships.",
-      focus: "Community & Relationships",
-      activities: ["Social events", "New member orientation", "Game nights"],
-      leader: "Fellowship Coordinator",
-      meetingTime: "Saturdays 4:00 PM",
-    },
-    {
-      name: "Prayer Ministry",
-      icon: Heart,
-      description:
-        "Coordinating prayer groups, maintaining prayer chains, and providing spiritual support.",
-      focus: "Prayer & Spiritual Support",
-      activities: ["Prayer meetings", "Prayer chains", "Intercessory prayer"],
-      leader: "Prayer Coordinator",
-      meetingTime: "Daily 6:00 AM",
-    },
-    {
-      name: "Media Committee",
-      icon: Mic,
-      description:
-        "Managing digital content, live streaming services, and maintaining online presence.",
-      focus: "Digital Ministry & Communication",
-      activities: ["Live streaming", "Social media management", "Website updates"],
-      leader: "Media Director",
-      meetingTime: "Thursdays 5:00 PM",
-    },
-  ]
+  const live = await getCommittees(createServerSupabase())
+  const legacyCommittees = live ? live.map(toCard) : FALLBACK
 
   return (
     <MinistryPageShell
@@ -133,10 +174,9 @@ export default async function CommitteesPage() {
                       <li key={a}>• {a}</li>
                     ))}
                   </ul>
-                  <p className="text-sm text-gray-500 mb-6">
-                    {committee.leader} · {committee.meetingTime}
+                  <p className="text-sm text-gray-500">
+                    {[committee.leader, committee.meetingTime].filter(Boolean).join(" · ")}
                   </p>
-                  <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">Join Committee</Button>
                 </div>
               )
             })}

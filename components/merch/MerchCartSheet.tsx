@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -19,6 +19,8 @@ import {
   FREE_DELIVERY_THRESHOLD_ZMW,
 } from '@/lib/merch-data'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { friendlyError } from '@/lib/data/forms'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -48,6 +50,7 @@ export function MerchCartSheet() {
     setCartOpen,
     placeOrder,
   } = useMerchCart()
+  const { user, profile, loading: authLoading } = useAuth()
 
   const [step, setStep] = useState<'cart' | 'checkout' | 'done'>('cart')
   const [lastOrder, setLastOrder] = useState<PlacedOrder | null>(null)
@@ -60,19 +63,41 @@ export function MerchCartSheet() {
     notes: '',
     payment: 'mobile-money' as 'mobile-money' | 'cash-on-collection',
   })
+  const [submitting, setSubmitting] = useState(false)
+  const [orderError, setOrderError] = useState('')
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  // Prefill contact details from the signed-in member's profile
+  useEffect(() => {
+    if (!user) return
+    setForm((f) => ({
+      ...f,
+      name: f.name || profile?.name || '',
+      email: f.email || profile?.email || user.email || '',
+      phone: f.phone || profile?.phone || '',
+    }))
+  }, [user, profile])
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault()
-    const order = placeOrder({
-      name: form.name,
-      phone: form.phone,
-      email: form.email || undefined,
-      campus: form.campus,
-      payment: form.payment === 'mobile-money' ? 'Mobile Money (Airtel/MTN)' : 'Cash on collection',
-      notes: form.notes || undefined,
-    })
-    setLastOrder(order)
-    setStep('done')
+    if (submitting) return
+    setSubmitting(true)
+    setOrderError('')
+    try {
+      const order = await placeOrder({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        campus: form.campus,
+        payment: form.payment === 'mobile-money' ? 'Mobile Money (Airtel/MTN)' : 'Cash on collection',
+        notes: form.notes.trim() || undefined,
+      })
+      setLastOrder(order)
+      setStep('done')
+    } catch (err: unknown) {
+      setOrderError(friendlyError(err))
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -80,6 +105,7 @@ export function MerchCartSheet() {
     if (!open) {
       setStep('cart')
       setCopied(false)
+      setOrderError('')
     }
   }
 
@@ -159,6 +185,34 @@ export function MerchCartSheet() {
               Continue shopping
             </Button>
           </div>
+        ) : step === 'checkout' && !user ? (
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <button
+              type="button"
+              onClick={() => setStep('cart')}
+              className="text-sm text-gray-500 hover:text-gray-900"
+            >
+              ← Back to cart
+            </button>
+            {authLoading ? (
+              <p className="text-sm text-gray-500">Checking your account…</p>
+            ) : (
+              <div className="rounded-xl bg-gray-50 ring-1 ring-gray-200 p-5 text-center space-y-4">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Please sign in to place your order. Your cart is saved on this device, and you can
+                  track your order from your account.
+                </p>
+                <Button
+                  asChild
+                  className="w-full h-12 rounded-xl bg-[#0B0F12] hover:bg-[#0B0F12]/90 text-white font-semibold"
+                >
+                  <Link href="/login?next=/merch" onClick={() => setCartOpen(false)}>
+                    Sign in to checkout
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
         ) : step === 'checkout' ? (
           <form onSubmit={handlePlaceOrder} className="flex-1 overflow-y-auto p-5 space-y-4">
             <button
@@ -183,7 +237,8 @@ export function MerchCartSheet() {
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
             />
             <Input
-              placeholder="Email (optional)"
+              placeholder="Email *"
+              required
               type="email"
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
@@ -235,11 +290,18 @@ export function MerchCartSheet() {
               total={totalFormatted}
             />
 
+            {orderError && (
+              <p role="alert" className="rounded-lg bg-red-50 ring-1 ring-red-200 px-3 py-2 text-sm text-red-700">
+                {orderError}
+              </p>
+            )}
+
             <Button
               type="submit"
+              disabled={submitting}
               className="w-full h-12 rounded-xl bg-[#0B0F12] hover:bg-[#0B0F12]/90 text-white font-semibold"
             >
-              Place order · {totalFormatted}
+              {submitting ? 'Placing order…' : `Place order · ${totalFormatted}`}
             </Button>
           </form>
         ) : (

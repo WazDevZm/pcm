@@ -2,17 +2,19 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { signIn, signUp } from '@/lib/auth'
+import { resetPassword, signIn, signUp } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 import { FRONTEND_ONLY } from '@/lib/config'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock, User, Eye, EyeOff, Users, Crown } from 'lucide-react'
 
 interface LoginFormProps {
-  onClose?: () => void
+  /** Where to go after signing in (e.g. the page that sent the user to /login) */
+  next?: string
 }
 
-export function LoginForm({ onClose }: LoginFormProps) {
+export function LoginForm({ next }: LoginFormProps) {
   const router = useRouter()
   const [isLogin, setIsLogin] = useState(true)
   const [loginType, setLoginType] = useState<'member' | 'leader'>('member')
@@ -20,6 +22,8 @@ export function LoginForm({ onClose }: LoginFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [resetting, setResetting] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   
   const [formData, setFormData] = useState({
     email: '',
@@ -39,14 +43,9 @@ export function LoginForm({ onClose }: LoginFormProps) {
         await signIn(formData.email, formData.password)
         setSuccess('Successfully signed in!')
         
-        // Redirect based on login type
-        if (loginType === 'leader') {
-          router.push('/band-admin')
-        } else {
-          router.push('/member-dashboard')
-        }
-        
-        onClose?.()
+        // Back to where the user came from, otherwise their dashboard
+        const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null
+        router.push(safeNext ?? (loginType === 'leader' ? '/band-admin' : '/member-dashboard'))
       } else {
         const role = loginType === 'leader' ? 'leader' : 'student'
         await signUp(formData.email, formData.password, formData.name, role)
@@ -56,6 +55,44 @@ export function LoginForm({ onClose }: LoginFormProps) {
       setError(err.message || 'An error occurred')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    setError('')
+    setSuccess('')
+    const email = formData.email.trim()
+    if (!email) {
+      setError('Enter your email address above, then tap "Forgot your password?" again.')
+      return
+    }
+    setResetting(true)
+    try {
+      await resetPassword(email)
+      setSuccess(`If an account exists for ${email}, we've sent a link to reset your password. Check your inbox.`)
+    } catch {
+      setError("We couldn't send the reset email — please try again later.")
+    } finally {
+      setResetting(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setError('')
+    setSuccess('')
+    if (!supabase) {
+      setError('Sign-in is not available right now — please try again later.')
+      return
+    }
+    setGoogleLoading(true)
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
+    // On success the browser navigates to Google, so only errors land here
+    if (oauthError) {
+      setError("We couldn't start Google sign-in — please try again later.")
+      setGoogleLoading(false)
     }
   }
 
@@ -210,6 +247,24 @@ export function LoginForm({ onClose }: LoginFormProps) {
         </Button>
       </form>
 
+      <div className="flex items-center gap-3 my-6">
+        <div className="h-px flex-1 bg-white/15" />
+        <span className="text-xs uppercase tracking-wider text-white/50">or</span>
+        <div className="h-px flex-1 bg-white/15" />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={googleLoading}
+        className="w-full flex items-center justify-center gap-3 py-3 rounded-lg bg-white/10 border border-white/20 text-white font-medium hover:bg-white/15 transition-colors disabled:opacity-60"
+      >
+        <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.66 4.1-5.5 4.1-3.31 0-6-2.74-6-6.2s2.69-6.2 6-6.2c1.88 0 3.15.8 3.87 1.49l2.64-2.54C16.84 3.2 14.65 2.2 12 2.2 6.48 2.2 2 6.68 2 12s4.48 9.8 10 9.8c5.77 0 9.6-4.06 9.6-9.77 0-.66-.07-1.16-.16-1.66H12z" />
+        </svg>
+        {googleLoading ? 'Redirecting…' : 'Continue with Google'}
+      </button>
+
       <div className="mt-6 text-center">
         <button
           onClick={() => setIsLogin(!isLogin)}
@@ -221,8 +276,13 @@ export function LoginForm({ onClose }: LoginFormProps) {
 
       {isLogin && (
         <div className="mt-4 text-center">
-          <button className="text-white/70 hover:text-white text-sm">
-            Forgot your password?
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            disabled={resetting}
+            className="text-white/70 hover:text-white text-sm disabled:opacity-60"
+          >
+            {resetting ? 'Sending reset link…' : 'Forgot your password?'}
           </button>
         </div>
       )}

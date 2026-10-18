@@ -6,11 +6,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { 
   LayoutDashboard, FileText, Calendar, Users, Image, BookOpen, 
-  Heart, HandHeart, MessageCircle, UserCheck, BarChart3, Settings,
+  Heart, HandHeart, MessageCircle, UserCheck,
   LogOut, Home, Menu, X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FRONTEND_ONLY } from '@/lib/config'
+import { PcmShield } from '@/components/brand/PcmShield'
+import { BRAND } from '@/lib/brand'
 
 const adminNavItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -22,9 +24,7 @@ const adminNavItems = [
   { name: 'Prayer Requests', href: '/admin/prayers', icon: Heart },
   { name: 'Volunteers', href: '/admin/volunteers', icon: HandHeart },
   { name: 'Counseling', href: '/admin/counseling', icon: MessageCircle },
-  { name: 'Users', href: '/admin/users', icon: UserCheck },
-  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-  { name: 'Settings', href: '/admin/settings', icon: Settings }
+  { name: 'Users', href: '/admin/users', icon: UserCheck }
 ]
 
 export default function AdminLayout({
@@ -32,16 +32,16 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, profile, loading, signOut } = useAuth()
+  const { user, profile, loading, isLeader, signOut } = useAuth()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (FRONTEND_ONLY) return
-    if (!loading && (!user || !profile || !['admin', 'leader'].includes(profile.role))) {
+    if (!loading && (!user || !profile || !isLeader)) {
       router.push('/')
     }
-  }, [user, profile, loading, router])
+  }, [user, profile, loading, isLeader, router])
 
   const demoProfile = FRONTEND_ONLY
     ? { name: 'Demo Admin', role: 'admin' as const, email: 'demo@cbusda.org' }
@@ -60,7 +60,7 @@ export default function AdminLayout({
 
   if (
     !FRONTEND_ONLY &&
-    (!user || !profile || !['admin', 'leader'].includes(profile.role))
+    (!user || !profile || !isLeader)
   ) {
     return null
   }
@@ -69,10 +69,10 @@ export default function AdminLayout({
     <>
       <div className="p-6">
         <div className="flex items-center gap-3 mb-8">
-          <img src="/logo (2).png" alt="Logo" className="w-10 h-10 object-contain" />
+          <PcmShield className="h-12" />
           <div>
             <h2 className="font-bold text-lg">Admin Panel</h2>
-            <p className="text-white/60 text-sm">CBU SDA Ministry</p>
+            <p className="text-white/60 text-sm">{BRAND.ministryShort}</p>
           </div>
         </div>
 
@@ -136,7 +136,7 @@ export default function AdminLayout({
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 bg-black/60 border-b border-white/10 sticky top-0 z-30">
         <div className="flex items-center gap-2">
-          <img src="/logo (2).png" alt="Logo" className="w-8 h-8 object-contain" />
+          <PcmShield className="h-8" />
           <span className="font-semibold text-sm">Admin Panel</span>
         </div>
         <button

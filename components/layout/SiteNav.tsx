@@ -35,7 +35,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { OptimizedImage } from '@/components/ui/optimized-image'
+import { HavenLogo, HavenMark } from '@/components/brand/HavenLogo'
+import { PcmShield } from '@/components/brand/PcmShield'
+import { BRAND } from '@/lib/brand'
 import { MerchCartButton } from '@/components/merch/MerchCartSheet'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { FRONTEND_ONLY } from '@/lib/config'
@@ -330,16 +332,9 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
       <header className="relative z-[100] w-full">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <OptimizedImage
-              src="/logo.png"
-              alt="FaithLink"
-              width={36}
-              height={36}
-              className="h-9 w-9"
-              objectFit="contain"
-              priority
-            />
-            <span className="hidden sm:inline text-sm font-semibold text-white">FaithLink</span>
+            <HavenLogo tone="onDark" markClassName="h-9 w-9" className="text-sm" />
+            <span className="h-7 w-px bg-white/15" aria-hidden />
+            <PcmShield className="h-9" />
           </Link>
           <Button
             asChild
@@ -361,23 +356,17 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
           href="/"
           className="flex items-center gap-2.5 shrink-0 min-w-0 mr-1 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-white/30"
         >
-          <OptimizedImage
-            src="/logo.png"
-            alt="FaithLink"
-            width={38}
-            height={38}
-            className="h-[38px] w-[38px] shrink-0"
-            objectFit="contain"
-            priority
-          />
+          <HavenMark tone="onDark" className="h-[38px] w-[38px]" title={BRAND.name} />
           <div className="hidden lg:block min-w-0">
             <span className="block text-sm font-semibold text-white leading-tight truncate">
-              FaithLink
+              {BRAND.name}
             </span>
             <span className="block text-[10px] text-white/45 leading-tight truncate tracking-wide">
-              Connecting Faith
+              {BRAND.tagline}
             </span>
           </div>
+          <span className="h-7 w-px bg-white/15" aria-hidden />
+          <PcmShield className="h-[38px]" priority />
         </Link>
 
         <nav className="hidden lg:flex flex-1 items-center justify-center min-w-0" aria-label="Main">
@@ -471,15 +460,9 @@ export function SiteNav({ variant = 'default' }: { variant?: 'default' | 'minima
             >
               <SheetHeader className="border-b border-white/10 px-4 py-4 text-left space-y-3">
                 <SheetTitle className="text-white flex items-center gap-2.5 text-base">
-                  <OptimizedImage
-                    src="/logo.png"
-                    alt=""
-                    width={28}
-                    height={28}
-                    className="h-7 w-7"
-                    objectFit="contain"
-                  />
-                  FaithLink
+                  <HavenMark tone="onDark" className="h-7 w-7" />
+                  {BRAND.name}
+                  <PcmShield className="ml-auto h-8" />
                 </SheetTitle>
                 <div className="grid grid-cols-2 gap-2">
                   <Link

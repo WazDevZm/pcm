@@ -11,10 +11,11 @@ import {
 import type { MerchColor, MerchSize } from '@/lib/merch-data'
 import {
   formatZmw,
-  generateOrderId,
   DELIVERY_FEE_ZMW,
   FREE_DELIVERY_THRESHOLD_ZMW,
 } from '@/lib/merch-data'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { placeMerchOrder } from '@/lib/data/forms'
 
 export type CartLine = {
   lineId: string
@@ -38,7 +39,7 @@ export type PlacedOrder = {
   customer: {
     name: string
     phone: string
-    email?: string
+    email: string
     campus: string
     payment: string
     notes?: string
@@ -65,15 +66,14 @@ type MerchCartContextValue = {
   clearCart: () => void
   cartOpen: boolean
   setCartOpen: (open: boolean) => void
-  placeOrder: (customer: PlacedOrder['customer']) => PlacedOrder
-  orders: PlacedOrder[]
+  /** Writes the order to Supabase (orders table). Requires a signed-in user; throws on failure. */
+  placeOrder: (customer: PlacedOrder['customer']) => Promise<PlacedOrder>
   wishlist: string[]
   toggleWishlist: (productId: string) => void
   isInWishlist: (productId: string) => boolean
 }
 
 const CART_KEY = 'pcm-merch-cart'
-const ORDERS_KEY = 'pcm-merch-orders'
 const WISHLIST_KEY = 'pcm-merch-wishlist'
 const PROMO_CODES: Record<string, number> = {
   PCM10: 0.1,
@@ -93,8 +93,8 @@ function loadJson<T>(key: string, fallback: T): T {
 }
 
 export function MerchCartProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
   const [items, setItems] = useState<CartLine[]>([])
-  const [orders, setOrders] = useState<PlacedOrder[]>([])
   const [wishlist, setWishlist] = useState<string[]>([])
   const [cartOpen, setCartOpen] = useState(false)
   const [hydrated, setHydrated] = useState(false)
@@ -104,7 +104,10 @@ export function MerchCartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setItems(loadJson(CART_KEY, []))
-    setOrders(loadJson(ORDERS_KEY, []))
+    // Orders now live in Supabase; drop the old local copy
+    try {
+      localStorage.removeItem('pcm-merch-orders')
+    } catch {}
     setWishlist(loadJson(WISHLIST_KEY, []))
     setHydrated(true)
   }, [])
@@ -113,11 +116,6 @@ export function MerchCartProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated) return
     localStorage.setItem(CART_KEY, JSON.stringify(items))
   }, [items, hydrated])
-
-  useEffect(() => {
-    if (!hydrated) return
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders))
-  }, [orders, hydrated])
 
   useEffect(() => {
     if (!hydrated) return
@@ -214,9 +212,37 @@ export function MerchCartProvider({ children }: { children: React.ReactNode }) {
   )
 
   const placeOrder = useCallback(
-    (customer: PlacedOrder['customer']): PlacedOrder => {
+    async (customer: PlacedOrder['customer']): Promise<PlacedOrder> => {
+      if (!user) throw new Error('Please sign in to place an order.')
+      if (items.length === 0) throw new Error('Your cart is empty.')
+
+      const extras = [
+        `Pickup: ${customer.campus}`,
+        `Payment: ${customer.payment}`,
+        discountZmw > 0 ? `Discount: -${formatZmw(discountZmw)}` : null,
+        deliveryZmw > 0 ? `Delivery: ${formatZmw(deliveryZmw)}` : null,
+        customer.notes ? `Notes: ${customer.notes}` : null,
+      ].filter(Boolean)
+
+      const { reference } = await placeMerchOrder({
+        user_id: user.id,
+        customer_name: customer.name,
+        customer_email: customer.email,
+        customer_phone: customer.phone,
+        pickup_note: extras.join(' · '),
+        items: items.map((i) => ({
+          product_slug: i.productSlug,
+          name: i.productName,
+          size: i.size ?? null,
+          color: i.color?.name ?? null,
+          quantity: i.quantity,
+          unit_price_zmw: i.priceZmw,
+        })),
+        total_zmw: totalZmw,
+      })
+
       const order: PlacedOrder = {
-        orderId: generateOrderId(),
+        orderId: reference,
         items: [...items],
         subtotalZmw,
         deliveryZmw,
@@ -225,14 +251,13 @@ export function MerchCartProvider({ children }: { children: React.ReactNode }) {
         customer,
         placedAt: new Date().toISOString(),
       }
-      setOrders((prev) => [order, ...prev])
       clearCart()
       setAppliedPromo(null)
       setPromoCode('')
       setPromoMessage(null)
       return order
     },
-    [items, subtotalZmw, deliveryZmw, discountZmw, totalZmw, clearCart]
+    [user, items, subtotalZmw, deliveryZmw, discountZmw, totalZmw, clearCart]
   )
 
   const itemCount = useMemo(
@@ -260,7 +285,6 @@ export function MerchCartProvider({ children }: { children: React.ReactNode }) {
     cartOpen,
     setCartOpen,
     placeOrder,
-    orders,
     wishlist,
     toggleWishlist,
     isInWishlist,

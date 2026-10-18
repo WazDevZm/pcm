@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { createGalleryItem } from '@/lib/database'
-import { uploadImage } from '@/lib/storage'
+import { uploadMedia } from '@/lib/data/admin'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { toast } from 'sonner'
 
@@ -28,7 +28,7 @@ export default function GalleryUploadPage() {
     const file = e.target.files?.[0]
     if (!file) return
     try {
-      const url = await uploadImage(file, 'gallery')
+      const url = await uploadMedia(file, 'gallery')
       setImageUrl(url)
       toast.success('Image uploaded')
     } catch (err: unknown) {

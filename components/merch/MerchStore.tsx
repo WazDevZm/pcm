@@ -84,7 +84,7 @@ export function MerchStore() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-14 md:pb-20 pt-2 md:pt-4">
             <div className="max-w-2xl">
               <p className="text-sky-300 text-sm font-semibold uppercase tracking-wider mb-3">
-                CBU-PCM Official Store
+                PCM Official Store
               </p>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-balance">
                 Ministry Merch Shop

@@ -3,14 +3,30 @@
 import { Heart, Users, DollarSign, Gift, HandHeart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useState } from "react"
+import { BRAND } from "@/lib/brand"
+import type { DonationType } from "@/lib/data/forms"
+import { PledgeForm, VolunteerApplyForm } from "./SupportForms"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
 import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 
 export default function SupportPage() {
+  const [volunteerRole, setVolunteerRole] = useState<string | null>(null)
+  const [pledgeFor, setPledgeFor] = useState<string | null>(null)
+
+  const joinPrayerTeam = () => {
+    setVolunteerRole("Prayer Team")
+    setTimeout(
+      () => document.getElementById("prayer-team-apply")?.scrollIntoView({ behavior: "smooth", block: "center" }),
+      50
+    )
+  }
+
   const volunteerOpportunities = [
     {
       title: "Worship Team",
+      hours: 2,
       icon: Heart,
       description: "Join our music ministry as a vocalist, instrumentalist, or sound technician.",
       commitment: "2-3 hours/week",
@@ -19,6 +35,7 @@ export default function SupportPage() {
     },
     {
       title: "Bible Study Leader",
+      hours: 3,
       icon: Users,
       description: "Lead small group Bible studies and mentor new believers.",
       commitment: "3-4 hours/week",
@@ -27,6 +44,7 @@ export default function SupportPage() {
     },
     {
       title: "Campus Outreach",
+      hours: 4,
       icon: HandHeart,
       description: "Share the gospel through campus events and personal evangelism.",
       commitment: "4-5 hours/week",
@@ -35,6 +53,7 @@ export default function SupportPage() {
     },
     {
       title: "Media Ministry",
+      hours: 2,
       icon: Gift,
       description: "Help with live streaming, social media, and digital content creation.",
       commitment: "2-3 hours/week",
@@ -46,24 +65,28 @@ export default function SupportPage() {
   const contributionOptions = [
     {
       title: "Monthly Partnership",
+      type: "monthly" as DonationType,
       amount: "$25-100/month",
       description: "Become a regular supporter of our campus ministry programs and activities.",
       benefits: ["Monthly ministry updates", "Prayer request notifications", "Special events access"]
     },
     {
       title: "Event Sponsorship",
+      type: "event_sponsorship" as DonationType,
       amount: "$100-500",
       description: "Sponsor specific events like evangelistic series, retreats, or community service projects.",
       benefits: ["Event recognition", "Impact reports", "Photo updates"]
     },
     {
       title: "Student Support",
+      type: "student_support" as DonationType,
       amount: "$50-200",
       description: "Help cover costs for students attending conferences, retreats, or mission trips.",
       benefits: ["Student testimonials", "Thank you notes", "Progress updates"]
     },
     {
       title: "Ministry Resources",
+      type: "one_time" as DonationType,
       amount: "$20-100",
       description: "Fund Bible study materials, devotional books, and evangelistic literature.",
       benefits: ["Resource lists", "Distribution reports", "Student feedback"]
@@ -165,9 +188,21 @@ export default function SupportPage() {
                     </div>
                   </div>
                   
-                  <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">
-                    Apply to Volunteer
-                  </Button>
+                  {volunteerRole === opportunity.title ? (
+                    <VolunteerApplyForm
+                      role={opportunity.title}
+                      defaultHours={opportunity.hours}
+                      onCancel={() => setVolunteerRole(null)}
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={() => setVolunteerRole(opportunity.title)}
+                      className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                    >
+                      Apply to Volunteer
+                    </Button>
+                  )}
                 </div>
               )
             })}
@@ -206,9 +241,21 @@ export default function SupportPage() {
                   </ul>
                 </div>
                 
-                <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">
-                  Contribute
-                </Button>
+                {pledgeFor === option.title ? (
+                  <PledgeForm
+                    type={option.type}
+                    purpose={option.title}
+                    onCancel={() => setPledgeFor(null)}
+                  />
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={() => setPledgeFor(option.title)}
+                    className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                  >
+                    Pledge Support
+                  </Button>
+                )}
               </div>
             ))}
           </div>
@@ -228,13 +275,23 @@ export default function SupportPage() {
               ministry activities, and the spread of the gospel on campus.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-white text-[#0f2d6e] hover:bg-white/90 rounded-full px-8 font-semibold shadow-lg">
+              <Button
+                size="lg"
+                type="button"
+                onClick={joinPrayerTeam}
+                className="bg-white text-[#0f2d6e] hover:bg-white/90 rounded-full px-8 font-semibold shadow-lg"
+              >
                 Join Prayer Team
               </Button>
               <Button size="lg" variant="outline" className="border-2 border-white/40 text-white hover:bg-white/15 hover:border-white/60 rounded-full px-8 font-semibold" asChild>
                 <Link href="/prayer-request">Submit Prayer Request</Link>
               </Button>
             </div>
+            {volunteerRole === "Prayer Team" && (
+              <div id="prayer-team-apply" className="mt-8 text-left text-gray-900 max-w-xl mx-auto">
+                <VolunteerApplyForm role="Prayer Team" defaultHours={1} onCancel={() => setVolunteerRole(null)} />
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -248,11 +305,11 @@ export default function SupportPage() {
               Contact our ministry team to learn more about volunteer opportunities and how you can support our mission.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full px-8 font-semibold">
-                Contact Ministry Team
+              <Button size="lg" className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full px-8 font-semibold" asChild>
+                <a href={`mailto:${BRAND.email}?subject=${encodeURIComponent("Getting involved")}`}>Contact Ministry Team</a>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 border-gray-300">
-                Schedule Meeting
+              <Button size="lg" variant="outline" className="rounded-full px-8 border-gray-300" asChild>
+                <a href={`mailto:${BRAND.email}?subject=${encodeURIComponent("Meeting request")}`}>Schedule Meeting</a>
               </Button>
             </div>
           </div>

@@ -1,15 +1,18 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar, MapPin, Users } from 'lucide-react'
+import { Plus, Search, Filter, Trash2, Calendar, MapPin, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { getEvents } from '@/lib/database'
+import { listEvents, deleteEvent } from '@/lib/data/admin'
+import { toast } from 'sonner'
 import type { Event } from '@/lib/supabase'
 
 export default function EventsDashboard() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
@@ -23,19 +26,25 @@ export default function EventsDashboard() {
   ]
 
   useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        const data = await getEvents()
-        setEvents(data)
-      } catch (error) {
-        console.error('Error loading events:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadEvents()
+    listEvents()
+      .then(setEvents)
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Could not load events.'))
+      .finally(() => setLoading(false))
   }, [])
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return
+    setDeletingId(id)
+    try {
+      await deleteEvent(id)
+      setEvents((prev) => prev.filter((x) => x.id !== id))
+      toast.success('Event deleted')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Could not delete event')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -85,6 +94,12 @@ export default function EventsDashboard() {
           </Link>
         </Button>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/10 ring-1 ring-red-500/20 rounded-lg text-sm text-red-200">
+          Could not load events: {error}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -175,20 +190,9 @@ export default function EventsDashboard() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50 p-2"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50 p-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
+                    onClick={() => handleDelete(event.id, event.title)}
+                    disabled={deletingId === event.id}
+                    aria-label={`Delete ${event.title}`}
                     className="bg-red-500/20 ring-1 ring-red-500/30 backdrop-blur border-0 text-red-200 hover:bg-red-500/30 p-2"
                   >
                     <Trash2 className="w-4 h-4" />

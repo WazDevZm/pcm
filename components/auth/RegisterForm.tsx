@@ -136,21 +136,9 @@ export function RegisterForm({ onClose }: RegisterFormProps) {
           </div>
         </div>
 
-        <div>
-          <label htmlFor="role" className="block text-sm font-medium text-white/90 mb-2">
-            I am a
-          </label>
-          <select
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
-          >
-            <option value="student" className="bg-gray-800">Student</option>
-            <option value="leader" className="bg-gray-800">Ministry Leader</option>
-          </select>
-        </div>
+        <p className="text-sm text-white/70">
+          Ministry leaders: create your account, then ask a Haven admin to give you leader access.
+        </p>
 
         {error && (
           <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm">

@@ -9,25 +9,17 @@ export const signUp = async (
   if (FRONTEND_ONLY) throw new Error('Sign up is disabled in frontend-only mode.')
 
   const { supabase } = await import('./supabase')
-  const { createUser } = await import('./database')
   if (!supabase) throw new Error('Database not configured')
 
+  // The on_auth_user_created trigger creates the profile row as a student.
+  // Leader and admin access is granted by an admin (Users & roles in the app, or SQL).
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name, role } },
+    options: { data: { name, requested_role: role } },
   })
 
   if (error) throw error
-
-  if (data.user) {
-    await createUser({
-      id: data.user.id,
-      email,
-      name,
-      role,
-    })
-  }
 
   return data
 }
@@ -88,8 +80,4 @@ export const updatePassword = async (password: string) => {
   if (!supabase) throw new Error('Database not configured')
   const { error } = await supabase.auth.updateUser({ password })
   if (error) throw error
-}
-
-export const onAuthStateChange = () => {
-  return { data: { subscription: { unsubscribe: () => {} } } }
 }

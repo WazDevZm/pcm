@@ -10,12 +10,14 @@ import Link from 'next/link'
 import { createResource } from '@/lib/database'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { toast } from 'sonner'
+import { uploadMedia } from '@/lib/data/admin'
 
 export default function NewResourcePage() {
   const router = useRouter()
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadedName, setUploadedName] = useState<string | null>(null)
   
   const [formData, setFormData] = useState({
     title: '',
@@ -48,27 +50,35 @@ export default function NewResourcePage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const result = e.target?.result as string
-        setImagePreview(result)
-        setFormData(prev => ({ ...prev, file_url: result }))
-      }
-      reader.readAsDataURL(file)
+    if (!file) return
+    setUploading(true)
+    try {
+      const url = await uploadMedia(file, 'resources')
+      setFormData(prev => ({ ...prev, file_url: url }))
+      setUploadedName(file.name)
+      toast.success('File uploaded')
+    } catch (err: unknown) {
+      e.target.value = ''
+      toast.error(err instanceof Error ? `Upload failed: ${err.message}` : 'Upload failed')
+    } finally {
+      setUploading(false)
     }
   }
 
-  const removeImage = () => {
-    setImagePreview(null)
+  const removeFile = () => {
+    setUploadedName(null)
     setFormData(prev => ({ ...prev, file_url: '' }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) return
+    if (!formData.file_url && !formData.external_link.trim()) {
+      toast.error('Upload a file or add an external link')
+      return
+    }
 
     setLoading(true)
     try {
@@ -77,7 +87,7 @@ export default function NewResourcePage() {
         description: formData.description,
         type: formData.type,
         author: formData.author,
-        file_url: formData.file_url || formData.external_link,
+        file_url: formData.file_url || formData.external_link.trim(),
         category: formData.category,
         level: formData.level,
         updated_at: new Date().toISOString()
@@ -87,7 +97,7 @@ export default function NewResourcePage() {
       router.push('/admin/resources')
     } catch (error) {
       console.error('Error creating resource:', error)
-      toast.error('Failed to create resource')
+      toast.error(error instanceof Error ? error.message : 'Failed to create resource')
     } finally {
       setLoading(false)
     }
@@ -117,7 +127,7 @@ export default function NewResourcePage() {
         <Button
           form="resource-form"
           type="submit"
-          disabled={loading}
+          disabled={loading || uploading}
           className="bg-blue-600 hover:bg-blue-700"
         >
           <Save className="w-4 h-4 mr-2" />
@@ -185,12 +195,23 @@ export default function NewResourcePage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs text-white/60 mb-2">Upload File</label>
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx"
-                  onChange={handleFileUpload}
-                  className="bg-white/10 border-white/20"
-                />
+                {uploadedName ? (
+                  <div className="flex items-center justify-between gap-3 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-sm">
+                    <span className="truncate">{uploadedName}</span>
+                    <button type="button" onClick={removeFile} aria-label="Remove file" className="p-1 rounded-full bg-red-500 text-white hover:bg-red-600 shrink-0">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <Input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,image/*"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                    className="bg-white/10 border-white/20"
+                  />
+                )}
+                {uploading && <p className="text-xs text-white/60 mt-2">Uploading...</p>}
               </div>
               
               <div className="text-center text-white/40 text-sm">or</div>
