@@ -1,17 +1,18 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar, User, Tag } from 'lucide-react'
+import { Plus, Search, Filter, Trash2, Calendar, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { getPosts } from '@/lib/database'
-import type { Post, User as UserType } from '@/lib/supabase'
-
-type PostWithAuthor = Post & { author: Pick<UserType, 'name' | 'email'> }
+import { listPosts, deletePost } from '@/lib/data/admin'
+import { toast } from 'sonner'
+import type { AdminPost } from '@/lib/data/admin'
 
 export default function ContentDashboard() {
-  const [posts, setPosts] = useState<PostWithAuthor[]>([])
+  const [posts, setPosts] = useState<AdminPost[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
@@ -24,19 +25,25 @@ export default function ContentDashboard() {
   ]
 
   useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        const data = await getPosts()
-        setPosts(data)
-      } catch (error) {
-        console.error('Error loading posts:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadPosts()
+    listPosts()
+      .then(setPosts)
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Could not load posts.'))
+      .finally(() => setLoading(false))
   }, [])
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return
+    setDeletingId(id)
+    try {
+      await deletePost(id)
+      setPosts((prev) => prev.filter((x) => x.id !== id))
+      toast.success('Post deleted')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Could not delete post')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -85,6 +92,12 @@ export default function ContentDashboard() {
           </Link>
         </Button>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/10 ring-1 ring-red-500/20 rounded-lg text-sm text-red-200">
+          Could not load posts: {error}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -171,20 +184,9 @@ export default function ContentDashboard() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50 p-2"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50 p-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
+                    onClick={() => handleDelete(post.id, post.title)}
+                    disabled={deletingId === post.id}
+                    aria-label={`Delete ${post.title}`}
                     className="bg-red-500/20 ring-1 ring-red-500/30 backdrop-blur border-0 text-red-200 hover:bg-red-500/30 p-2"
                   >
                     <Trash2 className="w-4 h-4" />

@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { HavenLogo } from '@/components/brand/HavenLogo'
+import { PcmEndorsement } from '@/components/brand/PcmShield'
+import { BRAND } from '@/lib/brand'
 
 const footerLinks = {
   ministries: [
@@ -14,7 +16,8 @@ const footerLinks = {
     { label: 'Gallery', href: '/gallery' },
   ],
   connect: [
-    { label: 'PCM Merch', href: '/merch' },
+    { label: 'Haven Merch', href: '/merch' },
+    { label: 'Posters', href: '/posters' },
     { label: 'Get Involved', href: '/support' },
     { label: 'News', href: '/news' },
     { label: 'Committees', href: '/committees' },
@@ -27,18 +30,14 @@ export function HomeFooter() {
       <div className="max-w-7xl mx-auto px-6 py-16 md:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
           <div className="lg:col-span-5">
-            <Link href="/" className="inline-flex items-center gap-3 mb-6">
-              <Image src="/icon.svg" alt="" width={40} height={40} className="w-10 h-10" />
-              <span className="font-semibold text-lg leading-tight">
-                CBU SDA
-                <br />
-                <span className="text-white/60 font-normal text-sm">Public Campus Ministries</span>
-              </span>
+            <Link href="/" className="inline-flex items-center mb-6">
+              <HavenLogo tone="onDark" showTagline markClassName="h-10 w-10" className="text-lg" />
             </Link>
             <p className="text-white/55 text-sm leading-relaxed max-w-sm">
-              Proclaiming the everlasting gospel and preparing students for Christ&apos;s return
-              through worship, study, fellowship, and service on campus.
+              A shelter for every student — proclaiming the everlasting gospel through
+              worship, study, fellowship, and service on campus.
             </p>
+            <PcmEndorsement className="mt-6" />
           </div>
 
           {Object.entries(footerLinks).map(([title, links]) => (
@@ -63,8 +62,10 @@ export function HomeFooter() {
         </div>
 
         <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-white/40 text-sm">© {new Date().getFullYear()} CBU SDA Public Campus Ministries</p>
-          <p className="text-white/40 text-xs">Copperbelt University · Kitwe, Zambia</p>
+          <p className="text-white/40 text-sm text-center sm:text-left">
+            © {new Date().getFullYear()} {BRAND.name} · {BRAND.ministryShort}
+          </p>
+          <p className="text-white/40 text-xs">{BRAND.location}</p>
         </div>
       </div>
     </footer>

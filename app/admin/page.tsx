@@ -1,78 +1,24 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { 
-  Users, Calendar, FileText, Heart, Image, BookOpen, 
-  TrendingUp, Activity, Clock, AlertCircle 
+import {
+  Users, Calendar, FileText, Heart, Image, BookOpen,
+  MessageCircle, HandHeart, ShoppingBag, AlertCircle
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ScrollToBottom } from '@/components/ui/scroll-to-bottom'
-import { getPosts, getEvents, getPrayerRequests, getGalleryItems, getVolunteers } from '@/lib/database'
-import { getBands } from '@/lib/bands'
-
-interface DashboardStats {
-  totalUsers: number
-  totalPosts: number
-  upcomingEvents: number
-  activePrayers: number
-  galleryItems: number
-  totalBands: number
-  totalVolunteers: number
-  recentActivity: any[]
-}
+import { getAdminCounts, type AdminCounts, type AdminCountKey } from '@/lib/data/admin'
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalPosts: 0,
-    upcomingEvents: 0,
-    activePrayers: 0,
-    galleryItems: 0,
-    totalBands: 0,
-    totalVolunteers: 0,
-    recentActivity: []
-  })
+  const [counts, setCounts] = useState<AdminCounts | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const [posts, events, prayers, gallery] = await Promise.all([
-          getPosts(),
-          getEvents(undefined, true), // upcoming events
-          getPrayerRequests('active'),
-          getGalleryItems()
-        ])
-
-        const bands = await getBands()
-        const volunteers = await getVolunteers()
-        
-        setStats({
-          totalUsers: 156, // This would come from a user count query
-          totalPosts: posts.length,
-          upcomingEvents: events.length,
-          activePrayers: prayers.length,
-          galleryItems: gallery.length,
-          totalBands: bands.length,
-          totalVolunteers: volunteers.length,
-          recentActivity: [
-            { type: 'post', title: 'New testimony published', time: '2 hours ago' },
-            { type: 'event', title: 'Bible Study event created', time: '4 hours ago' },
-            { type: 'prayer', title: 'New prayer request submitted', time: '6 hours ago' },
-            { type: 'user', title: 'New user registered', time: '1 day ago' },
-            { type: 'volunteer', title: 'New volunteer application', time: '8 hours ago' },
-            { type: 'band', title: 'Welfare Band updated', time: '12 hours ago' }
-          ]
-        })
-      } catch (error) {
-        console.error('Error loading dashboard data:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadDashboardData()
+    getAdminCounts()
+      .then(setCounts)
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Could not load dashboard data.'))
+      .finally(() => setLoading(false))
   }, [])
 
   const quickActions = [
@@ -82,16 +28,26 @@ export default function AdminDashboard() {
     { name: 'Add Resource', href: '/admin/resources/new', icon: BookOpen, color: 'bg-orange-500' }
   ]
 
-  const statCards = [
-    { name: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-blue-400', change: '+12%' },
-    { name: 'Published Posts', value: stats.totalPosts, icon: FileText, color: 'text-green-400', change: '+8%' },
-    { name: 'Upcoming Events', value: stats.upcomingEvents, icon: Calendar, color: 'text-purple-400', change: '+15%' },
-    { name: 'Active Prayers', value: stats.activePrayers, icon: Heart, color: 'text-red-400', change: '+5%' },
-    { name: 'Gallery Items', value: stats.galleryItems, icon: Image, color: 'text-yellow-400', change: '+20%' },
-    { name: 'Bands & Committees', value: stats.totalBands, icon: BookOpen, color: 'text-indigo-400', change: '+2%' },
-    { name: 'Volunteers', value: stats.totalVolunteers, icon: Users, color: 'text-pink-400', change: '+18%' },
-    { name: 'Resources', value: 24, icon: BookOpen, color: 'text-cyan-400', change: '+3%' }
+  const statCards: { key: AdminCountKey; name: string; icon: typeof Users; color: string; href: string }[] = [
+    { key: 'users', name: 'Users', icon: Users, color: 'text-blue-400', href: '/admin/users' },
+    { key: 'posts', name: 'Posts', icon: FileText, color: 'text-green-400', href: '/admin/content' },
+    { key: 'upcomingEvents', name: 'Upcoming Events', icon: Calendar, color: 'text-purple-400', href: '/admin/events' },
+    { key: 'resources', name: 'Resources', icon: BookOpen, color: 'text-cyan-400', href: '/admin/resources' }
   ]
+
+  const pendingItems: { key: AdminCountKey; name: string; icon: typeof Users; href: string; unit: string }[] = [
+    { key: 'pendingPrayers', name: 'Prayer Requests', icon: Heart, href: '/admin/prayers', unit: 'active' },
+    { key: 'pendingCounseling', name: 'Counseling Requests', icon: MessageCircle, href: '/admin/counseling', unit: 'pending' },
+    { key: 'pendingVolunteers', name: 'Volunteer Applications', icon: HandHeart, href: '/admin/volunteers', unit: 'pending review' },
+    { key: 'pendingOrders', name: 'Merch Orders', icon: ShoppingBag, href: '/admin', unit: 'pending' }
+  ]
+
+  const show = (key: AdminCountKey) => {
+    const value = counts?.[key]
+    return value === null || value === undefined ? '—' : value
+  }
+
+  const unavailable = counts ? Object.values(counts).filter((v) => v === null).length : 0
 
   if (loading) {
     return (
@@ -111,12 +67,23 @@ export default function AdminDashboard() {
   return (
     <div className="p-4 md:p-8 relative min-h-screen">
       <ScrollToBottom targetId="dashboard-content" label="Scroll down" />
-      
+
       {/* Header */}
       <div id="dashboard-content" className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-white/70 text-sm md:text-base">Welcome back! Here's what's happening with your ministry.</p>
+        <p className="text-white/70 text-sm md:text-base">Welcome back! Here&apos;s what&apos;s happening with your ministry.</p>
       </div>
+
+      {(error || unavailable > 0) && (
+        <div className="mb-8 flex items-start gap-3 p-4 bg-yellow-500/10 ring-1 ring-yellow-500/20 rounded-lg text-sm">
+          <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0" />
+          <p className="text-white/80">
+            {error
+              ? `Could not reach the database: ${error}`
+              : 'Some figures could not be loaded (shown as —). The database tables may not be set up yet.'}
+          </p>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="mb-8">
@@ -147,106 +114,58 @@ export default function AdminDashboard() {
           {statCards.map((stat) => {
             const IconComponent = stat.icon
             return (
-              <div key={stat.name} className="bg-white/5 ring-1 ring-white/10 rounded-lg p-4 md:p-6">
-                <div className="flex items-center justify-between mb-3 md:mb-4">
-                  <div className="p-2 rounded-lg bg-white/10">
+              <Link
+                key={stat.key}
+                href={stat.href}
+                className="bg-white/5 ring-1 ring-white/10 rounded-lg p-4 md:p-6 hover:bg-white/10 transition-colors"
+              >
+                <div className="mb-3 md:mb-4">
+                  <div className="inline-flex p-2 rounded-lg bg-white/10">
                     <IconComponent className={`w-5 h-5 md:w-6 md:h-6 ${stat.color}`} />
                   </div>
-                  <div className="flex items-center gap-1 text-xs md:text-sm text-green-400">
-                    <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
-                    {stat.change}
-                  </div>
                 </div>
-                <div className="text-xl md:text-2xl font-bold mb-1">{stat.value}</div>
+                <div className="text-xl md:text-2xl font-bold mb-1">{show(stat.key)}</div>
                 <div className="text-white/70 text-xs md:text-sm">{stat.name}</div>
-              </div>
+              </Link>
             )
           })}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        {/* Recent Activity */}
-        <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Recent Activity</h3>
-            <Activity className="w-5 h-5 text-white/50" />
-          </div>
-          
-          <div className="space-y-4">
-            {stats.recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-white/90 text-sm">{activity.title}</p>
-                  <p className="text-white/50 text-xs">{activity.time}</p>
+      {/* Pending Items */}
+      <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold">Needs Attention</h3>
+          <AlertCircle className="w-5 h-5 text-yellow-400" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {pendingItems.map((item) => {
+            const IconComponent = item.icon
+            const value = show(item.key)
+            const content = (
+              <>
+                <div className="flex items-center gap-3">
+                  <IconComponent className="w-5 h-5 text-white/60" />
+                  <div>
+                    <p className="text-white/90 text-sm">{item.name}</p>
+                    <p className="text-white/50 text-xs">
+                      {value === '—' ? 'Unavailable' : `${value} ${item.unit}`}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          
-          <Button variant="outline" className="w-full mt-4 bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50">
-            View All Activity
-          </Button>
-        </div>
-
-        {/* Pending Items */}
-        <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Pending Items</h3>
-            <AlertCircle className="w-5 h-5 text-yellow-400" />
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-yellow-500/10 ring-1 ring-yellow-500/20 rounded-lg">
-              <div>
-                <p className="text-white/90 text-sm">Volunteer Applications</p>
-                <p className="text-white/50 text-xs">3 pending review</p>
-              </div>
-              <Button size="sm" className="bg-yellow-500 text-black hover:bg-yellow-400">
-                Review
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-blue-500/10 ring-1 ring-blue-500/20 rounded-lg">
-              <div>
-                <p className="text-white/90 text-sm">Counseling Requests</p>
-                <p className="text-white/50 text-xs">2 need scheduling</p>
-              </div>
-              <Button size="sm" className="bg-blue-500 text-white hover:bg-blue-400">
-                Schedule
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-green-500/10 ring-1 ring-green-500/20 rounded-lg">
-              <div>
-                <p className="text-white/90 text-sm">Event Registrations</p>
-                <p className="text-white/50 text-xs">15 new registrations</p>
-              </div>
-              <Button size="sm" className="bg-green-500 text-white hover:bg-green-400">
-                View
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* System Status */}
-      <div className="mt-6 md:mt-8 bg-white/5 ring-1 ring-white/10 rounded-lg p-4 md:p-6">
-        <h3 className="text-lg font-semibold mb-4">System Status</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full shrink-0"></div>
-            <span className="text-white/90 text-sm">Database: Online</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full shrink-0"></div>
-            <span className="text-white/90 text-sm">Storage: Online</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full shrink-0"></div>
-            <span className="text-white/90 text-sm">Email: Online</span>
-          </div>
+                <span className="text-xl font-bold">{value}</span>
+              </>
+            )
+            const cls = 'flex items-center justify-between p-3 bg-white/5 ring-1 ring-white/10 rounded-lg'
+            return item.key === 'pendingOrders' ? (
+              <div key={item.key} className={cls}>{content}</div>
+            ) : (
+              <Link key={item.key} href={item.href} className={`${cls} hover:bg-white/10 transition-colors`}>
+                {content}
+              </Link>
+            )
+          })}
         </div>
       </div>
     </div>

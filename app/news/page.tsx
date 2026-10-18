@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Calendar, User, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -7,8 +8,39 @@ import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
 import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 import { ministryImage } from "@/lib/site-images"
+import type { Post } from "@/lib/supabase"
+import { formatDate, getPosts, isLocalImage } from "@/lib/data/content"
 
-const newsArticlesBase = [
+type PostCategory = Post["category"]
+
+type Article = {
+  id: string
+  title: string
+  excerpt: string
+  content?: string
+  date: string
+  author: string
+  category: string
+  type: PostCategory
+  image: string
+}
+
+const CATEGORY_LABELS: Record<PostCategory, string> = {
+  testimony: "Testimony",
+  news: "Ministry News",
+  announcement: "Announcement",
+  ministry: "Ministry",
+}
+
+const FILTERS: { id: "all" | PostCategory; name: string }[] = [
+  { id: "all", name: "All" },
+  { id: "testimony", name: "Testimonies" },
+  { id: "news", name: "News" },
+  { id: "announcement", name: "Announcements" },
+  { id: "ministry", name: "Ministry" },
+]
+
+const FALLBACK_BASE = [
   {
     title: "Student Testimony: Finding Hope in Christ",
     excerpt:
@@ -16,7 +48,7 @@ const newsArticlesBase = [
     date: "January 28, 2025",
     author: "Sarah Martinez",
     category: "Testimony",
-    type: "testimony" as const,
+    type: "testimony" as PostCategory,
   },
   {
     title: "Revival Week Transforms Campus",
@@ -25,7 +57,7 @@ const newsArticlesBase = [
     date: "January 25, 2025",
     author: "Pastor Johnson",
     category: "Ministry News",
-    type: "news" as const,
+    type: "news" as PostCategory,
   },
   {
     title: "From Addiction to Freedom: Michael's Story",
@@ -34,7 +66,7 @@ const newsArticlesBase = [
     date: "January 22, 2025",
     author: "Michael Thompson",
     category: "Testimony",
-    type: "testimony" as const,
+    type: "testimony" as PostCategory,
   },
   {
     title: "Community Service Reaches 1,000 Hours",
@@ -43,7 +75,7 @@ const newsArticlesBase = [
     date: "January 20, 2025",
     author: "Outreach Team",
     category: "Community Impact",
-    type: "news" as const,
+    type: "news" as PostCategory,
   },
   {
     title: "International Student Finds Family in Faith",
@@ -52,7 +84,7 @@ const newsArticlesBase = [
     date: "January 18, 2025",
     author: "Chen Wei",
     category: "Testimony",
-    type: "testimony" as const,
+    type: "testimony" as PostCategory,
   },
   {
     title: "New Prayer Garden Dedicated on Campus",
@@ -61,7 +93,7 @@ const newsArticlesBase = [
     date: "January 15, 2025",
     author: "Campus Development",
     category: "Campus News",
-    type: "news" as const,
+    type: "news" as PostCategory,
   },
   {
     title: "Healing After Loss: Emma's Journey",
@@ -70,7 +102,7 @@ const newsArticlesBase = [
     date: "January 12, 2025",
     author: "Emma Rodriguez",
     category: "Testimony",
-    type: "testimony" as const,
+    type: "testimony" as PostCategory,
   },
   {
     title: "Bible Study Groups Double in Size",
@@ -79,15 +111,47 @@ const newsArticlesBase = [
     date: "January 10, 2025",
     author: "Bible Study Coordinator",
     category: "Ministry Growth",
-    type: "news" as const,
+    type: "news" as PostCategory,
   },
 ]
 
+
+const FALLBACK: Article[] = FALLBACK_BASE.map((article, index) => ({
+  ...article,
+  id: `fallback-${index}`,
+  image: ministryImage(index),
+}))
+
+function toArticle(post: Post, index: number): Article {
+  return {
+    id: post.id,
+    title: post.title,
+    excerpt: post.excerpt,
+    content: post.content,
+    date: formatDate(post.published_at ?? post.created_at),
+    author: post.author?.name ?? "FaithLink",
+    category: CATEGORY_LABELS[post.category] ?? post.category,
+    type: post.category,
+    image: post.image_url || ministryImage(index),
+  }
+}
+
 export default function NewsPage() {
-  const newsArticles = newsArticlesBase.map((article, index) => ({
-    ...article,
-    image: ministryImage(index),
-  }))
+  const [articles, setArticles] = useState<Article[] | null>(null)
+  const [filter, setFilter] = useState<"all" | PostCategory>("all")
+  const [expanded, setExpanded] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    getPosts().then((rows) => {
+      if (active) setArticles(rows ? rows.map(toArticle) : FALLBACK)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const newsArticles = (articles ?? []).filter((a) => filter === "all" || a.type === filter)
 
   return (
     <MinistryPageShell
@@ -106,10 +170,31 @@ export default function NewsPage() {
             </p>
           </div>
 
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setFilter(f.id)}
+                className={`px-6 py-3 rounded-full transition-colors ${
+                  filter === f.id
+                    ? "bg-[#0B0F12] text-white"
+                    : "bg-white ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {f.name}
+              </button>
+            ))}
+          </div>
+
+          {!articles && <p className="text-center text-gray-500">Loading news...</p>}
+          {articles && newsArticles.length === 0 && (
+            <p className="text-center text-gray-500">No posts in this category yet.</p>
+          )}
+
           <div className="space-y-6">
-            {newsArticles.map((article, index) => (
+            {newsArticles.map((article) => (
               <article
-                key={index}
+                key={article.id}
                 className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="relative aspect-video bg-gray-200">
@@ -119,6 +204,7 @@ export default function NewsPage() {
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
+                    unoptimized={!isLocalImage(article.image)}
                   />
                   {article.type === "testimony" && (
                     <div className="absolute top-4 left-4 px-3 py-1 bg-[#0f2d6e] text-white text-xs font-medium rounded-full">
@@ -146,9 +232,22 @@ export default function NewsPage() {
                   <h3 className="text-xl font-semibold mb-3 text-gray-900">{article.title}</h3>
                   <p className="text-gray-600 leading-relaxed mb-4">{article.excerpt}</p>
 
-                  <Button className="bg-[#0B0F12] text-white hover:bg-[#0B0F12]/90 rounded-full px-6">
-                    {article.type === "testimony" ? "Read Testimony" : "Read Full Article"}
-                  </Button>
+                  {article.content && expanded === article.id && (
+                    <div className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">{article.content}</div>
+                  )}
+
+                  {article.content && (
+                    <Button
+                      className="bg-[#0B0F12] text-white hover:bg-[#0B0F12]/90 rounded-full px-6"
+                      onClick={() => setExpanded(expanded === article.id ? null : article.id)}
+                    >
+                      {expanded === article.id
+                        ? "Show Less"
+                        : article.type === "testimony"
+                          ? "Read Testimony"
+                          : "Read Full Article"}
+                    </Button>
+                  )}
                 </div>
               </article>
             ))}

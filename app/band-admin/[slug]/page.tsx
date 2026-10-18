@@ -16,6 +16,7 @@ import {
   deleteBandEvent,
 } from '@/lib/bands'
 import { uploadImage } from '@/lib/storage'
+import { getBandCounts } from '@/lib/data/admin'
 import type { Band, BandAnnouncement, Event } from '@/lib/supabase'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -37,7 +38,12 @@ export default function BandAdminDashboard() {
   const [events, setEvents] = useState<Event[]>([])
   const [authorized, setAuthorized] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [bandStats, setBandStats] = useState({
+  const [bandStats, setBandStats] = useState<{
+    memberCount: number | null
+    upcomingEvents: number
+    totalAnnouncements: number
+    activeVolunteers: number | null
+  }>({
     memberCount: 0,
     upcomingEvents: 0,
     totalAnnouncements: 0,
@@ -100,19 +106,20 @@ export default function BandAdminDashboard() {
         leader_image_url: b.leader_image_url,
       })
 
-      const [ann, ev] = await Promise.all([
+      const [ann, ev, counts] = await Promise.all([
         getBandAnnouncements(b.id, slug),
         getBandEvents(b.id),
+        getBandCounts(b.id).catch(() => ({ members: null, activeVolunteers: null })),
       ])
       setAnnouncements(ann)
       setEvents(ev)
       
       // Calculate band stats
       setBandStats({
-        memberCount: Math.floor(Math.random() * 20) + 5, // Would come from database
+        memberCount: counts.members,
         upcomingEvents: ev.filter(e => new Date(e.date) >= new Date()).length,
         totalAnnouncements: ann.length,
-        activeVolunteers: Math.floor(Math.random() * 10) + 2 // Would come from database
+        activeVolunteers: counts.activeVolunteers,
       })
     }
 
@@ -217,7 +224,7 @@ export default function BandAdminDashboard() {
         {/* Band Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-400">{bandStats.memberCount}</div>
+            <div className="text-2xl font-bold text-blue-400">{bandStats.memberCount ?? '—'}</div>
             <div className="text-xs text-white/60 mt-1">Members</div>
           </div>
           <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 text-center">
@@ -229,7 +236,7 @@ export default function BandAdminDashboard() {
             <div className="text-xs text-white/60 mt-1">Announcements</div>
           </div>
           <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 text-center">
-            <div className="text-2xl font-bold text-pink-400">{bandStats.activeVolunteers}</div>
+            <div className="text-2xl font-bold text-pink-400">{bandStats.activeVolunteers ?? '—'}</div>
             <div className="text-xs text-white/60 mt-1">Active Volunteers</div>
           </div>
         </div>

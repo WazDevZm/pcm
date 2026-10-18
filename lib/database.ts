@@ -119,10 +119,7 @@ export const registerForEvent = async (eventId: string, userId: string) => {
     .single()
 
   if (error) throw error
-
-  // Update attendee count
-  await supabase.rpc('increment_event_attendees', { event_id: eventId })
-
+  // current_attendees is kept in sync by the event_attendees_count trigger
   return data
 }
 
@@ -376,18 +373,6 @@ export const updateUser = async (id: string, updates: Partial<User>) => {
     .from('users')
     .update(updates)
     .eq('id', id)
-    .select()
-    .single()
-
-  if (error) throw error
-  return data as User
-}
-
-export const createUser = async (user: Omit<User, 'created_at' | 'updated_at'>) => {
-  if (!supabase) throw new Error('Database disabled')
-  const { data, error } = await supabase
-    .from('users')
-    .insert(user)
     .select()
     .single()
 

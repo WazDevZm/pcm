@@ -24,6 +24,10 @@ import { HomeFooter } from "@/components/home/HomeFooter"
 import { HeroSlider } from "@/components/home/HeroSlider"
 import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 import { cn } from "@/lib/utils"
+import { PcmShield } from "@/components/brand/PcmShield"
+import { PosterCard } from "@/components/posters/PosterCard"
+import { POSTERS } from "@/lib/posters"
+import { BRAND } from "@/lib/brand"
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -82,7 +86,7 @@ const stats = [
 
 const faqs = [
   {
-    question: "What ministries does FaithLink offer?",
+    question: "What ministries does The Haven offer?",
     answer:
       "We offer Sabbath worship, Bible studies, prayer ministry, evangelism training, counseling, and specialized bands including Bible Study, Welfare, Health, Witnessing, and Publicity.",
   },
@@ -108,9 +112,32 @@ export default function HomePage() {
   const [contactSent, setContactSent] = useState(false)
   const [heroReady, setHeroReady] = useState(true)
 
-  const handleContact = (e: React.FormEvent<HTMLFormElement>) => {
+  const [contactError, setContactError] = useState("")
+  const [contactSending, setContactSending] = useState(false)
+
+  const handleContact = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setContactSent(true)
+    const form = new FormData(e.currentTarget)
+    setContactSending(true)
+    setContactError("")
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.get("name"),
+          email: form.get("email"),
+          message: form.get("message"),
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || "Could not send your message")
+      setContactSent(true)
+    } catch (err) {
+      setContactError(err instanceof Error ? err.message : "Could not send your message")
+    } finally {
+      setContactSending(false)
+    }
   }
 
   return (
@@ -133,15 +160,15 @@ export default function HomePage() {
             )}
           >
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-balance mb-6">
-              Find your purpose at{" "}
+              Find your place at{" "}
               <span className="bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
-                FaithLink
+                The Haven
               </span>
             </h1>
 
             <p className="text-lg md:text-xl text-white/75 leading-relaxed max-w-2xl mb-10 text-pretty">
-              Join FaithLink for spiritual growth, biblical studies,
-              meaningful fellowship, and outreach that transforms lives on campus.
+              A shelter on campus for worship, Bible study, real friendship,
+              and service that carries Christ&apos;s light beyond the classroom.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-14">
@@ -179,14 +206,7 @@ export default function HomePage() {
         <ScrollToBottom targetId="features" />
 
         <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-10 pointer-events-none">
-          <Image
-            src="/logo.png"
-            alt=""
-            width={96}
-            height={96}
-            className="w-14 h-14 md:w-20 md:h-20 object-contain opacity-80 rounded-full"
-            priority
-          />
+          <PcmShield className="h-16 md:h-24 drop-shadow-lg" />
         </div>
       </header>
 
@@ -297,6 +317,39 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ——— What's on (posters) ——— */}
+      <section className="py-20 md:py-28 px-6 bg-[#0B0F12] text-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+            <div className="max-w-xl">
+              <span className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-[#d9a441] mb-3">
+                What&apos;s on
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-balance">
+                Every week at The Haven
+              </h2>
+            </div>
+            <Button
+              asChild
+              variant="outline"
+              className="self-start md:self-auto rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10"
+            >
+              <Link href="/posters">
+                All posters
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {POSTERS.slice(0, 3).map((poster) => (
+              <Link key={poster.slug} href="/posters" className="block group">
+                <PosterCard poster={poster} className="transition-transform duration-300 group-hover:-translate-y-1" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ——— FAQ ——— */}
       <section className="py-20 md:py-28 px-6">
         <div className="max-w-4xl mx-auto">
@@ -306,7 +359,7 @@ export default function HomePage() {
               Common questions
             </h2>
             <p className="text-gray-600 leading-relaxed">
-              Everything you need to know about FaithLink.
+              Everything you need to know about The Haven.
             </p>
           </div>
 
@@ -363,20 +416,16 @@ export default function HomePage() {
           </div>
 
           <div className="rounded-2xl bg-[#fafbfc] ring-1 ring-gray-200/80 p-6 md:p-8 mb-8 flex items-center gap-4">
-            <div className="relative h-14 w-14 shrink-0 rounded-full overflow-hidden bg-[#0f2d6e]/10">
-              <Image
-                src="/logo.png"
-                alt=""
-                fill
-                className="object-cover"
-              />
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#0f2d6e]/10">
+              <PcmShield className="h-11" />
             </div>
             <div>
               <h4 className="font-semibold">Ministry Leadership Team</h4>
+              <p className="text-xs font-medium text-[#0f2d6e]">{BRAND.ministryShort}</p>
               <p className="text-sm text-gray-600 mb-2">Pastoral care & guidance</p>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <MapPin className="w-4 h-4 shrink-0" />
-                Campus Location
+                {BRAND.location}
               </div>
             </div>
           </div>
@@ -400,6 +449,7 @@ export default function HomePage() {
                     </label>
                     <input
                       id="name"
+                      name="name"
                       required
                       className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-[#fafbfc] text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2d6e]/20 focus:border-[#0f2d6e]"
                       placeholder="Your full name"
@@ -411,6 +461,7 @@ export default function HomePage() {
                     </label>
                     <input
                       id="email"
+                      name="email"
                       type="email"
                       required
                       className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-[#fafbfc] text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2d6e]/20 focus:border-[#0f2d6e]"
@@ -423,18 +474,25 @@ export default function HomePage() {
                     </label>
                     <textarea
                       id="message"
+                      name="message"
                       required
                       rows={4}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-[#fafbfc] text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2d6e]/20 focus:border-[#0f2d6e] resize-none"
                       placeholder="How can we help you?"
                     />
                   </div>
+                  {contactError && (
+                    <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-200">
+                      {contactError}
+                    </p>
+                  )}
                   <Button
                     type="submit"
+                    disabled={contactSending}
                     className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-xl py-3 font-semibold shadow-md"
                   >
                     <Mail className="w-4 h-4 mr-2" />
-                    Send message
+                    {contactSending ? "Sending..." : "Send message"}
                   </Button>
                 </form>
               </>

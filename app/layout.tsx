@@ -21,9 +21,9 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "CBU SDA Public Campus Ministries",
+  title: "The Haven | The Copperbelt University Public Campus Ministries",
   description:
-    "Join CBU SDA Public Campus Ministries for spiritual growth, community outreach, biblical studies, and meaningful fellowship with fellow believers.",
+    "Join The Copperbelt University Public Campus Ministries (PCM) at The Haven for spiritual growth, community outreach, biblical studies, and meaningful fellowship with fellow believers.",
 }
 
 export default function RootLayout({

@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
-  <path d="M55 75 Q120 45 185 75 L200 95 L185 110 V180 H55 V110 L40 95 Z" fill="#0B0F12" stroke="#64748b" stroke-width="2"/>
-  <ellipse cx="120" cy="55" rx="28" ry="18" fill="#0B0F12" stroke="#64748b" stroke-width="2"/>
-  <text x="120" y="140" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="14" font-weight="bold">PCM</text>
-</svg>

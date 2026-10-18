@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" fill="none">
-  <path d="M60 70 L30 90 L45 105 L55 95 V175 H185 V95 L195 105 L210 90 L180 70 L150 85 H90 L60 70Z" fill="#0f2d6e" stroke="#38bdf8" stroke-width="2"/>
-  <rect x="95" y="115" width="50" height="28" rx="4" fill="#f8fafc" opacity="0.95"/>
-  <text x="120" y="133" text-anchor="middle" fill="#0f2d6e" font-family="system-ui,sans-serif" font-size="11" font-weight="bold">PCM</text>
-</svg>

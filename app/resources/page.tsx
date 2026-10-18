@@ -1,121 +1,221 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { BookOpen, Play, Download, FileText, Headphones, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
 import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
+import type { Resource } from "@/lib/supabase"
+import { formatDate, getResources } from "@/lib/data/content"
+
+type Meta = [label: string, value: string | number]
+type StudyCard = { key: string; title: string; description: string; meta: Meta[]; url?: string }
+type SermonCard = { key: string; title: string; subtitle: string; badge: string; url?: string }
+type Grouped = { studies: StudyCard[]; sermons: SermonCard[]; devotionals: StudyCard[]; materials: StudyCard[] }
+
+const FALLBACK_bibleStudies = [
+  {
+    title: "Prophecies of Daniel",
+    description: "A comprehensive study of the prophetic book of Daniel and its relevance for today.",
+    lessons: 12,
+    duration: "45 min each",
+    level: "Intermediate",
+  },
+  {
+    title: "The Sanctuary Service",
+    description: "Understanding God's plan of salvation through the Old Testament sanctuary.",
+    lessons: 8,
+    duration: "60 min each",
+    level: "Advanced",
+  },
+  {
+    title: "Steps to Christ",
+    description: "A foundational study for new believers based on Ellen White's classic book.",
+    lessons: 10,
+    duration: "30 min each",
+    level: "Beginner",
+  },
+  {
+    title: "Revelation Unveiled",
+    description: "Exploring the prophetic messages of Revelation for the end times.",
+    lessons: 15,
+    duration: "50 min each",
+    level: "Advanced",
+  },
+]
+
+const FALLBACK_sermons = [
+  {
+    title: "The Second Coming of Christ",
+    speaker: "Pastor Johnson",
+    date: "January 15, 2025",
+    duration: "42 min",
+    series: "End Time Events",
+  },
+  {
+    title: "Living by Faith",
+    speaker: "Elder Martinez",
+    date: "January 8, 2025",
+    duration: "38 min",
+    series: "Christian Living",
+  },
+  {
+    title: "The Sabbath Rest",
+    speaker: "Pastor Johnson",
+    date: "January 1, 2025",
+    duration: "45 min",
+    series: "God's Law",
+  },
+  {
+    title: "Prayer and Fasting",
+    speaker: "Elder Smith",
+    date: "December 25, 2024",
+    duration: "35 min",
+    series: "Spiritual Disciplines",
+  },
+]
+
+const FALLBACK_devotionals = [
+  {
+    title: "Morning Watch",
+    description: "Daily devotional readings for spiritual growth and reflection.",
+    frequency: "Daily",
+    type: "Text & Audio",
+  },
+  {
+    title: "Youth Devotions",
+    description: "Specially crafted devotionals addressing college-age challenges.",
+    frequency: "Weekly",
+    type: "Interactive",
+  },
+  {
+    title: "Sabbath Reflections",
+    description: "Deep spiritual thoughts for Sabbath meditation and worship.",
+    frequency: "Weekly",
+    type: "Text",
+  },
+]
+
+const FALLBACK_ministryMaterials = [
+  {
+    title: "Evangelism Training Manual",
+    description: "Complete guide for personal evangelism and witnessing.",
+    pages: 120,
+    format: "PDF",
+  },
+  {
+    title: "Small Group Leader's Guide",
+    description: "Resources for leading effective Bible study groups.",
+    pages: 85,
+    format: "PDF",
+  },
+  {
+    title: "Campus Ministry Handbook",
+    description: "Guidelines and best practices for campus outreach.",
+    pages: 95,
+    format: "PDF",
+  },
+  {
+    title: "Prayer Ministry Resources",
+    description: "Tools and guides for effective prayer ministry.",
+    pages: 60,
+    format: "PDF",
+  },
+]
+
+const FALLBACK: Grouped = {
+  studies: FALLBACK_bibleStudies.map((s) => ({
+    key: s.title,
+    title: s.title,
+    description: s.description,
+    meta: [["Lessons", s.lessons], ["Duration", s.duration], ["Level", s.level]],
+  })),
+  sermons: FALLBACK_sermons.map((s) => ({
+    key: s.title,
+    title: s.title,
+    subtitle: `${s.speaker} · ${s.date} · ${s.duration}`,
+    badge: s.series,
+  })),
+  devotionals: FALLBACK_devotionals.map((d) => ({
+    key: d.title,
+    title: d.title,
+    description: d.description,
+    meta: [["Frequency", d.frequency], ["Type", d.type]],
+  })),
+  materials: FALLBACK_ministryMaterials.map((m) => ({
+    key: m.title,
+    title: m.title,
+    description: m.description,
+    meta: [["Pages", m.pages], ["Format", m.format]],
+  })),
+}
+
+const capitalize = (v: string) => v.charAt(0).toUpperCase() + v.slice(1)
+
+function resourceUrl(r: Resource): string | undefined {
+  return r.download_url || r.file_url || undefined
+}
+
+function studyMeta(r: Resource): Meta[] {
+  const meta: Meta[] = []
+  if (r.lessons) meta.push(["Lessons", r.lessons])
+  if (r.duration) meta.push(["Duration", r.duration])
+  if (r.category) meta.push(["Category", r.category])
+  if (r.level) meta.push(["Level", capitalize(r.level)])
+  if (r.author) meta.push(["Author", r.author])
+  return meta
+}
+
+function groupResources(rows: Resource[]): Grouped {
+  const toStudy = (r: Resource): StudyCard => ({
+    key: r.id,
+    title: r.title,
+    description: r.description,
+    meta: studyMeta(r),
+    url: resourceUrl(r),
+  })
+  return {
+    studies: rows.filter((r) => r.type === "bible_study").map(toStudy),
+    sermons: rows
+      .filter((r) => r.type === "sermon")
+      .map((r) => ({
+        key: r.id,
+        title: r.title,
+        subtitle: [r.author, formatDate(r.created_at), r.duration].filter(Boolean).join(" · "),
+        badge: r.category,
+        url: resourceUrl(r),
+      })),
+    devotionals: rows.filter((r) => r.type === "devotional").map(toStudy),
+    materials: rows.filter((r) => r.type === "manual").map(toStudy),
+  }
+}
+
+function MetaList({ meta }: { meta: Meta[] }) {
+  return (
+    <dl className="space-y-1 mb-6 text-sm">
+      {meta.map(([label, value]) => (
+        <div key={label} className="flex justify-between">
+          <dt className="text-gray-500">{label}</dt>
+          <dd>{value}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
 
 export default function ResourcesPage() {
-  const bibleStudies = [
-    {
-      title: "Prophecies of Daniel",
-      description: "A comprehensive study of the prophetic book of Daniel and its relevance for today.",
-      lessons: 12,
-      duration: "45 min each",
-      level: "Intermediate",
-    },
-    {
-      title: "The Sanctuary Service",
-      description: "Understanding God's plan of salvation through the Old Testament sanctuary.",
-      lessons: 8,
-      duration: "60 min each",
-      level: "Advanced",
-    },
-    {
-      title: "Steps to Christ",
-      description: "A foundational study for new believers based on Ellen White's classic book.",
-      lessons: 10,
-      duration: "30 min each",
-      level: "Beginner",
-    },
-    {
-      title: "Revelation Unveiled",
-      description: "Exploring the prophetic messages of Revelation for the end times.",
-      lessons: 15,
-      duration: "50 min each",
-      level: "Advanced",
-    },
-  ]
+  const [groups, setGroups] = useState<Grouped | null>(null)
 
-  const sermons = [
-    {
-      title: "The Second Coming of Christ",
-      speaker: "Pastor Johnson",
-      date: "January 15, 2025",
-      duration: "42 min",
-      series: "End Time Events",
-    },
-    {
-      title: "Living by Faith",
-      speaker: "Elder Martinez",
-      date: "January 8, 2025",
-      duration: "38 min",
-      series: "Christian Living",
-    },
-    {
-      title: "The Sabbath Rest",
-      speaker: "Pastor Johnson",
-      date: "January 1, 2025",
-      duration: "45 min",
-      series: "God's Law",
-    },
-    {
-      title: "Prayer and Fasting",
-      speaker: "Elder Smith",
-      date: "December 25, 2024",
-      duration: "35 min",
-      series: "Spiritual Disciplines",
-    },
-  ]
-
-  const devotionals = [
-    {
-      title: "Morning Watch",
-      description: "Daily devotional readings for spiritual growth and reflection.",
-      frequency: "Daily",
-      type: "Text & Audio",
-    },
-    {
-      title: "Youth Devotions",
-      description: "Specially crafted devotionals addressing college-age challenges.",
-      frequency: "Weekly",
-      type: "Interactive",
-    },
-    {
-      title: "Sabbath Reflections",
-      description: "Deep spiritual thoughts for Sabbath meditation and worship.",
-      frequency: "Weekly",
-      type: "Text",
-    },
-  ]
-
-  const ministryMaterials = [
-    {
-      title: "Evangelism Training Manual",
-      description: "Complete guide for personal evangelism and witnessing.",
-      pages: 120,
-      format: "PDF",
-    },
-    {
-      title: "Small Group Leader's Guide",
-      description: "Resources for leading effective Bible study groups.",
-      pages: 85,
-      format: "PDF",
-    },
-    {
-      title: "Campus Ministry Handbook",
-      description: "Guidelines and best practices for campus outreach.",
-      pages: 95,
-      format: "PDF",
-    },
-    {
-      title: "Prayer Ministry Resources",
-      description: "Tools and guides for effective prayer ministry.",
-      pages: 60,
-      format: "PDF",
-    },
-  ]
+  useEffect(() => {
+    let active = true
+    getResources().then((rows) => {
+      if (active) setGroups(rows ? groupResources(rows) : FALLBACK)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
 
   function SectionHeader({ icon: Icon, title }: { icon: typeof BookOpen; title: string }) {
     return (
@@ -136,129 +236,113 @@ export default function ResourcesPage() {
     >
       <ScrollToBottom targetId="resources-content" label="Scroll" />
       <MinistryContent>
-        <section id="resources-content" className="max-w-4xl mx-auto py-8">
+        <div id="resources-content">
+          {!groups && <p className="max-w-4xl mx-auto py-8 text-center text-gray-500">Loading resources...</p>}
+        </div>
+
+        {groups && groups.studies.length > 0 && (
+        <section className="max-w-4xl mx-auto py-8">
           <SectionHeader icon={BookOpen} title="Bible Studies" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {bibleStudies.map((study, index) => (
-              <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            {groups.studies.map((study) => (
+              <div key={study.key} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="text-lg font-semibold mb-2 text-[#0B0F12]">{study.title}</h3>
                 <p className="text-gray-600 text-sm mb-4">{study.description}</p>
-                <dl className="space-y-1 mb-6 text-sm">
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Lessons</dt>
-                    <dd>{study.lessons}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Duration</dt>
-                    <dd>{study.duration}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Level</dt>
-                    <dd>{study.level}</dd>
-                  </div>
-                </dl>
-                <div className="flex gap-2">
-                  <Button size="sm" className="flex-1 bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">
-                    <Download className="w-4 h-4 mr-1" />
-                    Download
+                <MetaList meta={study.meta} />
+                {study.url && (
+                  <Button size="sm" className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full" asChild>
+                    <a href={study.url} target="_blank" rel="noopener noreferrer">
+                      <Download className="w-4 h-4 mr-1" />
+                      Open Study
+                    </a>
                   </Button>
-                  <Button size="sm" variant="outline" className="rounded-full border-gray-300">
-                    <Play className="w-4 h-4" />
-                  </Button>
-                </div>
+                )}
               </div>
             ))}
           </div>
         </section>
+        )}
 
+        {groups && groups.sermons.length > 0 && (
         <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
           <SectionHeader icon={Headphones} title="Recent Sermons" />
           <div className="space-y-6">
-            {sermons.map((sermon, index) => (
-              <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            {groups.sermons.map((sermon) => (
+              <div key={sermon.key} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between gap-4 mb-3">
                   <div>
                     <h3 className="text-lg font-semibold text-[#0B0F12]">{sermon.title}</h3>
-                    <p className="text-gray-500 text-sm">
-                      {sermon.speaker} · {sermon.date} · {sermon.duration}
-                    </p>
+                    <p className="text-gray-500 text-sm">{sermon.subtitle}</p>
                   </div>
-                  <span className="shrink-0 px-3 py-1 h-fit bg-[#0f2d6e]/10 text-[#0f2d6e] rounded-full text-xs">
-                    {sermon.series}
-                  </span>
+                  {sermon.badge && (
+                    <span className="shrink-0 px-3 py-1 h-fit bg-[#0f2d6e]/10 text-[#0f2d6e] rounded-full text-xs">
+                      {sermon.badge}
+                    </span>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" className="flex-1 bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">
-                    <Play className="w-4 h-4 mr-1" />
-                    Listen
+                {sermon.url && (
+                  <Button size="sm" className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full" asChild>
+                    <a href={sermon.url} target="_blank" rel="noopener noreferrer">
+                      <Play className="w-4 h-4 mr-1" />
+                      Listen
+                    </a>
                   </Button>
-                  <Button size="sm" variant="outline" className="rounded-full border-gray-300">
-                    <Download className="w-4 h-4" />
-                  </Button>
-                </div>
+                )}
               </div>
             ))}
           </div>
         </section>
+        )}
 
+        {groups && groups.devotionals.length > 0 && (
         <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
           <SectionHeader icon={FileText} title="Devotionals" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {devotionals.map((devotional, index) => (
-              <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            {groups.devotionals.map((devotional) => (
+              <div key={devotional.key} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="text-lg font-semibold mb-2 text-[#0B0F12]">{devotional.title}</h3>
                 <p className="text-gray-600 text-sm mb-4">{devotional.description}</p>
-                <dl className="space-y-1 mb-6 text-sm">
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Frequency</dt>
-                    <dd>{devotional.frequency}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Type</dt>
-                    <dd>{devotional.type}</dd>
-                  </div>
-                </dl>
-                <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">Access Devotional</Button>
+                <MetaList meta={devotional.meta} />
+                {devotional.url && (
+                  <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full" asChild>
+                    <a href={devotional.url} target="_blank" rel="noopener noreferrer">Access Devotional</a>
+                  </Button>
+                )}
               </div>
             ))}
           </div>
         </section>
+        )}
 
+        {groups && groups.materials.length > 0 && (
         <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
           <SectionHeader icon={Video} title="Ministry Materials" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {ministryMaterials.map((material, index) => (
-              <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            {groups.materials.map((material) => (
+              <div key={material.key} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="text-lg font-semibold mb-2 text-[#0B0F12]">{material.title}</h3>
                 <p className="text-gray-600 text-sm mb-4">{material.description}</p>
-                <dl className="space-y-1 mb-6 text-sm">
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Pages</dt>
-                    <dd>{material.pages}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Format</dt>
-                    <dd>{material.format}</dd>
-                  </div>
-                </dl>
-                <Button size="sm" className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">
-                  <Download className="w-4 h-4 mr-1" />
-                  Download
-                </Button>
+                <MetaList meta={material.meta} />
+                {material.url && (
+                  <Button size="sm" className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full" asChild>
+                    <a href={material.url} target="_blank" rel="noopener noreferrer">
+                      <Download className="w-4 h-4 mr-1" />
+                      Download
+                    </a>
+                  </Button>
+                )}
               </div>
             ))}
           </div>
         </section>
+        )}
 
         <section className="max-w-4xl mx-auto py-12 border-t border-gray-200 text-center">
           <div className="rounded-2xl bg-white ring-1 ring-gray-200 p-10 shadow-sm">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Need More Resources?</h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600">
               Contact our ministry team for additional materials and personalized study guides.
             </p>
-            <Button size="lg" className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full px-8 font-semibold">
-              Request Resources
-            </Button>
           </div>
         </section>
       </MinistryContent>
