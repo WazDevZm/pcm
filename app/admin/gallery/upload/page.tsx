@@ -66,17 +66,17 @@ export default function GalleryUploadPage() {
           placeholder="Title"
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          className="bg-black/40 border-white/20"
+          className="bg-white border-border"
           required
         />
         <Textarea
           placeholder="Description"
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-          className="bg-black/40 border-white/20"
+          className="bg-white border-border"
         />
-        <Input type="file" accept="image/*" onChange={handleFile} className="bg-black/40 border-white/20" />
-        <Button type="submit" disabled={loading || !imageUrl} className="rounded-full bg-white text-black">
+        <Input type="file" accept="image/*" onChange={handleFile} className="bg-white border-border" />
+        <Button type="submit" disabled={loading || !imageUrl} className="rounded-full bg-navy text-white">
           Save to gallery
         </Button>
       </form>

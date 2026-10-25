@@ -18,13 +18,13 @@ export default function AdminGalleryPage() {
   return (
     <AdminSection title="Gallery" description="Manage ministry photos and albums.">
       <div className="mb-6">
-        <Button asChild className="rounded-full bg-white text-black">
+        <Button asChild className="rounded-full bg-navy text-white">
           <Link href="/admin/gallery/upload">Upload Image</Link>
         </Button>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {items.map((item) => (
-          <div key={item.id} className="rounded-xl overflow-hidden bg-white/5 ring-1 ring-white/10">
+          <div key={item.id} className="rounded-xl overflow-hidden bg-white ring-1 ring-border">
             <div className="relative h-32">
               <OptimizedImage src={item.image_url} alt={item.title} fill sizes="200px" />
             </div>
@@ -32,7 +32,7 @@ export default function AdminGalleryPage() {
           </div>
         ))}
         {items.length === 0 && (
-          <p className="col-span-full text-white/50 text-center py-8">No gallery items yet.</p>
+          <p className="col-span-full text-muted-foreground text-center py-8">No gallery items yet.</p>
         )}
       </div>
     </AdminSection>

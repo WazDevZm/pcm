@@ -19,11 +19,12 @@ import { uploadImage } from '@/lib/storage'
 import { getBandCounts } from '@/lib/data/admin'
 import type { Band, BandAnnouncement, Event } from '@/lib/supabase'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { BandMembers } from '@/components/bands/BandMembers'
+import { HavenMark } from '@/components/brand/HavenLogo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ScrollToBottom } from '@/components/ui/scroll-to-bottom'
-import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ExternalLink, Megaphone, Plus, Trash2, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { FRONTEND_ONLY } from '@/lib/config'
 
@@ -67,7 +68,7 @@ export default function BandAdminDashboard() {
   useEffect(() => {
     if (loading) return
     if (!FRONTEND_ONLY && !user) {
-      router.push(`/login?redirect=/band-admin/${slug}`)
+      router.push(`/login?next=/band-admin/${slug}`)
       return
     }
 
@@ -199,50 +200,72 @@ export default function BandAdminDashboard() {
 
   if (loading || !authorized || !band) {
     return (
-      <div className="min-h-screen bg-[#0B0F12] flex items-center justify-center text-white">
+      <div className="min-h-screen bg-canvas flex items-center justify-center text-ink">
         Loading...
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F12] text-white relative">
-      <ScrollToBottom targetId="band-admin-content" label="Scroll" />
-      <div className="border-b border-white/10 px-6 py-4 flex items-center gap-4">
-        <Link href="/band-admin" className="text-white/60 hover:text-white">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold">{band.name}</h1>
-          <Link href={`/bands/${slug}`} className="text-sm text-sky-400 hover:underline">
-            View public page →
+    <div className="min-h-screen bg-canvas text-ink relative">
+      <header className="relative overflow-hidden bg-navy-deep text-white">
+        <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gold/15 blur-3xl" aria-hidden />
+        <div className="relative max-w-4xl mx-auto px-6 pt-6 pb-10">
+          <div className="flex items-center justify-between gap-3">
+            <Link href="/band-admin" className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/75 hover:text-white">
+              <ArrowLeft className="h-4 w-4" /> My bands
+            </Link>
+            <Link href="/" aria-label="The Haven home"><HavenMark tone="onDark" className="h-8 w-8" /></Link>
+          </div>
+          <p className="eyebrow text-gold mt-8">Band dashboard</p>
+          <h1 className="mt-2 text-3xl md:text-4xl">{band.name}</h1>
+          <Link href={`/bands/${slug}`} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-white/80 hover:text-white">
+            View public page <ExternalLink className="h-3.5 w-3.5" />
           </Link>
         </div>
-      </div>
+      </header>
 
       <div id="band-admin-content" className="max-w-4xl mx-auto p-6">
         {/* Band Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-400">{bandStats.memberCount ?? '—'}</div>
-            <div className="text-xs text-white/60 mt-1">Members</div>
+          <div className="rounded-2xl bg-white border border-border p-4 text-center">
+            <div className="font-serif text-3xl text-ink">{bandStats.memberCount ?? '—'}</div>
+            <div className="text-xs text-muted-foreground mt-1">Members</div>
           </div>
-          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 text-center">
-            <div className="text-2xl font-bold text-green-400">{bandStats.upcomingEvents}</div>
-            <div className="text-xs text-white/60 mt-1">Upcoming Events</div>
+          <div className="rounded-2xl bg-white border border-border p-4 text-center">
+            <div className="font-serif text-3xl text-ink">{bandStats.upcomingEvents}</div>
+            <div className="text-xs text-muted-foreground mt-1">Upcoming Events</div>
           </div>
-          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 text-center">
-            <div className="text-2xl font-bold text-purple-400">{bandStats.totalAnnouncements}</div>
-            <div className="text-xs text-white/60 mt-1">Announcements</div>
+          <div className="rounded-2xl bg-white border border-border p-4 text-center">
+            <div className="font-serif text-3xl text-ink">{bandStats.totalAnnouncements}</div>
+            <div className="text-xs text-muted-foreground mt-1">Announcements</div>
           </div>
-          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 text-center">
-            <div className="text-2xl font-bold text-pink-400">{bandStats.activeVolunteers ?? '—'}</div>
-            <div className="text-xs text-white/60 mt-1">Active Volunteers</div>
+          <div className="rounded-2xl bg-white border border-border p-4 text-center">
+            <div className="font-serif text-3xl text-ink">{bandStats.activeVolunteers ?? '—'}</div>
+            <div className="text-xs text-muted-foreground mt-1">Active Volunteers</div>
           </div>
         </div>
 
+        {slug === 'publicity-committee' && (
+          <Link
+            href="/admin"
+            className="mb-8 flex items-center gap-4 rounded-2xl bg-navy p-5 text-white transition-colors hover:bg-navy-deep"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-gold">
+              <Megaphone className="h-6 w-6" />
+            </span>
+            <span className="flex-1">
+              <span className="block font-bold">Website content</span>
+              <span className="block text-sm text-white/75">
+                Publish posts, events, photos and resources that appear on the landing page, the website and the app.
+              </span>
+            </span>
+            <ArrowRight className="h-5 w-5 shrink-0 text-gold" />
+          </Link>
+        )}
+
         <Tabs defaultValue="announcements">
-          <TabsList className="bg-white/5 mb-6">
+          <TabsList className="bg-white mb-6">
             <TabsTrigger value="announcements">Announcements</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="details">Band Details</TabsTrigger>
@@ -251,7 +274,7 @@ export default function BandAdminDashboard() {
           </TabsList>
 
           <TabsContent value="announcements" className="space-y-6">
-            <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 space-y-4">
+            <div className="rounded-2xl bg-white ring-1 ring-border p-6 space-y-4">
               <h2 className="font-semibold flex items-center gap-2">
                 <Plus className="w-4 h-4" /> New announcement
               </h2>
@@ -259,20 +282,20 @@ export default function BandAdminDashboard() {
                 placeholder="Title"
                 value={newAnn.title}
                 onChange={(e) => setNewAnn((a) => ({ ...a, title: e.target.value }))}
-                className="bg-black/40 border-white/20"
+                className="bg-white border-border"
               />
               <Textarea
                 placeholder="Content"
                 value={newAnn.content}
                 onChange={(e) => setNewAnn((a) => ({ ...a, content: e.target.value }))}
-                className="bg-black/40 border-white/20 min-h-[100px]"
+                className="bg-white border-border min-h-[100px]"
               />
               <select
                 value={newAnn.type}
                 onChange={(e) =>
                   setNewAnn((a) => ({ ...a, type: e.target.value as BandAnnouncement['type'] }))
                 }
-                className="w-full rounded-md bg-black/40 border border-white/20 px-3 py-2 text-sm"
+                className="w-full rounded-md bg-white border border-border px-3 py-2 text-sm"
               >
                 <option value="announcement">Announcement</option>
                 <option value="meeting">Meeting</option>
@@ -285,15 +308,15 @@ export default function BandAdminDashboard() {
 
             <div className="space-y-3">
               {announcements.map((ann) => (
-                <div key={ann.id} className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 flex justify-between gap-4">
+                <div key={ann.id} className="rounded-xl bg-white ring-1 ring-border p-4 flex justify-between gap-4">
                   <div>
                     <h3 className="font-medium">{ann.title}</h3>
-                    <p className="text-sm text-white/60 line-clamp-2">{ann.content}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{ann.content}</p>
                   </div>
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="text-red-400 shrink-0"
+                    className="text-red-700 shrink-0"
                     onClick={async () => {
                       try {
                         await deleteBandAnnouncement(ann.id)
@@ -312,43 +335,43 @@ export default function BandAdminDashboard() {
           </TabsContent>
 
           <TabsContent value="events" className="space-y-6">
-            <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 space-y-4">
+            <div className="rounded-2xl bg-white ring-1 ring-border p-6 space-y-4">
               <h2 className="font-semibold">New event</h2>
               <Input
                 placeholder="Event title"
                 value={newEvent.title}
                 onChange={(e) => setNewEvent((ev) => ({ ...ev, title: e.target.value }))}
-                className="bg-black/40 border-white/20"
+                className="bg-white border-border"
               />
               <Textarea
                 placeholder="Description"
                 value={newEvent.description}
                 onChange={(e) => setNewEvent((ev) => ({ ...ev, description: e.target.value }))}
-                className="bg-black/40 border-white/20"
+                className="bg-white border-border"
               />
               <Input
                 type="datetime-local"
                 value={newEvent.date}
                 onChange={(e) => setNewEvent((ev) => ({ ...ev, date: e.target.value }))}
-                className="bg-black/40 border-white/20"
+                className="bg-white border-border"
               />
               <Input
                 placeholder="Location"
                 value={newEvent.location}
                 onChange={(e) => setNewEvent((ev) => ({ ...ev, location: e.target.value }))}
-                className="bg-black/40 border-white/20"
+                className="bg-white border-border"
               />
               <Button onClick={handleCreateEvent} disabled={saving} className="rounded-full">
                 Add event
               </Button>
             </div>
             {events.map((ev) => (
-              <div key={ev.id} className="rounded-xl bg-white/5 p-4 flex justify-between">
+              <div key={ev.id} className="rounded-xl bg-white p-4 flex justify-between">
                 <span>{ev.title}</span>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="text-red-400"
+                  className="text-red-700"
                   onClick={async () => {
                     try {
                       await deleteBandEvent(ev.id)
@@ -368,13 +391,13 @@ export default function BandAdminDashboard() {
             {(['description', 'mission', 'responsibilities', 'how_to_join', 'important_info', 'meeting_time', 'meeting_location'] as const).map(
               (field) => (
                 <div key={field}>
-                  <label className="text-sm text-white/60 capitalize block mb-1">
+                  <label className="text-sm text-muted-foreground capitalize block mb-1">
                     {field.replace(/_/g, ' ')}
                   </label>
                   <Textarea
                     value={(bandForm[field] as string) || ''}
                     onChange={(e) => setBandForm((f) => ({ ...f, [field]: e.target.value }))}
-                    className="bg-black/40 border-white/20"
+                    className="bg-white border-border"
                   />
                 </div>
               )
@@ -389,18 +412,18 @@ export default function BandAdminDashboard() {
             {(['leader_name', 'leader_position', 'leader_tenure', 'leader_email', 'leader_phone'] as const).map(
               (field) => (
                 <div key={field}>
-                  <label className="text-sm text-white/60 block mb-1">{field.replace(/_/g, ' ')}</label>
+                  <label className="text-sm text-muted-foreground block mb-1">{field.replace(/_/g, ' ')}</label>
                   <Input
                     value={(bandForm[field] as string) || ''}
                     onChange={(e) => setBandForm((f) => ({ ...f, [field]: e.target.value }))}
-                    className="bg-black/40 border-white/20"
+                    className="bg-white border-border"
                   />
                 </div>
               )
             )}
             <div>
-              <label className="text-sm text-white/60 block mb-1">Leader photo</label>
-              <Input type="file" accept="image/*" onChange={handleLeaderImage} className="bg-black/40 border-white/20" />
+              <label className="text-sm text-muted-foreground block mb-1">Leader photo</label>
+              <Input type="file" accept="image/*" onChange={handleLeaderImage} className="bg-white border-border" />
             </div>
             <Button onClick={handleSaveBand} disabled={saving} className="rounded-full">
               Save leadership
@@ -408,32 +431,7 @@ export default function BandAdminDashboard() {
           </TabsContent>
 
           <TabsContent value="members" className="space-y-4">
-            <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6">
-              <h2 className="font-semibold mb-4">Band Members</h2>
-              <p className="text-white/60 text-sm mb-4">
-                This section will display all band members once the database is connected.
-                You'll be able to manage member roles, track participation, and send notifications.
-              </p>
-              <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm">
-                        {String.fromCharCode(65 + i)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Member {i + 1}</p>
-                        <p className="text-xs text-white/50">Joined {['1 week ago', '2 weeks ago', '1 month ago'][i]}</p>
-                      </div>
-                    </div>
-                    <span className="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">Active</span>
-                  </div>
-                ))}
-              </div>
-              <Button className="w-full mt-4 rounded-full" variant="outline">
-                Invite New Member
-              </Button>
-            </div>
+            <BandMembers bandId={band.id} bandName={band.name} />
           </TabsContent>
         </Tabs>
       </div>

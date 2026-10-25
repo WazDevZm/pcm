@@ -111,7 +111,7 @@ export default function NewResourcePage() {
             asChild
             variant="outline"
             size="sm"
-            className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50 self-start"
+            className="bg-white ring-1 ring-border backdrop-blur border-0 text-ink hover:bg-canvas self-start"
           >
             <Link href="/admin/resources">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -120,7 +120,7 @@ export default function NewResourcePage() {
           </Button>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Add New Resource</h1>
-            <p className="text-white/70 text-sm">Share Bible studies, sermons, and ministry materials</p>
+            <p className="text-muted-foreground text-sm">Share Bible studies, sermons, and ministry materials</p>
           </div>
         </div>
         
@@ -128,7 +128,7 @@ export default function NewResourcePage() {
           form="resource-form"
           type="submit"
           disabled={loading || uploading}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-navy hover:bg-navy-deep"
         >
           <Save className="w-4 h-4 mr-2" />
           {loading ? 'Saving...' : 'Save Resource'}
@@ -139,8 +139,8 @@ export default function NewResourcePage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Title */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="title" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="title" className="block text-sm font-medium text-ink mb-2">
               Resource Title *
             </label>
             <Input
@@ -149,14 +149,14 @@ export default function NewResourcePage() {
               value={formData.title}
               onChange={handleInputChange}
               required
-              className="bg-white/10 border-white/20"
+              className="bg-muted border-border"
               placeholder="Enter resource title..."
             />
           </div>
 
           {/* Description */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="description" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="description" className="block text-sm font-medium text-ink mb-2">
               Description *
             </label>
             <Textarea
@@ -166,14 +166,14 @@ export default function NewResourcePage() {
               onChange={handleInputChange}
               required
               rows={4}
-              className="bg-white/10 border-white/20 resize-none"
+              className="bg-muted border-border resize-none"
               placeholder="Describe this resource..."
             />
           </div>
 
           {/* Author */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="author" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="author" className="block text-sm font-medium text-ink mb-2">
               Author/Source
             </label>
             <Input
@@ -181,22 +181,22 @@ export default function NewResourcePage() {
               name="author"
               value={formData.author}
               onChange={handleInputChange}
-              className="bg-white/10 border-white/20"
+              className="bg-muted border-border"
               placeholder="Author name or source"
             />
           </div>
 
           {/* File Upload or External Link */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label className="block text-sm font-medium text-white/90 mb-4">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label className="block text-sm font-medium text-ink mb-4">
               Resource File or Link *
             </label>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-xs text-white/60 mb-2">Upload File</label>
+                <label className="block text-xs text-muted-foreground mb-2">Upload File</label>
                 {uploadedName ? (
-                  <div className="flex items-center justify-between gap-3 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-sm">
+                  <div className="flex items-center justify-between gap-3 px-3 py-2 bg-muted border border-border rounded-md text-sm">
                     <span className="truncate">{uploadedName}</span>
                     <button type="button" onClick={removeFile} aria-label="Remove file" className="p-1 rounded-full bg-red-500 text-white hover:bg-red-600 shrink-0">
                       <X className="w-3 h-3" />
@@ -208,24 +208,24 @@ export default function NewResourcePage() {
                     accept=".pdf,.doc,.docx,.ppt,.pptx,image/*"
                     onChange={handleFileUpload}
                     disabled={uploading}
-                    className="bg-white/10 border-white/20"
+                    className="bg-muted border-border"
                   />
                 )}
-                {uploading && <p className="text-xs text-white/60 mt-2">Uploading...</p>}
+                {uploading && <p className="text-xs text-muted-foreground mt-2">Uploading...</p>}
               </div>
               
-              <div className="text-center text-white/40 text-sm">or</div>
+              <div className="text-center text-muted-foreground text-sm">or</div>
               
               <div>
-                <label className="block text-xs text-white/60 mb-2">External Link</label>
+                <label className="block text-xs text-muted-foreground mb-2">External Link</label>
                 <div className="relative">
-                  <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                  <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="external_link"
                     name="external_link"
                     value={formData.external_link}
                     onChange={handleInputChange}
-                    className="bg-white/10 border-white/20 pl-10"
+                    className="bg-muted border-border pl-10"
                     placeholder="https://example.com/resource"
                   />
                 </div>
@@ -237,8 +237,8 @@ export default function NewResourcePage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Resource Type */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="type" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="type" className="block text-sm font-medium text-ink mb-2">
               Resource Type *
             </label>
             <select
@@ -247,10 +247,10 @@ export default function NewResourcePage() {
               value={formData.type}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-navy/20"
             >
               {resourceTypes.map(type => (
-                <option key={type.value} value={type.value} className="bg-gray-800">
+                <option key={type.value} value={type.value} className="bg-white">
                   {type.label}
                 </option>
               ))}
@@ -258,8 +258,8 @@ export default function NewResourcePage() {
           </div>
 
           {/* Category */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="category" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="category" className="block text-sm font-medium text-ink mb-2">
               Category
             </label>
             <select
@@ -267,10 +267,10 @@ export default function NewResourcePage() {
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-navy/20"
             >
               {categories.map(cat => (
-                <option key={cat.value} value={cat.value} className="bg-gray-800">
+                <option key={cat.value} value={cat.value} className="bg-white">
                   {cat.label}
                 </option>
               ))}
@@ -278,9 +278,9 @@ export default function NewResourcePage() {
           </div>
 
           {/* Tips */}
-          <div className="bg-blue-500/10 ring-1 ring-blue-500/20 rounded-lg p-6">
-            <h3 className="text-sm font-medium text-blue-300 mb-2">Resource Guidelines</h3>
-            <ul className="text-blue-200/80 text-sm space-y-1">
+          <div className="bg-navy-soft ring-1 ring-navy/20 rounded-lg p-6">
+            <h3 className="text-sm font-medium text-navy mb-2">Resource Guidelines</h3>
+            <ul className="text-navy text-sm space-y-1">
               <li>• Use clear, descriptive titles</li>
               <li>• Include author attribution</li>
               <li>• Provide helpful descriptions</li>

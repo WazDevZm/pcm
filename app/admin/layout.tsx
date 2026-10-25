@@ -1,176 +1,202 @@
 "use client"
 
-import { useAuth } from '@/components/auth/AuthProvider'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { 
-  LayoutDashboard, FileText, Calendar, Users, Image, BookOpen, 
-  Heart, HandHeart, MessageCircle, UserCheck,
-  LogOut, Home, Menu, X
+import { usePathname, useRouter } from 'next/navigation'
+import {
+  BookOpen,
+  Calendar,
+  FileText,
+  HandHeart,
+  Heart,
+  Home,
+  Image as ImageIcon,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  MessageCircle,
+  ShoppingBag,
+  Terminal,
+  UserCheck,
+  Users,
+  X,
+  type LucideIcon,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { HavenMark, HavenWordmark } from '@/components/brand/HavenLogo'
+import { OFFICE_LABEL } from '@/lib/brand'
 import { FRONTEND_ONLY } from '@/lib/config'
-import { PcmShield } from '@/components/brand/PcmShield'
-import { BRAND } from '@/lib/brand'
+import { cn } from '@/lib/utils'
 
-const adminNavItems = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Content', href: '/admin/content', icon: FileText },
-  { name: 'Events', href: '/admin/events', icon: Calendar },
-  { name: 'Bands', href: '/admin/bands', icon: Users },
-  { name: 'Gallery', href: '/admin/gallery', icon: Image },
-  { name: 'Resources', href: '/admin/resources', icon: BookOpen },
-  { name: 'Prayer Requests', href: '/admin/prayers', icon: Heart },
-  { name: 'Volunteers', href: '/admin/volunteers', icon: HandHeart },
-  { name: 'Counseling', href: '/admin/counseling', icon: MessageCircle },
-  { name: 'Users', href: '/admin/users', icon: UserCheck }
+/** Who may open a section: content = Publicity Committee too; leader = leaders/admins; developer = Developer office */
+type Access = 'content' | 'leader' | 'developer'
+type NavItem = { name: string; href: string; icon: LucideIcon; access: Access }
+
+const NAV: { label: string; items: NavItem[] }[] = [
+  {
+    label: 'Overview',
+    items: [{ name: 'Dashboard', href: '/admin', icon: LayoutDashboard, access: 'content' }],
+  },
+  {
+    label: 'Website content',
+    items: [
+      { name: 'Posts & news', href: '/admin/content', icon: FileText, access: 'content' },
+      { name: 'Events', href: '/admin/events', icon: Calendar, access: 'content' },
+      { name: 'Gallery', href: '/admin/gallery', icon: ImageIcon, access: 'content' },
+      { name: 'Resources', href: '/admin/resources', icon: BookOpen, access: 'content' },
+    ],
+  },
+  {
+    label: 'Care',
+    items: [
+      { name: 'Prayer requests', href: '/admin/prayers', icon: Heart, access: 'leader' },
+      { name: 'Counseling', href: '/admin/counseling', icon: MessageCircle, access: 'leader' },
+      { name: 'Volunteers', href: '/admin/volunteers', icon: HandHeart, access: 'leader' },
+      { name: 'Messages', href: '/admin/messages', icon: Mail, access: 'leader' },
+    ],
+  },
+  {
+    label: 'Ministry',
+    items: [
+      { name: 'Bands & committees', href: '/admin/bands', icon: Users, access: 'leader' },
+      { name: 'Merch orders', href: '/admin/orders', icon: ShoppingBag, access: 'leader' },
+      { name: 'Users & roles', href: '/admin/users', icon: UserCheck, access: 'leader' },
+    ],
+  },
+  {
+    label: 'System',
+    items: [{ name: 'Developer', href: '/admin/developer', icon: Terminal, access: 'developer' }],
+  },
 ]
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const { user, profile, loading, isLeader, signOut } = useAuth()
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { user, profile, loading, isLeader, isPublicity, isDeveloper, signOut } = useAuth()
   const router = useRouter()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname()
+  const [open, setOpen] = useState(false)
+
+  const can = (access: Access) =>
+    FRONTEND_ONLY || (access === 'content' ? isPublicity : access === 'leader' ? isLeader : isDeveloper)
+
+  const current = NAV.flatMap((g) => g.items)
+    .filter((i) => pathname === i.href || (i.href !== '/admin' && pathname.startsWith(i.href)))
+    .sort((a, b) => b.href.length - a.href.length)[0]
+  const allowed = current ? can(current.access) : can('leader')
+
+  useEffect(() => setOpen(false), [pathname])
 
   useEffect(() => {
-    if (FRONTEND_ONLY) return
-    if (!loading && (!user || !profile || !isLeader)) {
-      router.push('/')
-    }
-  }, [user, profile, loading, isLeader, router])
+    if (FRONTEND_ONLY || loading) return
+    if (!user) router.replace(`/login?next=${encodeURIComponent(pathname)}`)
+    else if (profile && !isPublicity) router.replace('/member-dashboard')
+    else if (profile && !allowed) router.replace('/admin')
+  }, [user, profile, loading, isPublicity, allowed, pathname, router])
 
-  const demoProfile = FRONTEND_ONLY
-    ? { name: 'Demo Admin', role: 'admin' as const, email: 'demo@cbusda.org' }
-    : profile
-
-  if (!FRONTEND_ONLY && loading) {
+  if (!FRONTEND_ONLY && (loading || !user || !profile || !isPublicity || !allowed)) {
     return (
-      <div className="min-h-screen bg-[#0B0F12] flex items-center justify-center">
-        <div className="animate-pulse space-y-4 w-full max-w-md px-8">
-          <div className="h-8 bg-white/10 rounded w-48 mx-auto" />
-          <div className="h-4 bg-white/10 rounded w-32 mx-auto" />
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <HavenMark className="h-10 w-10 animate-pulse" />
+          <p className="text-sm">{loading || !profile ? 'Loading…' : 'Redirecting…'}</p>
         </div>
       </div>
     )
   }
 
-  if (
-    !FRONTEND_ONLY &&
-    (!user || !profile || !isLeader)
-  ) {
-    return null
-  }
+  const office = profile?.office ? OFFICE_LABEL[profile.office] : null
+  const roleLabel = office ?? (isLeader ? (profile?.role === 'admin' ? 'Admin' : 'Leader') : 'Publicity Committee')
 
-  const SidebarContent = () => (
-    <>
-      <div className="p-6">
-        <div className="flex items-center gap-3 mb-8">
-          <PcmShield className="h-12" />
-          <div>
-            <h2 className="font-bold text-lg">Admin Panel</h2>
-            <p className="text-white/60 text-sm">{BRAND.ministryShort}</p>
+  const sidebar = (
+    <div className="flex h-full flex-col">
+      <Link href="/" className="flex items-center gap-2 px-5 pt-6 pb-2">
+        <HavenMark className="h-8 w-8" />
+        <HavenWordmark className="text-xl" />
+      </Link>
+      <p className="eyebrow px-5 text-muted-foreground">{isLeader ? 'Leadership' : 'Publicity dashboard'}</p>
+
+      <nav className="mt-5 flex-1 space-y-5 overflow-y-auto px-3 pb-4">
+        {NAV.map((group) => {
+          const items = group.items.filter((i) => can(i.access))
+          if (!items.length) return null
+          return (
+            <div key={group.label}>
+              <p className="eyebrow !text-[10px] px-3 mb-1.5 text-[#8a93a3]">{group.label}</p>
+              {items.map((item) => {
+                const Icon = item.icon
+                const active = current?.href === item.href
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                      active ? 'bg-navy text-white' : 'text-ink/80 hover:bg-canvas hover:text-ink'
+                    )}
+                  >
+                    <Icon className={cn('h-[18px] w-[18px]', active ? 'text-gold' : 'text-navy')} strokeWidth={1.75} />
+                    {item.name}
+                  </Link>
+                )
+              })}
+            </div>
+          )
+        })}
+      </nav>
+
+      <div className="border-t border-border p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy font-serif text-white">
+            {(profile?.name || 'A').slice(0, 1).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-ink">{profile?.name ?? 'Demo admin'}</p>
+            <p className="truncate text-xs text-muted-foreground">{roleLabel}</p>
           </div>
         </div>
-
-        <nav className="space-y-1">
-          {adminNavItems.map((item) => {
-            const IconComponent = item.icon
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors group"
-              >
-                <IconComponent className="w-5 h-5 text-white/70 group-hover:text-white" />
-                <span className="text-white/70 group-hover:text-white text-sm">{item.name}</span>
-              </Link>
-            )
-          })}
-        </nav>
-      </div>
-
-      <div className="p-6 border-t border-white/10 mt-auto">
-        {FRONTEND_ONLY && (
-          <p className="mb-3 text-xs text-amber-400/90 rounded-lg bg-amber-500/10 px-3 py-2 ring-1 ring-amber-500/20">
-            Frontend-only mode — changes are not saved to a database.
-          </p>
-        )}
-        <div className="mb-4">
-          <p className="text-white/90 font-medium">{demoProfile?.name ?? 'Admin'}</p>
-          <p className="text-white/60 text-sm capitalize">{demoProfile?.role ?? 'admin'}</p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="flex-1 bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"
+        <div className="grid grid-cols-2 gap-2">
+          <Link href="/" className="flex items-center justify-center gap-1.5 rounded-full border border-border py-2 text-sm font-semibold text-navy hover:bg-canvas">
+            <Home className="h-4 w-4" /> Site
+          </Link>
+          <button
+            onClick={async () => {
+              await signOut()
+              router.push('/')
+            }}
+            className="flex items-center justify-center gap-1.5 rounded-full bg-danger-soft py-2 text-sm font-semibold text-destructive hover:bg-destructive hover:text-white transition-colors"
           >
-            <Link href="/">
-              <Home className="w-4 h-4 mr-2" />
-              Site
-            </Link>
-          </Button>
-          
-          <Button
-            onClick={signOut}
-            variant="outline"
-            size="sm"
-            className="bg-red-500/20 ring-1 ring-red-500/30 backdrop-blur border-0 text-red-200 hover:bg-red-500/30"
-          >
-            <LogOut className="w-4 h-4" />
-          </Button>
+            <LogOut className="h-4 w-4" /> Sign out
+          </button>
         </div>
       </div>
-    </>
+    </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#0B0F12] text-white">
-      {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-black/60 border-b border-white/10 sticky top-0 z-30">
-        <div className="flex items-center gap-2">
-          <PcmShield className="h-8" />
-          <span className="font-semibold text-sm">Admin Panel</span>
-        </div>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-          aria-label="Toggle sidebar"
-        >
-          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+    <div className="min-h-screen bg-canvas text-ink">
+      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between border-b border-border bg-white/90 px-4 py-3 backdrop-blur">
+        <Link href="/admin" className="flex items-center gap-2">
+          <HavenMark className="h-7 w-7" />
+          <span className="font-serif text-lg text-ink">Admin</span>
+        </Link>
+        <button onClick={() => setOpen(!open)} className="rounded-full p-2 hover:bg-muted" aria-label="Toggle menu">
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-20 bg-black/60"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {open && <div className="md:hidden fixed inset-0 z-20 bg-ink/40" onClick={() => setOpen(false)} />}
 
       <div className="flex">
-        {/* Desktop sidebar */}
-        <div className="hidden md:flex md:flex-col w-64 bg-black/40 backdrop-blur border-r border-white/10 min-h-screen sticky top-0 h-screen overflow-y-auto">
-          <SidebarContent />
-        </div>
-
-        {/* Mobile sidebar drawer */}
-        <div className={`md:hidden fixed top-0 left-0 z-30 h-full w-64 bg-[#0B0F12] border-r border-white/10 flex flex-col overflow-y-auto transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <SidebarContent />
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 min-w-0">
-          {children}
-        </div>
+        <aside className="hidden md:block sticky top-0 h-screen w-64 shrink-0 border-r border-border bg-white">{sidebar}</aside>
+        <aside
+          className={cn(
+            'md:hidden fixed inset-y-0 left-0 z-30 w-72 border-r border-border bg-white transition-transform duration-300',
+            open ? 'translate-x-0' : '-translate-x-full'
+          )}
+        >
+          {sidebar}
+        </aside>
+        <main className="min-w-0 flex-1">{children}</main>
       </div>
     </div>
   )

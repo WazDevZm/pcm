@@ -5,7 +5,6 @@ import { Camera, Play, Calendar, Users, MapPin } from "lucide-react"
 import { useEffect, useState } from "react"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 import { ministryImage } from "@/lib/site-images"
 import type { GalleryItem } from "@/lib/supabase"
 import { formatDate, getGalleryItems, isLocalImage } from "@/lib/data/content"
@@ -155,10 +154,10 @@ export default function GalleryPage() {
   return (
     <MinistryPageShell
       heroImage="/Slider/KCM_0669.jpg"
+      eyebrow="Moments"
       title="Gallery"
       subtitle="Witness God's work through our ministry activities, events, and community outreach."
     >
-      <ScrollToBottom targetId="gallery-content" label="Scroll" />
       <MinistryContent>
       {/* Category Filter */}
       <section className="py-8 max-w-4xl mx-auto">
@@ -169,8 +168,8 @@ export default function GalleryPage() {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-6 py-3 rounded-full transition-colors ${
                 selectedCategory === category.id
-                  ? "bg-[#0B0F12] text-white"
-                  : "bg-white ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50"
+                  ? "bg-ink text-white"
+                  : "bg-white border border-border text-ink/80 hover:bg-canvas"
               }`}
             >
               {category.name}
@@ -181,13 +180,13 @@ export default function GalleryPage() {
 
       {/* Gallery Grid */}
       <section id="gallery-content" className="py-12 max-w-4xl mx-auto">
-          {!galleryItems && <p className="text-center text-gray-500">Loading gallery...</p>}
+          {!galleryItems && <p className="text-center text-muted-foreground">Loading gallery...</p>}
           {galleryItems && filteredItems.length === 0 && (
-            <p className="text-center text-gray-500">No media in this category yet.</p>
+            <p className="text-center text-muted-foreground">No media in this category yet.</p>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredItems.map((item) => (
-              <div key={item.id} className="group rounded-2xl bg-white ring-1 ring-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div key={item.id} className="group rounded-2xl bg-white border border-border overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <div className="relative aspect-square overflow-hidden">
                   <Image
                     src={item.image}
@@ -236,11 +235,11 @@ export default function GalleryPage() {
                 </div>
                 
                 <div className="p-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                     <MapPin className="w-3 h-3" />
                     <span>{item.location}</span>
                   </div>
-                  <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
                 </div>
               </div>
             ))}
@@ -248,13 +247,13 @@ export default function GalleryPage() {
       </section>
 
       {/* Submit Content */}
-      <section className="py-12 max-w-4xl mx-auto text-center border-t border-gray-200">
-          <div className="rounded-3xl bg-white ring-1 ring-gray-200 p-12 shadow-sm">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#0f2d6e]/10 mb-6">
-              <Camera className="w-8 h-8 text-[#0f2d6e]" />
+      <section className="py-12 max-w-4xl mx-auto text-center border-t border-border">
+          <div className="rounded-3xl bg-white border border-border p-12 shadow-sm">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-navy/10 mb-6">
+              <Camera className="w-8 h-8 text-navy" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[#0B0F12]">Share Your Photos</h2>
-            <p className="text-lg text-gray-600">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-ink">Share Your Photos</h2>
+            <p className="text-lg text-muted-foreground">
               Have photos or videos from our ministry events? Share them with a ministry leader to be featured in our gallery.
             </p>
           </div>

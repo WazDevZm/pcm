@@ -6,8 +6,8 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { HavenMark, HavenWordmark } from '@/components/brand/HavenLogo'
 import { Input } from '@/components/ui/input'
-import { ScrollToBottom } from '@/components/ui/scroll-to-bottom'
 import { getMemberData, updateMyProfile, type MemberData } from '@/lib/data/admin'
 import {
   Calendar,
@@ -28,17 +28,17 @@ const fmtDate = (d: string) =>
 
 const statusColor = (status: string) => {
   switch (status) {
-    case 'pending': return 'bg-yellow-500/20 text-yellow-300'
+    case 'pending': return 'bg-amber-50 text-amber-700'
     case 'active':
     case 'scheduled':
     case 'confirmed':
-    case 'ready': return 'bg-blue-500/20 text-blue-300'
+    case 'ready': return 'bg-navy-soft text-navy'
     case 'answered':
     case 'completed':
-    case 'collected': return 'bg-green-500/20 text-green-300'
+    case 'collected': return 'bg-emerald-50 text-emerald-700'
     case 'cancelled':
-    case 'inactive': return 'bg-red-500/20 text-red-300'
-    default: return 'bg-white/10 text-white/70'
+    case 'inactive': return 'bg-red-50 text-red-700'
+    default: return 'bg-muted text-muted-foreground'
   }
 }
 
@@ -64,26 +64,26 @@ function Section({
   count: number
 }) {
   return (
-    <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-6">
+    <div className="rounded-xl bg-white ring-1 ring-border p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold flex items-center gap-2">
-          <Icon className="w-5 h-5 text-white/60" />
+          <Icon className="w-5 h-5 text-muted-foreground" />
           {title}
         </h2>
         {action && (
-          <Link href={action.href} className="text-sm text-white/60 hover:text-white flex items-center gap-1">
+          <Link href={action.href} className="text-sm text-muted-foreground hover:text-ink flex items-center gap-1">
             {action.label}
             <ChevronRight className="w-4 h-4" />
           </Link>
         )}
       </div>
-      {count === 0 ? <p className="text-sm text-white/50">{empty}</p> : <div className="divide-y divide-white/10">{children}</div>}
+      {count === 0 ? <p className="text-sm text-muted-foreground">{empty}</p> : <div className="divide-y divide-border">{children}</div>}
     </div>
   )
 }
 
 export default function MemberDashboard() {
-  const { user, profile, loading, isLeader, refreshProfile, signOut } = useAuth()
+  const { user, profile, loading, isLeader, refreshProfile, signOut, isPublicity, managedBands } = useAuth()
   const router = useRouter()
   const [data, setData] = useState<MemberData | null>(null)
   const [dataError, setDataError] = useState<string | null>(null)
@@ -141,7 +141,7 @@ export default function MemberDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B0F12] flex items-center justify-center text-white">
+      <div className="min-h-screen bg-canvas flex items-center justify-center text-ink">
         Loading...
       </div>
     )
@@ -157,42 +157,48 @@ export default function MemberDashboard() {
   const stat = (n: number | undefined) => (data ? n ?? 0 : '—')
 
   return (
-    <div className="min-h-screen bg-[#0B0F12] text-white relative">
-      <ScrollToBottom targetId="dashboard-content" label="Scroll" />
+    <div className="min-h-screen bg-canvas text-ink relative">
 
       {/* Header */}
-      <div className="border-b border-white/10 px-4 md:px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold truncate">Welcome, {profile?.name || user.email?.split('@')[0]}</h1>
-            <p className="text-white/60 text-sm">Member Dashboard</p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {isLeader && (
-              <Button asChild variant="outline" size="sm" className="bg-black/40 ring-1 ring-white/20 border-0 text-white hover:bg-black/50">
-                <Link href="/admin">
-                  <LayoutDashboard className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Admin</span>
-                </Link>
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSignOut}
-              aria-label="Sign out"
-              className="text-white/70 hover:text-white"
-            >
-              <LogOut className="w-5 h-5" />
+      <header className="relative overflow-hidden bg-navy-deep text-white">
+        <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gold/15 blur-3xl" aria-hidden />
+        <div className="relative max-w-6xl mx-auto px-4 md:px-6 pt-6 pb-10">
+          <div className="flex items-center justify-between gap-3">
+            <Link href="/" className="inline-flex items-center gap-2" aria-label="The Haven home">
+              <HavenMark tone="onDark" className="h-8 w-8" />
+              <HavenWordmark tone="onDark" className="text-xl" />
+            </Link>
+            <Button variant="light" size="sm" onClick={handleSignOut}>
+              <LogOut /> Sign out
             </Button>
           </div>
+          <p className="eyebrow text-gold mt-8">My dashboard</p>
+          <h1 className="mt-2 text-3xl md:text-4xl truncate">Welcome, {(profile?.name || user.email?.split('@')[0] || '').split(' ')[0]}</h1>
+          {(isPublicity || managedBands.length > 0) && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {isPublicity && (
+                <Button asChild variant="gold">
+                  <Link href="/admin">
+                    <LayoutDashboard /> {isLeader ? 'Admin dashboard' : 'Website content'}
+                  </Link>
+                </Button>
+              )}
+              {managedBands.map((slug) => (
+                <Button key={slug} asChild variant="light">
+                  <Link href={`/band-admin/${slug}`}>
+                    {slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} dashboard
+                  </Link>
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
       <div id="dashboard-content" className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-8">
         {(dataError || (data && data.errors.length > 0)) && (
-          <div className="p-4 rounded-xl bg-yellow-500/10 ring-1 ring-yellow-500/20 text-sm text-white/80">
+          <div className="p-4 rounded-xl bg-amber-50 ring-1 ring-amber-200 text-sm text-ink/85">
             {dataError
               ? `We couldn't load your activity right now: ${dataError}`
               : `Some sections couldn't be loaded (${data!.errors.join(', ')}). Please try again later.`}
@@ -201,26 +207,26 @@ export default function MemberDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 text-center">
-            <div className="text-3xl font-bold text-blue-400 mb-1">{stat(upcomingRsvps.length)}</div>
-            <div className="text-sm text-white/60">Upcoming RSVPs</div>
+          <div className="rounded-xl bg-white ring-1 ring-border p-6 text-center">
+            <div className="text-3xl font-bold text-navy mb-1">{stat(upcomingRsvps.length)}</div>
+            <div className="text-sm text-muted-foreground">Upcoming RSVPs</div>
           </div>
-          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 text-center">
-            <div className="text-3xl font-bold text-purple-400 mb-1">{stat(data?.bands.length)}</div>
-            <div className="text-sm text-white/60">My Bands</div>
+          <div className="rounded-xl bg-white ring-1 ring-border p-6 text-center">
+            <div className="text-3xl font-bold text-violet-700 mb-1">{stat(data?.bands.length)}</div>
+            <div className="text-sm text-muted-foreground">My Bands</div>
           </div>
-          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 text-center">
-            <div className="text-3xl font-bold text-green-400 mb-1">{stat(pastRsvps)}</div>
-            <div className="text-sm text-white/60">Past Events</div>
+          <div className="rounded-xl bg-white ring-1 ring-border p-6 text-center">
+            <div className="text-3xl font-bold text-emerald-700 mb-1">{stat(pastRsvps)}</div>
+            <div className="text-sm text-muted-foreground">Past Events</div>
           </div>
-          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 text-center">
-            <div className="text-3xl font-bold text-red-400 mb-1">{stat(data?.prayers.length)}</div>
-            <div className="text-sm text-white/60">Prayer Requests</div>
+          <div className="rounded-xl bg-white ring-1 ring-border p-6 text-center">
+            <div className="text-3xl font-bold text-red-700 mb-1">{stat(data?.prayers.length)}</div>
+            <div className="text-sm text-muted-foreground">Prayer Requests</div>
           </div>
         </div>
 
         {/* Profile */}
-        <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-6">
+        <div className="rounded-xl bg-white ring-1 ring-border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold">My Profile</h2>
             {!editing && (
@@ -229,7 +235,7 @@ export default function MemberDashboard() {
                 size="sm"
                 onClick={() => setEditing(true)}
                 disabled={!profile}
-                className="bg-black/40 ring-1 ring-white/20 border-0 text-white hover:bg-black/50"
+                className="bg-white ring-1 ring-border border-0 text-ink hover:bg-canvas"
               >
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit
@@ -239,23 +245,23 @@ export default function MemberDashboard() {
           {editing ? (
             <form onSubmit={saveProfile} className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="name" className="block text-sm text-white/70 mb-1">Name</label>
+                <label htmlFor="name" className="block text-sm text-muted-foreground mb-1">Name</label>
                 <Input
                   id="name"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   required
-                  className="bg-black/40 border-white/20"
+                  className="bg-white border-border"
                 />
               </div>
               <div>
-                <label htmlFor="phone" className="block text-sm text-white/70 mb-1">Phone</label>
+                <label htmlFor="phone" className="block text-sm text-muted-foreground mb-1">Phone</label>
                 <Input
                   id="phone"
                   type="tel"
                   value={form.phone}
                   onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                  className="bg-black/40 border-white/20"
+                  className="bg-white border-border"
                   placeholder="Optional"
                 />
               </div>
@@ -267,11 +273,11 @@ export default function MemberDashboard() {
                     setEditing(false)
                     setForm({ name: profile?.name ?? '', phone: profile?.phone ?? '' })
                   }}
-                  className="text-white/70 hover:text-white"
+                  className="text-muted-foreground hover:text-ink"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={saving} className="bg-white text-black hover:bg-white/90 rounded-full">
+                <Button type="submit" disabled={saving} className="bg-navy text-white hover:bg-navy-deep rounded-full">
                   {saving ? 'Saving...' : 'Save'}
                 </Button>
               </div>
@@ -279,15 +285,15 @@ export default function MemberDashboard() {
           ) : (
             <dl className="grid sm:grid-cols-3 gap-4 text-sm">
               <div>
-                <dt className="text-white/50">Name</dt>
+                <dt className="text-muted-foreground">Name</dt>
                 <dd className="mt-1">{profile?.name || '—'}</dd>
               </div>
               <div className="min-w-0">
-                <dt className="text-white/50">Email</dt>
+                <dt className="text-muted-foreground">Email</dt>
                 <dd className="mt-1 truncate">{profile?.email || user.email}</dd>
               </div>
               <div>
-                <dt className="text-white/50">Phone</dt>
+                <dt className="text-muted-foreground">Phone</dt>
                 <dd className="mt-1">{profile?.phone || '—'}</dd>
               </div>
             </dl>
@@ -301,7 +307,7 @@ export default function MemberDashboard() {
                 <div key={e.id} className="py-3 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium truncate">{e.title}</p>
-                    <p className="text-sm text-white/50 flex items-center gap-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
                       {fmtDate(e.date)}
                       {e.location && (
                         <>
@@ -335,7 +341,7 @@ export default function MemberDashboard() {
                 <div key={p.id} className="py-3 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm line-clamp-2">{p.request}</p>
-                    <p className="text-xs text-white/50 mt-1 capitalize">{p.category} · {fmtDate(p.created_at)}</p>
+                    <p className="text-xs text-muted-foreground mt-1 capitalize">{p.category} · {fmtDate(p.created_at)}</p>
                   </div>
                   <StatusPill status={p.status} />
                 </div>
@@ -347,7 +353,7 @@ export default function MemberDashboard() {
                 <div key={c.id} className="py-3 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium capitalize">{c.service_type} counseling</p>
-                    <p className="text-xs text-white/50 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Requested {fmtDate(c.created_at)}
                       {c.appointment_date && ` · Appointment ${fmtDate(c.appointment_date)}`}
                     </p>
@@ -362,7 +368,7 @@ export default function MemberDashboard() {
                 <div key={v.id} className="py-3 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium truncate">{v.role}</p>
-                    <p className="text-xs text-white/50 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {v.committee_name ? `${v.committee_name} · ` : ''}{fmtDate(v.created_at)}
                     </p>
                   </div>
@@ -378,7 +384,7 @@ export default function MemberDashboard() {
                     <p className="font-medium">
                       {o.reference} · K{Number(o.total_zmw).toFixed(2)}
                     </p>
-                    <p className="text-xs text-white/50 mt-1 line-clamp-2">
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                       {(Array.isArray(o.items) ? o.items : [])
                         .map((i) => `${i.quantity}× ${i.name}${i.size ? ` (${i.size})` : ''}`)
                         .join(', ')}
@@ -395,18 +401,18 @@ export default function MemberDashboard() {
         {!data && !dataError && (
           <div className="grid md:grid-cols-2 gap-6 animate-pulse">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-40 rounded-xl bg-white/5" />
+              <div key={i} className="h-40 rounded-xl bg-white" />
             ))}
           </div>
         )}
 
         {/* Contact Support */}
-        <div className="rounded-xl bg-gradient-to-r from-[#0f2d6e]/30 to-[#0f2d6e]/10 ring-1 ring-[#0f2d6e]/30 p-6">
+        <div className="rounded-xl bg-gradient-to-r from-navy/30 to-navy/10 ring-1 ring-navy/30 p-6">
           <h2 className="font-semibold mb-2">Need Help?</h2>
-          <p className="text-white/70 text-sm mb-4">
+          <p className="text-muted-foreground text-sm mb-4">
             Contact the ministry team for support or questions about your membership.
           </p>
-          <Button asChild className="bg-white text-black hover:bg-white/90 rounded-full">
+          <Button asChild className="bg-navy text-white hover:bg-navy-deep rounded-full">
             <Link href="/support">Contact Ministry Team</Link>
           </Button>
         </div>

@@ -3,44 +3,74 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* The Haven palette — mirrors mobile/src/theme.ts so the site and app read as one product */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --navy: #0f2d6e;
+  --navy-deep: #0a1f4d;
+  --navy-soft: #e8edf7;
+  --ink: #0b0f12;
+  --ink-elevated: #121820;
+  --canvas: #fafbfc;
+  --gold: #d9a441;
+  --gold-soft: #fbf3e2;
+  --gold-ink: #8a5d0b;
+  --success: #067647;
+  --success-soft: #ecfdf3;
+  --danger-soft: #fef3f2;
+
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--navy);
+  --primary-foreground: #ffffff;
+  --secondary: var(--navy-soft);
+  --secondary-foreground: var(--navy);
+  --muted: #f1f3f6;
+  --muted-foreground: #5b6472;
+  --accent: var(--navy-soft);
+  --accent-foreground: var(--navy);
+  --destructive: #b42318;
+  --destructive-foreground: #b42318;
+  --border: #e4e7ec;
+  --input: #e4e7ec;
+  --ring: var(--navy);
+  --chart-1: var(--navy);
+  --chart-2: var(--gold);
+  --chart-3: #4a6fb5;
+  --chart-4: #067647;
+  --chart-5: #8a93a3;
+  --radius: 0.75rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--navy);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--navy-soft);
+  --sidebar-accent-foreground: var(--navy);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--navy);
 }
 
 @theme inline {
-  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-mono: var(--font-mono);
+
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-navy-soft: var(--navy-soft);
+  --color-ink: var(--ink);
+  --color-ink-elevated: var(--ink-elevated);
+  --color-canvas: var(--canvas);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-ink: var(--gold-ink);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger-soft: var(--danger-soft);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -83,7 +113,40 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Display headings use Fraunces like the app; h3 and below stay in Inter */
+  h1,
+  h2 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--gold) 35%, transparent);
+  }
+}
+
+@layer utilities {
+  /* Uppercase eyebrow above section titles (app: type.label) */
+  .eyebrow {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  /* Navy wash over photos, matching the app's LinearGradientOverlay */
+  .photo-overlay {
+    background: linear-gradient(
+      180deg,
+      rgb(10 31 77 / 0.35) 0%,
+      rgb(10 31 77 / 0.65) 55%,
+      rgb(10 31 77 / 0.95) 100%
+    );
   }
 }

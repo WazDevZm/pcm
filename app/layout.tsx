@@ -1,6 +1,7 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
+import localFont from "next/font/local"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { AuthProvider } from "@/components/auth/AuthProvider"
@@ -14,6 +15,16 @@ const inter = Inter({
   display: "swap",
 })
 
+/** Same Fraunces files as the app (brand-kit/fonts) */
+const fraunces = localFont({
+  src: [
+    { path: "./fonts/Fraunces_700Bold.ttf", weight: "700", style: "normal" },
+    { path: "./fonts/Fraunces_400Regular_Italic.ttf", weight: "400", style: "italic" },
+  ],
+  variable: "--font-serif",
+  display: "swap",
+})
+
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
@@ -21,9 +32,13 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "The Haven | The Copperbelt University Public Campus Ministries",
+  title: "The Haven | A ministry of CBU PCM",
   description:
-    "Join The Copperbelt University Public Campus Ministries (PCM) at The Haven for spiritual growth, community outreach, biblical studies, and meaningful fellowship with fellow believers.",
+    "The Haven is a ministry of The Copperbelt University Public Campus Ministries — a place to belong for worship, Bible study, fellowship and service.",
+}
+
+export const viewport: Viewport = {
+  themeColor: "#0f2d6e",
 }
 
 export default function RootLayout({
@@ -33,12 +48,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable} ${jetbrainsMono.variable}`}>
+      <body className={`font-sans antialiased ${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}>
         <AuthProvider>
           <MerchGlobal>
             <Suspense fallback={null}>{children}</Suspense>
           </MerchGlobal>
-          <Toaster theme="dark" richColors position="top-center" />
+          <Toaster richColors position="top-center" />
         </AuthProvider>
         <Analytics />
       </body>

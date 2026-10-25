@@ -1,119 +1,116 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
   ArrowRight,
   BookOpen,
-  Calendar,
+  CalendarDays,
   ChevronDown,
-  Heart,
-  MapPin,
-  ShoppingBag,
-  Sparkles,
-  Users,
-  Shield,
+  Gift,
   HandHeart,
+  Heart,
+  Image as ImageIcon,
   Mail,
-  CheckCircle2,
+  MapPin,
+  MessagesSquare,
+  Newspaper,
+  Sun,
+  Users,
+  type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SiteNav } from "@/components/layout/SiteNav"
 import { HomeFooter } from "@/components/home/HomeFooter"
 import { HeroSlider } from "@/components/home/HeroSlider"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
-import { cn } from "@/lib/utils"
 import { PcmShield } from "@/components/brand/PcmShield"
-import { PosterCard } from "@/components/posters/PosterCard"
+import { HavenMark } from "@/components/brand/HavenLogo"
+import { Card, IconTile, Notice, SectionHeader, cardClass, cardHoverClass, fieldClass, labelClass } from "@/components/ui/haven"
+import { useAuth } from "@/components/auth/AuthProvider"
 import { POSTERS } from "@/lib/posters"
 import { BRAND } from "@/lib/brand"
+import { getPosts, getUpcomingEvents, formatDate, formatTime } from "@/lib/data/content"
+import type { Event, Post } from "@/lib/supabase"
+import { ministryImage } from "@/lib/site-images"
+import { cn } from "@/lib/utils"
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-[#0f2d6e] mb-3">
-      {children}
-    </span>
-  )
-}
-
-const features = [
-  {
-    icon: BookOpen,
-    title: "Biblical Teaching",
-    description: "Weekly Scripture studies and discipleship led by experienced ministry leaders.",
-    color: "from-blue-500/20 to-blue-600/5",
-  },
-  {
-    icon: Users,
-    title: "Welcoming Community",
-    description: "A Christ-centered family for students from every background on campus.",
-    color: "from-violet-500/20 to-violet-600/5",
-  },
-  {
-    icon: HandHeart,
-    title: "Free Programs",
-    description: "Worship, Bible study, and fellowship — open to all students at no cost.",
-    color: "from-emerald-500/20 to-emerald-600/5",
-  },
-  {
-    icon: Heart,
-    title: "Campus Outreach",
-    description: "Share God's love through service, evangelism, and practical care.",
-    color: "from-rose-500/20 to-rose-600/5",
-  },
+const quickLinks: { icon: LucideIcon; label: string; href: string }[] = [
+  { icon: Heart, label: "Prayer", href: "/prayer-request" },
+  { icon: MessagesSquare, label: "Counseling", href: "/counseling" },
+  { icon: Newspaper, label: "News", href: "/news" },
+  { icon: ImageIcon, label: "Gallery", href: "/gallery" },
+  { icon: BookOpen, label: "Resources", href: "/resources" },
+  { icon: HandHeart, label: "Get involved", href: "/support" },
 ]
 
-const journeySteps = [
-  { step: "01", title: "Worship", text: "Weekly Sabbath worship and praise gatherings.", href: "/events" },
-  { step: "02", title: "Study", text: "Deep dive into God's Word in small groups.", href: "/bands/bible-study-band" },
-  { step: "03", title: "Fellowship", text: "Build lasting friendships with fellow believers.", href: "/programs" },
-  { step: "04", title: "Serve", text: "Ministry bands and outreach on campus.", href: "/bands" },
+const features: { icon: LucideIcon; title: string; body: string }[] = [
+  { icon: BookOpen, title: "Biblical teaching", body: "Weekly Scripture study and discipleship led by experienced leaders." },
+  { icon: Users, title: "A welcoming family", body: "A Christ-centred home for students from every background on campus." },
+  { icon: Gift, title: "Always free", body: "Worship, Bible study and fellowship — open to every student." },
+  { icon: Sun, title: "Campus outreach", body: "Carry God's love through service, evangelism and practical care." },
 ]
 
-const quickLinks = [
-  { href: "/bands", label: "Bands", icon: Users },
-  { href: "/events", label: "Events", icon: Calendar },
-  { href: "/merch", label: "Merch Store", icon: ShoppingBag, accent: true },
-  { href: "/news", label: "News", icon: Sparkles },
+const journey = [
+  { step: "01", title: "Worship", body: "Sabbath worship and praise together.", href: "/events" },
+  { step: "02", title: "Study", body: "Go deeper in God's Word in small groups.", href: "/bands/bible-study-band" },
+  { step: "03", title: "Belong", body: "Build friendships that last beyond campus.", href: "/programs" },
+  { step: "04", title: "Serve", body: "Find your place in a ministry band.", href: "/bands" },
 ]
 
 const stats = [
-  { value: "5+", label: "Ministry bands" },
+  { value: "5", label: "Ministry bands" },
   { value: "Weekly", label: "Worship & study" },
-  { value: "100%", label: "Open to students" },
+  { value: "Free", label: "For every student" },
 ]
 
 const faqs = [
   {
-    question: "What ministries does The Haven offer?",
-    answer:
-      "We offer Sabbath worship, Bible studies, prayer ministry, evangelism training, counseling, and specialized bands including Bible Study, Welfare, Health, Witnessing, and Publicity.",
+    q: "What does The Haven offer?",
+    a: "Sabbath worship, Bible studies, prayer ministry, evangelism training, counseling, and five ministry bands: Bible Study, Welfare, Health, Witnessing and Publicity.",
   },
   {
-    question: "How can I join the ministry?",
-    answer:
-      "Attend any weekly meeting, visit our Bands page to find a team that fits your gifts, or contact leadership through the form below.",
+    q: "How do I join?",
+    a: "Come to any weekly gathering, or open a band on the Bands page and choose “Join this band”. Your account works in The Haven app too.",
   },
   {
-    question: "Do you offer spiritual counseling?",
-    answer:
-      "Yes. Our pastoral team provides confidential spiritual guidance and support for academic, personal, and faith-related concerns.",
+    q: "Is counseling confidential?",
+    a: "Yes. Our pastoral team offers confidential spiritual guidance for academic, personal and faith concerns.",
   },
   {
-    question: "How do I get baptized?",
-    answer:
-      "Speak with a ministry leader after worship or submit an inquiry. We'll walk with you through Bible study preparation and baptism planning.",
+    q: "How do I get baptised?",
+    a: "Talk to a leader after worship or send us a message — we'll walk with you through Bible study and preparation.",
   },
 ]
 
-export default function HomePage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0)
-  const [contactSent, setContactSent] = useState(false)
-  const [heroReady, setHeroReady] = useState(true)
+function EventDate({ iso }: { iso: string }) {
+  const d = new Date(iso)
+  return (
+    <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-navy text-white">
+      <span className="eyebrow !text-[10px] text-gold">{d.toLocaleDateString("en-GB", { month: "short" })}</span>
+      <span className="font-serif text-2xl leading-none mt-0.5">{d.getDate()}</span>
+    </div>
+  )
+}
 
+export default function HomePage() {
+  const { profile } = useAuth()
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
+  const [events, setEvents] = useState<Event[] | null | undefined>(undefined)
+  const [posts, setPosts] = useState<Post[] | null>(null)
+
+  const [contactSent, setContactSent] = useState(false)
   const [contactError, setContactError] = useState("")
   const [contactSending, setContactSending] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    getUpcomingEvents().then((rows) => active && setEvents(rows))
+    getPosts().then((rows) => active && setPosts(rows))
+    return () => {
+      active = false
+    }
+  }, [])
 
   const handleContact = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -141,362 +138,326 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] text-[#0B0F12] antialiased">
+    <div className="min-h-screen bg-canvas text-ink">
       {/* ——— Hero ——— */}
-      <header className="relative h-screen flex flex-col bg-[#0B0F12] text-white isolate overflow-hidden">
-        <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
+      <header className="relative isolate flex min-h-[640px] h-[92svh] flex-col overflow-hidden bg-navy-deep text-white">
+        <div className="absolute inset-0 -z-10">
           <HeroSlider />
         </div>
 
-        <div className="relative z-20 shrink-0">
-          <SiteNav />
-        </div>
+        <SiteNav />
 
-        <div className="relative z-10 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full px-6 pb-20 pt-4 md:pt-6 pointer-events-auto">
-          <div
-            className={cn(
-              "max-w-3xl transition-all duration-700 ease-out",
-              heroReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-            )}
-          >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-balance mb-6">
-              Find your place at{" "}
-              <span className="bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
-                The Haven
-              </span>
+        <div className="flex-1 flex flex-col justify-end max-w-6xl mx-auto w-full px-5 sm:px-6 pb-24 md:pb-32">
+          <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-3 duration-700">
+            <p className="eyebrow text-gold mb-4">
+              {profile ? `Welcome back, ${profile.name.split(" ")[0]}` : BRAND.tagline}
+            </p>
+            <h1 className="text-[2.75rem] leading-[1.05] sm:text-6xl md:text-7xl text-balance">
+              Find your place at <span className="italic font-normal text-gold">The Haven</span>
             </h1>
-
-            <p className="text-lg md:text-xl text-white/75 leading-relaxed max-w-2xl mb-10 text-pretty">
-              A shelter on campus for worship, Bible study, real friendship,
-              and service that carries Christ&apos;s light beyond the classroom.
+            <p className="mt-6 text-base md:text-xl text-white/80 leading-relaxed max-w-2xl text-pretty">
+              A shelter on campus for worship, Bible study, real friendship and service that carries Christ&apos;s
+              light beyond the classroom.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-14">
-              <Button
-                asChild
-                size="lg"
-                className="h-12 rounded-full bg-white text-[#0B0F12] hover:bg-white/90 font-semibold px-8 shadow-lg shadow-black/20"
-              >
-                <Link href="/support">
-                  Join our ministry
-                  <ArrowRight className="ml-2 w-4 h-4" />
+            <div className="mt-9 flex flex-col sm:flex-row gap-3">
+              <Button asChild size="lg" variant="gold">
+                <Link href="/bands">
+                  Join a band <ArrowRight />
                 </Link>
               </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="h-12 rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10 backdrop-blur px-8"
-              >
-                <Link href="/programs">Explore programs</Link>
+              <Button asChild size="lg" variant="light">
+                <Link href="/events">This week</Link>
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-8 md:gap-12 pt-6 border-t border-white/10">
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <p className="text-2xl md:text-3xl font-bold tracking-tight">{stat.value}</p>
-                  <p className="text-sm text-white/50 mt-0.5">{stat.label}</p>
+            <dl className="mt-10 pt-6 border-t border-white/20 grid grid-cols-3 gap-6 max-w-lg">
+              {stats.map((s) => (
+                <div key={s.label}>
+                  <dt className="sr-only">{s.label}</dt>
+                  <dd className="text-xl md:text-2xl font-extrabold tracking-tight">{s.value}</dd>
+                  <dd className="text-xs md:text-sm text-white/60 mt-0.5">{s.label}</dd>
                 </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+
+        <PcmShield className="hidden md:block absolute bottom-28 right-8 lg:right-12 h-24 drop-shadow-2xl" />
+      </header>
+
+      {/* ——— Quick links (overlaps hero, like the app) ——— */}
+      <nav aria-label="Quick links" className="relative z-10 -mt-12 px-5 sm:px-6">
+        <div className={cn(cardClass, "max-w-4xl mx-auto grid grid-cols-3 md:grid-cols-6 py-3 rounded-3xl shadow-[0_20px_50px_rgba(10,31,77,0.12)]")}>
+          {quickLinks.map((q) => (
+            <Link
+              key={q.href}
+              href={q.href}
+              className="group flex flex-col items-center gap-2 rounded-2xl py-4 transition-colors hover:bg-canvas"
+            >
+              <IconTile icon={q.icon} className="transition-transform group-hover:-translate-y-0.5" />
+              <span className="text-[13px] font-semibold text-ink">{q.label}</span>
+            </Link>
+          ))}
+        </div>
+      </nav>
+
+      {/* ——— Upcoming events (live) ——— */}
+      <section className="py-20 md:py-24 px-5 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeader
+            eyebrow="Coming up"
+            title="Upcoming events"
+            description="RSVP on the website or in the app — your seat is saved in both."
+            action={{ label: "All events", href: "/events" }}
+          />
+
+          {events === undefined ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className={cn(cardClass, "h-[132px] animate-pulse bg-white/60")} />
+              ))}
+            </div>
+          ) : events && events.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              {events.slice(0, 3).map((e) => (
+                <Link key={e.id} href="/events" className={cn(cardClass, cardHoverClass, "flex gap-4 p-5")}>
+                  <EventDate iso={e.date} />
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-bold text-navy">
+                      {new Date(e.date).toLocaleDateString("en-GB", { weekday: "long" })} · {formatTime(e.date)}
+                    </p>
+                    <h3 className="mt-1 font-bold text-ink leading-snug line-clamp-2">{e.title}</h3>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground truncate">
+                      <MapPin className="h-3.5 w-3.5 shrink-0" /> {e.location}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <Card className="flex items-center gap-4">
+              <IconTile icon={CalendarDays} />
+              <p className="text-muted-foreground">
+                New events are posted every week. Check back soon, or join a band to hear first.
+              </p>
+            </Card>
+          )}
+        </div>
+      </section>
+
+      {/* ——— Latest news (live, managed by the Publicity Committee) ——— */}
+      {posts && posts.length > 0 && (
+        <section className="pb-20 md:pb-24 px-5 sm:px-6">
+          <div className="max-w-6xl mx-auto">
+            <SectionHeader eyebrow="Stories" title="Latest news" action={{ label: "All news", href: "/news" }} />
+            <div className="grid gap-5 md:grid-cols-3">
+              {posts.slice(0, 3).map((p, i) => (
+                <Link key={p.id} href="/news" className={cn(cardClass, cardHoverClass, "group overflow-hidden flex flex-col")}>
+                  <div className="relative aspect-[16/10] bg-navy-soft">
+                    <Image
+                      src={p.image_url || ministryImage(i + 3)}
+                      alt=""
+                      fill
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                      unoptimized={Boolean(p.image_url && !p.image_url.startsWith("/"))}
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col">
+                    <p className="text-[13px] font-semibold text-navy capitalize">
+                      {p.category} · {formatDate(p.published_at || p.created_at)}
+                    </p>
+                    <h3 className="mt-2 font-serif text-xl leading-snug text-ink">{p.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{p.excerpt}</p>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
-        </div>
+        </section>
+      )}
 
-        <ScrollToBottom targetId="features" />
-
-        <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-10 pointer-events-none">
-          <PcmShield className="h-16 md:h-24 drop-shadow-lg" />
-        </div>
-      </header>
-
-
-      {/* ——— Features ——— */}
-      <section id="features" className="py-20 md:py-28 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <SectionLabel>Why join us</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-balance mb-4">
-              Everything you need to grow in Christ on campus
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              Rooted in Scripture and the Adventist message — designed for university life.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-5">
-            {features.map((feature) => {
-              const Icon = feature.icon
-              return (
-                <div
-                  key={feature.title}
-                  className="group relative rounded-2xl bg-white p-6 md:p-8 ring-1 ring-gray-200/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  <div
-                    className={cn(
-                      "inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br mb-5 text-[#0f2d6e]",
-                      feature.color
-                    )}
-                  >
-                    <Icon className="w-6 h-6" strokeWidth={1.75} />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ——— Faith journey ——— */}
-      <section className="py-20 md:py-28 px-6 bg-white border-y border-gray-200/80">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <SectionLabel>Your path</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-balance mb-4">
-              Your faith journey in four steps
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            {journeySteps.map((item, i) => (
-              <Link
-                key={item.step}
-                href={item.href}
-                className="group relative rounded-2xl bg-[#fafbfc] p-6 md:p-8 ring-1 ring-gray-200/80 hover:bg-[#0f2d6e] hover:ring-[#0f2d6e] transition-colors duration-300 min-h-[200px] flex flex-col"
-              >
-                <span className="text-4xl font-bold text-gray-200 group-hover:text-white/20 transition-colors">
-                  {item.step}
-                </span>
-                <h3 className="text-xl font-semibold mt-4 mb-2 group-hover:text-white transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed flex-1 group-hover:text-white/75 transition-colors">
-                  {item.text}
-                </p>
-                <span className="inline-flex items-center gap-1 text-sm font-medium text-[#0f2d6e] group-hover:text-white mt-4 transition-colors">
-                  Learn more
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ——— Trust banner ——— */}
-      <section className="px-6 py-16">
-        <div className="max-w-4xl mx-auto rounded-3xl bg-gradient-to-br from-[#0f2d6e] to-[#1a3a7a] px-8 py-12 md:px-14 md:py-16 text-white overflow-hidden relative shadow-xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-          <div className="relative text-center">
-            <div className="flex items-center justify-center gap-2 text-sky-200 text-sm font-medium mb-3">
-              <Shield className="w-4 h-4" />
-              Rooted in faith & Scripture
+      {/* ——— Why join ——— */}
+      <section className="pb-20 md:pb-28 px-5 sm:px-6">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-center">
+          <div className="relative aspect-[4/5] sm:aspect-[16/11] lg:aspect-[4/5] overflow-hidden rounded-[2rem]">
+            <Image
+              src="/Features/KCM_0729.jpg"
+              alt="Students studying the Bible together at The Haven"
+              fill
+              sizes="(min-width: 1024px) 45vw, 100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 photo-overlay opacity-70" />
+            <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 text-white">
+              <HavenMark tone="onDark" className="h-10 w-10 mb-3" />
+              <p className="font-serif text-2xl md:text-3xl leading-tight">
+                “Come to me, all you who are weary…”
+              </p>
+              <p className="mt-2 text-sm text-white/70">Matthew 11:28</p>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">Ready to take the next step?</h2>
-            <p className="text-white/80 leading-relaxed mb-8 max-w-lg mx-auto">
-              Whether you&apos;re new to faith or deepening your walk with God, there&apos;s a place
-              for you in our ministry family.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild size="lg" className="rounded-full bg-white text-[#0f2d6e] hover:bg-white/90 font-semibold shadow-lg">
-                <Link href="/login">Join Our Ministry</Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="rounded-full border-2 border-white/40 text-white hover:bg-white/15 hover:border-white/60 font-semibold"
-              >
-                <Link href="/bands">Explore Bands</Link>
-              </Button>
+          </div>
+
+          <div>
+            <SectionHeader
+              eyebrow="Why join us"
+              title="Grow in Christ on campus"
+              description="Rooted in Scripture and the Adventist message — shaped for university life."
+              className="!mb-8"
+            />
+            <div className="grid sm:grid-cols-2 gap-4">
+              {features.map((f) => (
+                <Card key={f.title} className="space-y-3">
+                  <IconTile icon={f.icon} />
+                  <h3 className="font-bold text-ink">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* ——— What's on (posters) ——— */}
-      <section className="py-20 md:py-28 px-6 bg-[#0B0F12] text-white">
+      <section className="py-20 md:py-28 px-5 sm:px-6 bg-ink text-white">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
-            <div className="max-w-xl">
-              <span className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-[#d9a441] mb-3">
-                What&apos;s on
-              </span>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-balance">
-                Every week at The Haven
-              </h2>
-            </div>
-            <Button
-              asChild
-              variant="outline"
-              className="self-start md:self-auto rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10"
-            >
-              <Link href="/posters">
-                All posters
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </Button>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <SectionHeader dark eyebrow="What's on" title="Every week at The Haven" action={{ label: "All posters", href: "/posters" }} />
+          <div className="-mx-5 px-5 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-2 sm:pb-0">
             {POSTERS.slice(0, 3).map((poster) => (
-              <Link key={poster.slug} href="/posters" className="block group">
-                <PosterCard poster={poster} className="transition-transform duration-300 group-hover:-translate-y-1" />
+              <Link
+                key={poster.slug}
+                href="/posters"
+                className="group relative block w-[72%] sm:w-auto shrink-0 snap-start overflow-hidden rounded-2xl aspect-[4/5]"
+              >
+                <Image
+                  src={poster.image}
+                  alt={poster.title}
+                  fill
+                  sizes="(min-width: 640px) 33vw, 72vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ——— FAQ ——— */}
-      <section className="py-20 md:py-28 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <SectionLabel>FAQ</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-balance mb-4">
-              Common questions
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              Everything you need to know about The Haven.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "rounded-2xl bg-white ring-1 transition-all duration-200 overflow-hidden",
-                  openFaq === index ? "ring-[#0f2d6e]/30 shadow-md" : "ring-gray-200/80"
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-5 text-left flex items-start justify-between gap-4 hover:bg-gray-50/80 transition-colors"
-                >
-                  <span className="font-semibold text-[15px] leading-snug pr-2">{faq.question}</span>
-                  <ChevronDown
-                    className={cn(
-                      "w-5 h-5 shrink-0 text-gray-400 transition-transform duration-200 mt-0.5",
-                      openFaq === index && "rotate-180 text-[#0f2d6e]"
-                    )}
-                  />
-                </button>
-                <div
-                  className={cn(
-                    "grid transition-all duration-200 ease-out",
-                    openFaq === index ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                  )}
-                >
-                  <div className="overflow-hidden">
-                    <p className="px-6 pb-5 text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
-                  </div>
-                </div>
-              </div>
+      {/* ——— Journey ——— */}
+      <section className="py-20 md:py-28 px-5 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeader eyebrow="Your path" title="Your faith journey" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {journey.map((j) => (
+              <Link key={j.step} href={j.href} className={cn(cardClass, cardHoverClass, "group flex flex-col p-6 min-h-[200px]")}>
+                <span className="font-serif text-4xl text-navy-soft transition-colors group-hover:text-gold">{j.step}</span>
+                <h3 className="mt-6 text-lg font-bold text-ink">{j.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground leading-relaxed flex-1">{j.body}</p>
+                <ArrowRight className="mt-4 h-5 w-5 text-navy transition-transform group-hover:translate-x-1" />
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ——— Contact ——— */}
-      <section className="py-20 md:py-28 px-6 bg-white border-t border-gray-200/80">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <SectionLabel>Contact</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-balance mb-4">
-              Connect with us
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              Have questions about our ministry? Reach out — we&apos;re here to support your
-              spiritual journey.
+      {/* ——— CTA ——— */}
+      <section className="px-5 sm:px-6">
+        <div className="relative max-w-6xl mx-auto overflow-hidden rounded-[2rem] bg-navy px-6 py-14 md:px-16 md:py-20 text-center text-white">
+          <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gold/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-32 -right-16 h-80 w-80 rounded-full bg-white/10 blur-3xl" aria-hidden />
+          <div className="relative">
+            <p className="eyebrow text-gold">Rooted in Scripture</p>
+            <h2 className="mt-3 text-3xl md:text-5xl text-balance">Ready to take the next step?</h2>
+            <p className="mt-4 text-white/80 max-w-lg mx-auto">
+              New to faith or growing deeper — there&apos;s a place for you here.
             </p>
-          </div>
-
-          <div className="rounded-2xl bg-[#fafbfc] ring-1 ring-gray-200/80 p-6 md:p-8 mb-8 flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#0f2d6e]/10">
-              <PcmShield className="h-11" />
-            </div>
-            <div>
-              <h4 className="font-semibold">Ministry Leadership Team</h4>
-              <p className="text-xs font-medium text-[#0f2d6e]">{BRAND.ministryShort}</p>
-              <p className="text-sm text-gray-600 mb-2">Pastoral care & guidance</p>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <MapPin className="w-4 h-4 shrink-0" />
-                {BRAND.location}
-              </div>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <Button asChild size="lg" variant="gold">
+                <Link href={profile ? "/member-dashboard" : "/login"}>{profile ? "Your dashboard" : "Create your account"}</Link>
+              </Button>
+              <Button asChild size="lg" variant="light">
+                <Link href="/bands">Explore bands</Link>
+              </Button>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="rounded-2xl bg-white ring-1 ring-gray-200/80 shadow-xl shadow-gray-200/50 p-6 md:p-8">
-            {contactSent ? (
-              <div className="py-12 text-center">
-                <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Message received</h3>
-                <p className="text-gray-600 text-sm">
-                  Thank you! Our team will get back to you soon.
-                </p>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-xl font-semibold mb-6 text-center">Send an inquiry</h3>
-                <form onSubmit={handleContact} className="space-y-5">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Name
-                    </label>
-                    <input
-                      id="name"
-                      name="name"
-                      required
-                      className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-[#fafbfc] text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2d6e]/20 focus:border-[#0f2d6e]"
-                      placeholder="Your full name"
-                    />
+      {/* ——— FAQ + Contact ——— */}
+      <section id="contact" className="py-20 md:py-28 px-5 sm:px-6 scroll-mt-20">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16">
+          <div>
+            <SectionHeader eyebrow="FAQ" title="Common questions" className="!mb-8" />
+            <div className="space-y-3">
+              {faqs.map((f, i) => {
+                const open = openFaq === i
+                return (
+                  <div key={f.q} className={cn(cardClass, "overflow-hidden transition-colors", open && "border-navy/20")}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(open ? null : i)}
+                      aria-expanded={open}
+                      className="w-full flex items-center gap-4 px-5 py-4 text-left"
+                    >
+                      <span className="flex-1 font-bold text-ink">{f.q}</span>
+                      <ChevronDown className={cn("h-5 w-5 shrink-0 text-navy transition-transform", open && "rotate-180")} />
+                    </button>
+                    <div className={cn("grid transition-all duration-200", open ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
+                      <div className="overflow-hidden">
+                        <p className="px-5 pb-5 text-muted-foreground leading-relaxed">{f.a}</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader eyebrow="Contact" title="Connect with us" className="!mb-8" />
+            <div className={cn(cardClass, "p-6 md:p-8")}>
+              {contactSent ? (
+                <div className="py-10 text-center">
+                  <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-success-soft text-success">
+                    <Mail className="h-7 w-7" />
+                  </span>
+                  <h3 className="font-serif text-2xl text-ink">Message received</h3>
+                  <p className="mt-2 text-muted-foreground">Thank you! Our team will get back to you soon.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleContact} className="space-y-4">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="name" className={labelClass}>Name</label>
+                      <input id="name" name="name" required className={fieldClass} placeholder="Your full name" />
+                    </div>
+                    <div>
+                      <label htmlFor="email" className={labelClass}>Email</label>
+                      <input id="email" name="email" type="email" required className={fieldClass} placeholder="you@example.com" />
+                    </div>
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Email
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-[#fafbfc] text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2d6e]/20 focus:border-[#0f2d6e]"
-                      placeholder="your@email.com"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Message
-                    </label>
+                    <label htmlFor="message" className={labelClass}>Message</label>
                     <textarea
                       id="message"
                       name="message"
                       required
-                      rows={4}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-[#fafbfc] text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2d6e]/20 focus:border-[#0f2d6e] resize-none"
-                      placeholder="How can we help you?"
+                      rows={5}
+                      className={cn(fieldClass, "py-3 resize-none")}
+                      placeholder="How can we help?"
                     />
                   </div>
-                  {contactError && (
-                    <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-200">
-                      {contactError}
-                    </p>
-                  )}
-                  <Button
-                    type="submit"
-                    disabled={contactSending}
-                    className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-xl py-3 font-semibold shadow-md"
-                  >
-                    <Mail className="w-4 h-4 mr-2" />
-                    {contactSending ? "Sending..." : "Send message"}
+                  {contactError && <Notice tone="error">{contactError}</Notice>}
+                  <Button type="submit" size="lg" disabled={contactSending} className="w-full">
+                    <Mail />
+                    {contactSending ? "Sending…" : "Send message"}
                   </Button>
+                  <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5" /> {BRAND.location}
+                  </p>
                 </form>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </section>

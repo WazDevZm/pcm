@@ -3,7 +3,6 @@ import { Users, BookOpen, Heart, Megaphone, Activity, Music, Globe, Mic } from "
 import { Button } from "@/components/ui/button"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 import { getBands } from "@/lib/bands"
 import { getCommittees } from "@/lib/data/content"
 import { createServerSupabase } from "@/lib/supabase-server"
@@ -114,8 +113,8 @@ const iconMap: Record<string, typeof Users> = {
 }
 
 export const metadata = {
-  title: "Committees & Bands | FaithLink",
-  description: "Explore ministry committees and bands at FaithLink.",
+  title: "Committees & Bands | The Haven",
+  description: "Explore ministry committees and bands at The Haven.",
 }
 
 export const revalidate = 60
@@ -128,13 +127,13 @@ export default async function CommitteesPage() {
   return (
     <MinistryPageShell
       heroImage="/Slider/KCM_0669.jpg"
-      title="Committees & Bands"
+      eyebrow="Serve together"
+      title="Committees"
       subtitle="Join one of our ministry teams and use your gifts to serve God and build His kingdom on campus."
     >
-      <ScrollToBottom targetId="committees-content" label="Scroll" />
       <MinistryContent>
         <section id="committees-content" className="max-w-4xl mx-auto py-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-[#0B0F12]">Ministry Bands</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-ink">Ministry Bands</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
             {bands.map((band) => {
               const Icon = iconMap[band.slug ?? ""] ?? Users
@@ -142,39 +141,39 @@ export default async function CommitteesPage() {
                 <Link
                   key={band.id}
                   href={`/bands/${band.slug}`}
-                  className="rounded-2xl bg-white ring-1 ring-gray-200 p-8 block hover:ring-[#0f2d6e]/30 hover:shadow-md transition-shadow"
+                  className="rounded-2xl bg-white border border-border p-8 block hover:ring-navy/30 hover:shadow-md transition-shadow"
                 >
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#0f2d6e]/10">
-                    <Icon className="w-6 h-6 text-[#0f2d6e]" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-navy/10">
+                    <Icon className="w-6 h-6 text-navy" />
                   </div>
-                  <h3 className="text-xl font-semibold mt-6 mb-3 text-[#0B0F12]">{band.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{band.description}</p>
-                  <span className="text-sm font-medium text-[#0f2d6e]">View band page →</span>
+                  <h3 className="text-xl font-semibold mt-6 mb-3 text-ink">{band.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{band.description}</p>
+                  <span className="text-sm font-medium text-navy">View band page →</span>
                 </Link>
               )
             })}
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-[#0B0F12]">Other Committees</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-ink">Other Committees</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {legacyCommittees.map((committee, index) => {
               const Icon = committee.icon
               return (
-                <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#0f2d6e]/10">
-                    <Icon className="w-6 h-6 text-[#0f2d6e]" />
+                <div key={index} className="rounded-2xl bg-white border border-border p-8 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-navy/10">
+                    <Icon className="w-6 h-6 text-navy" />
                   </div>
-                  <h3 className="text-xl font-semibold mt-6 mb-3 text-[#0B0F12]">{committee.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{committee.description}</p>
-                  <p className="text-sm text-gray-500 mb-2">
-                    <span className="font-medium text-gray-700">Focus:</span> {committee.focus}
+                  <h3 className="text-xl font-semibold mt-6 mb-3 text-ink">{committee.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{committee.description}</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    <span className="font-medium text-ink/80">Focus:</span> {committee.focus}
                   </p>
-                  <ul className="text-sm text-gray-600 space-y-1 mb-4">
+                  <ul className="text-sm text-muted-foreground space-y-1 mb-4">
                     {committee.activities.map((a) => (
                       <li key={a}>• {a}</li>
                     ))}
                   </ul>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {[committee.leader, committee.meetingTime].filter(Boolean).join(" · ")}
                   </p>
                 </div>
@@ -183,18 +182,18 @@ export default async function CommitteesPage() {
           </div>
         </section>
 
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200 text-center">
-          <div className="rounded-2xl bg-white ring-1 ring-gray-200 p-10 shadow-sm">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Ready to Serve?</h2>
-            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border text-center">
+          <div className="rounded-2xl bg-white border border-border p-10 shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Ready to Serve?</h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Every member has unique gifts that can contribute to our ministry. Find your place and
               make a difference.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full px-8 font-semibold" asChild>
+              <Button size="lg" className="bg-navy text-white hover:bg-navy/90 rounded-full px-8 font-semibold" asChild>
                 <Link href="/support">Contact Leadership</Link>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 border-gray-300" asChild>
+              <Button size="lg" variant="outline" className="rounded-full px-8 border-border" asChild>
                 <Link href="/bands">View All Bands</Link>
               </Button>
             </div>

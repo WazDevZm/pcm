@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Calendar, User, Tag } from "lucide-react"
+import { Calendar, Newspaper, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 import { ministryImage } from "@/lib/site-images"
+import { Badge, EmptyState, cardClass } from "@/components/ui/haven"
+import { cn } from "@/lib/utils"
 import type { Post } from "@/lib/supabase"
 import { formatDate, getPosts, isLocalImage } from "@/lib/data/content"
 
@@ -129,7 +130,7 @@ function toArticle(post: Post, index: number): Article {
     excerpt: post.excerpt,
     content: post.content,
     date: formatDate(post.published_at ?? post.created_at),
-    author: post.author?.name ?? "FaithLink",
+    author: post.author?.name ?? "The Haven",
     category: CATEGORY_LABELS[post.category] ?? post.category,
     type: post.category,
     image: post.image_url || ministryImage(index),
@@ -156,101 +157,89 @@ export default function NewsPage() {
   return (
     <MinistryPageShell
       heroImage="/Slider/KCM_0822.jpg"
-      title="Ministry News"
+      eyebrow="Stories"
+      title="News & testimonies"
       subtitle="Read inspiring testimonies, ministry updates, and stories of God&apos;s transformative work in our campus community."
     >
-      <ScrollToBottom targetId="news-content" label="Scroll" />
       <MinistryContent>
-        <div id="news-content" className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Latest News</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover testimonies of transformation, ministry updates, and stories of God&apos;s work
-              in our community.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
+        <div id="news-content" className="max-w-6xl mx-auto">
+          <div className="-mx-5 px-5 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto pb-1 mb-8" role="tablist" aria-label="Filter posts">
             {FILTERS.map((f) => (
               <button
                 key={f.id}
+                role="tab"
+                aria-selected={filter === f.id}
                 onClick={() => setFilter(f.id)}
-                className={`px-6 py-3 rounded-full transition-colors ${
-                  filter === f.id
-                    ? "bg-[#0B0F12] text-white"
-                    : "bg-white ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50"
-                }`}
+                className={cn(
+                  "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+                  filter === f.id ? "border-navy bg-navy text-white" : "border-border bg-white text-ink hover:border-navy/30"
+                )}
               >
                 {f.name}
               </button>
             ))}
           </div>
 
-          {!articles && <p className="text-center text-gray-500">Loading news...</p>}
+          {!articles && (
+            <div className="grid md:grid-cols-2 gap-5">
+              {[0, 1].map((i) => (
+                <div key={i} className={cn(cardClass, "h-96 animate-pulse")} />
+              ))}
+            </div>
+          )}
           {articles && newsArticles.length === 0 && (
-            <p className="text-center text-gray-500">No posts in this category yet.</p>
+            <EmptyState icon={Newspaper} title="Nothing here yet" body="No posts in this category yet — check back soon." />
           )}
 
-          <div className="space-y-6">
-            {newsArticles.map((article) => (
-              <article
-                key={article.id}
-                className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
-              >
-                <div className="relative aspect-video bg-gray-200">
-                  <Image
-                    src={article.image}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    unoptimized={!isLocalImage(article.image)}
-                  />
-                  {article.type === "testimony" && (
-                    <div className="absolute top-4 left-4 px-3 py-1 bg-[#0f2d6e] text-white text-xs font-medium rounded-full">
-                      Testimony
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-6">
-                  <div className="flex flex-wrap items-center gap-4 mb-3 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>{article.date}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <User className="w-4 h-4" />
-                      <span>{article.author}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Tag className="w-4 h-4" />
-                      <span>{article.category}</span>
-                    </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {newsArticles.map((article, i) => {
+              const featured = i === 0 && filter === "all"
+              const open = expanded === article.id
+              return (
+                <article
+                  key={article.id}
+                  className={cn(cardClass, "overflow-hidden flex flex-col", featured && "md:col-span-2 md:flex-row")}
+                >
+                  <div className={cn("relative aspect-[16/10] bg-navy-soft shrink-0", featured && "md:aspect-auto md:w-1/2 md:min-h-[340px]")}>
+                    <Image
+                      src={article.image}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes={featured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 100vw, 33vw"}
+                      unoptimized={!isLocalImage(article.image)}
+                    />
+                    <Badge tone={article.type === "testimony" ? "gold" : "navy"} className="absolute top-4 left-4 shadow-sm">
+                      {article.category}
+                    </Badge>
                   </div>
 
-                  <h3 className="text-xl font-semibold mb-3 text-gray-900">{article.title}</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">{article.excerpt}</p>
+                  <div className={cn("p-6 flex flex-col flex-1", featured && "md:p-10 md:justify-center")}>
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] font-semibold text-navy">
+                      <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{article.date}</span>
+                      <span className="flex items-center gap-1.5 text-muted-foreground font-medium"><User className="h-3.5 w-3.5" />{article.author}</span>
+                    </p>
 
-                  {article.content && expanded === article.id && (
-                    <div className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">{article.content}</div>
-                  )}
+                    <h3 className={cn("mt-3 font-serif text-ink leading-tight", featured ? "text-3xl md:text-4xl" : "text-2xl")}>{article.title}</h3>
+                    <p className="mt-3 text-muted-foreground leading-relaxed">{article.excerpt}</p>
 
-                  {article.content && (
-                    <Button
-                      className="bg-[#0B0F12] text-white hover:bg-[#0B0F12]/90 rounded-full px-6"
-                      onClick={() => setExpanded(expanded === article.id ? null : article.id)}
-                    >
-                      {expanded === article.id
-                        ? "Show Less"
-                        : article.type === "testimony"
-                          ? "Read Testimony"
-                          : "Read Full Article"}
-                    </Button>
-                  )}
-                </div>
-              </article>
-            ))}
+                    {article.content && open && (
+                      <div className="mt-4 text-ink/85 leading-relaxed whitespace-pre-line">{article.content}</div>
+                    )}
+
+                    {article.content && (
+                      <Button
+                        variant={open ? "outline" : "default"}
+                        className="mt-6 self-start"
+                        onClick={() => setExpanded(open ? null : article.id)}
+                      >
+                        {open ? "Show less" : article.type === "testimony" ? "Read testimony" : "Read more"}
+                      </Button>
+                    )}
+                  </div>
+                </article>
+              )
+            })}
           </div>
         </div>
       </MinistryContent>

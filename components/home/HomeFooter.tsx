@@ -1,57 +1,68 @@
 import Link from 'next/link'
+import { Mail, MapPin } from 'lucide-react'
 import { HavenLogo } from '@/components/brand/HavenLogo'
 import { PcmEndorsement } from '@/components/brand/PcmShield'
 import { BRAND } from '@/lib/brand'
 
 const footerLinks = {
-  ministries: [
-    { label: 'Bands & Committees', href: '/bands' },
+  Ministry: [
+    { label: 'Bands', href: '/bands' },
     { label: 'Events', href: '/events' },
     { label: 'Programs', href: '/programs' },
-  ],
-  resources: [
-    { label: 'Prayer Request', href: '/prayer-request' },
-    { label: 'Bible Resources', href: '/resources' },
-    { label: 'Counseling', href: '/counseling' },
-    { label: 'Gallery', href: '/gallery' },
-  ],
-  connect: [
-    { label: 'Haven Merch', href: '/merch' },
-    { label: 'Posters', href: '/posters' },
-    { label: 'Get Involved', href: '/support' },
-    { label: 'News', href: '/news' },
     { label: 'Committees', href: '/committees' },
+  ],
+  Care: [
+    { label: 'Prayer request', href: '/prayer-request' },
+    { label: 'Counseling', href: '/counseling' },
+    { label: 'Get involved', href: '/support' },
+  ],
+  Discover: [
+    { label: 'News & testimonies', href: '/news' },
+    { label: 'Gallery', href: '/gallery' },
+    { label: 'Resources', href: '/resources' },
+    { label: 'Magazines', href: '/magazines' },
+    { label: 'Posters', href: '/posters' },
+    { label: 'Merch store', href: '/merch' },
   ],
 }
 
 export function HomeFooter() {
   return (
-    <footer className="bg-[#06080a] text-white border-t border-white/10">
-      <div className="max-w-7xl mx-auto px-6 py-16 md:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
-          <div className="lg:col-span-5">
-            <Link href="/" className="inline-flex items-center mb-6">
-              <HavenLogo tone="onDark" showTagline markClassName="h-10 w-10" className="text-lg" />
+    <footer className="relative overflow-hidden bg-navy-deep text-white">
+      <div
+        className="pointer-events-none absolute -top-40 -right-32 h-96 w-96 rounded-full bg-gold/10 blur-3xl"
+        aria-hidden
+      />
+      <div className="relative max-w-6xl mx-auto px-5 sm:px-6 pt-16 pb-10 md:pt-20">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-10 md:gap-8">
+          <div className="col-span-2 md:col-span-5">
+            <Link href="/" className="inline-flex mb-5" aria-label={`${BRAND.name} home`}>
+              <HavenLogo tone="onDark" showTagline markClassName="h-11 w-11" className="text-lg" />
             </Link>
-            <p className="text-white/55 text-sm leading-relaxed max-w-sm">
-              A shelter for every student — proclaiming the everlasting gospel through
-              worship, study, fellowship, and service on campus.
+            <p className="text-white/65 text-sm leading-relaxed max-w-sm">
+              A shelter on campus for worship, Bible study, real friendship and service that carries
+              Christ&apos;s light beyond the classroom.
             </p>
-            <PcmEndorsement className="mt-6" />
+            <ul className="mt-6 space-y-2 text-sm text-white/65">
+              <li className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-gold" /> {BRAND.location}
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-gold" />
+                <a href={`mailto:${BRAND.email}`} className="hover:text-white transition-colors">
+                  {BRAND.email}
+                </a>
+              </li>
+            </ul>
           </div>
 
           {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title} className="lg:col-span-2">
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-4">
-                {title}
-              </h3>
-              <ul className="space-y-3">
+            <div key={title} className="md:col-span-2 last:col-span-2 md:last:col-span-3">
+              <h3 className="eyebrow text-gold mb-4">{title}</h3>
+              <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/70 hover:text-white transition-colors"
-                    >
+                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors">
                       {link.label}
                     </Link>
                   </li>
@@ -61,11 +72,11 @@ export function HomeFooter() {
           ))}
         </div>
 
-        <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-white/40 text-sm text-center sm:text-left">
-            © {new Date().getFullYear()} {BRAND.name} · {BRAND.ministryShort}
+        <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-6">
+          <PcmEndorsement />
+          <p className="text-white/45 text-xs text-center sm:text-right">
+            © {new Date().getFullYear()} {BRAND.name} · {BRAND.ministry}
           </p>
-          <p className="text-white/40 text-xs">{BRAND.location}</p>
         </div>
       </div>
     </footer>

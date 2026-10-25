@@ -12,7 +12,7 @@ import {
 } from "@/lib/data/forms"
 
 const inputClass =
-  "w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent"
+  "w-full px-4 py-2.5 rounded-lg border border-border text-sm focus:ring-2 focus:ring-navy focus:border-transparent"
 
 function Status({ success, error }: { success?: string; error?: string }) {
   return (
@@ -50,18 +50,18 @@ export function VolunteerApplyForm({
   const [error, setError] = useState("")
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Checking your account…</p>
+    return <p className="text-sm text-muted-foreground">Checking your account…</p>
   }
 
   if (!user) {
     return (
-      <div className="rounded-xl bg-[#fafbfc] ring-1 ring-gray-200 p-5 text-sm text-gray-700 space-y-3">
+      <div className="rounded-xl bg-canvas border border-border p-5 text-sm text-ink/80 space-y-3">
         <p>Please sign in to apply — your application is linked to your member account so leaders can follow up.</p>
         <div className="flex gap-3">
-          <Button asChild className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full">
+          <Button asChild className="bg-navy text-white hover:bg-navy/90 rounded-full">
             <Link href="/login?next=/support">Sign in</Link>
           </Button>
-          <Button type="button" variant="outline" className="rounded-full border-gray-300" onClick={onCancel}>
+          <Button type="button" variant="outline" className="rounded-full border-border" onClick={onCancel}>
             Cancel
           </Button>
         </div>
@@ -95,10 +95,10 @@ export function VolunteerApplyForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl bg-[#fafbfc] ring-1 ring-gray-200 p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-xl bg-canvas border border-border p-5 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1.5 text-gray-700" htmlFor={`avail-${role}`}>
+          <label className="block text-sm font-medium mb-1.5 text-ink/80" htmlFor={`avail-${role}`}>
             Availability
           </label>
           <input
@@ -111,7 +111,7 @@ export function VolunteerApplyForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1.5 text-gray-700" htmlFor={`hours-${role}`}>
+          <label className="block text-sm font-medium mb-1.5 text-ink/80" htmlFor={`hours-${role}`}>
             Hours per week
           </label>
           <input
@@ -127,7 +127,7 @@ export function VolunteerApplyForm({
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1.5 text-gray-700" htmlFor={`skills-${role}`}>
+        <label className="block text-sm font-medium mb-1.5 text-ink/80" htmlFor={`skills-${role}`}>
           Skills (Optional, comma separated)
         </label>
         <input
@@ -143,11 +143,11 @@ export function VolunteerApplyForm({
         <Button
           type="submit"
           disabled={submitting}
-          className="flex-1 bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+          className="flex-1 bg-navy text-white hover:bg-navy/90 rounded-full"
         >
           {submitting ? "Sending..." : "Submit Application"}
         </Button>
-        <Button type="button" variant="outline" className="rounded-full border-gray-300" onClick={onCancel}>
+        <Button type="button" variant="outline" className="rounded-full border-border" onClick={onCancel}>
           Cancel
         </Button>
       </div>
@@ -212,9 +212,9 @@ export function PledgeForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl bg-[#fafbfc] ring-1 ring-gray-200 p-4 space-y-3 text-left">
+    <form onSubmit={handleSubmit} className="rounded-xl bg-canvas border border-border p-4 space-y-3 text-left">
       <div>
-        <label className="block text-sm font-medium mb-1.5 text-gray-700" htmlFor={`amt-${purpose}`}>
+        <label className="block text-sm font-medium mb-1.5 text-ink/80" htmlFor={`amt-${purpose}`}>
           Pledge amount (ZMW)
         </label>
         <input
@@ -234,7 +234,7 @@ export function PledgeForm({
         value={name}
         disabled={anonymous}
         onChange={(e) => setName(e.target.value)}
-        className={`${inputClass} disabled:bg-gray-100`}
+        className={`${inputClass} disabled:bg-muted`}
         placeholder="Your name (optional)"
       />
       <input
@@ -243,29 +243,29 @@ export function PledgeForm({
         value={email}
         disabled={anonymous}
         onChange={(e) => setEmail(e.target.value)}
-        className={`${inputClass} disabled:bg-gray-100`}
+        className={`${inputClass} disabled:bg-muted`}
         placeholder="Email so we can follow up (optional)"
       />
-      <label className="flex items-center gap-2 text-sm text-gray-700">
+      <label className="flex items-center gap-2 text-sm text-ink/80">
         <input
           type="checkbox"
           checked={anonymous}
           onChange={(e) => setAnonymous(e.target.checked)}
-          className="w-4 h-4 border-gray-300 rounded"
+          className="w-4 h-4 border-border rounded"
         />
         Give anonymously
       </label>
-      <p className="text-xs text-gray-500">This records a pledge — no payment is taken online.</p>
+      <p className="text-xs text-muted-foreground">This records a pledge — no payment is taken online.</p>
       <Status error={error} />
       <div className="flex gap-2">
         <Button
           type="submit"
           disabled={submitting}
-          className="flex-1 bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+          className="flex-1 bg-navy text-white hover:bg-navy/90 rounded-full"
         >
           {submitting ? "Sending..." : "Submit Pledge"}
         </Button>
-        <Button type="button" variant="outline" className="rounded-full border-gray-300" onClick={onCancel}>
+        <Button type="button" variant="outline" className="rounded-full border-border" onClick={onCancel}>
           Cancel
         </Button>
       </div>

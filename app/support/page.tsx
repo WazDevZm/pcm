@@ -9,7 +9,6 @@ import type { DonationType } from "@/lib/data/forms"
 import { PledgeForm, VolunteerApplyForm } from "./SupportForms"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 
 export default function SupportPage() {
   const [volunteerRole, setVolunteerRole] = useState<string | null>(null)
@@ -119,17 +118,17 @@ export default function SupportPage() {
   return (
     <MinistryPageShell
       heroImage="/Features/KCM_0741.jpg"
-      title="Support Our Ministry"
+      eyebrow="Get involved"
+      title="Serve, give & belong"
       subtitle="Join us in spreading God's love on campus through volunteering, financial support, and active participation in our mission."
     >
-      <ScrollToBottom targetId="support-content" label="Scroll" />
       <MinistryContent>
       {/* How to Get Involved */}
       <section id="support-content" className="py-12">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">How to Get Involved</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">How to Get Involved</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Whether you're a student, alumni, or community member, there's a place for you in our ministry.
             </p>
           </div>
@@ -137,11 +136,11 @@ export default function SupportPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {getInvolvedSteps.map((item, index) => (
               <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#0f2d6e]/10 text-[#0f2d6e] mb-6 text-2xl font-bold">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-navy/10 text-navy mb-6 text-2xl font-bold">
                   {item.step}
                 </div>
-                <h3 className="text-xl font-semibold mb-4 text-[#0B0F12]">{item.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                <h3 className="text-xl font-semibold mb-4 text-ink">{item.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
@@ -149,11 +148,11 @@ export default function SupportPage() {
       </section>
 
       {/* Volunteer Opportunities */}
-      <section className="py-12 border-t border-gray-200">
+      <section className="py-12 border-t border-border">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Volunteer Opportunities</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Volunteer Opportunities</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Use your gifts and talents to serve God and make a lasting impact on campus.
             </p>
           </div>
@@ -162,29 +161,29 @@ export default function SupportPage() {
             {volunteerOpportunities.map((opportunity, index) => {
               const IconComponent = opportunity.icon
               return (
-                <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div key={index} className="rounded-2xl bg-white border border-border p-8 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4 mb-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#0f2d6e]/10 flex-shrink-0">
-                      <IconComponent className="w-6 h-6 text-[#0f2d6e]" />
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-navy/10 flex-shrink-0">
+                      <IconComponent className="w-6 h-6 text-navy" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-2xl font-semibold mb-2 text-[#0B0F12]">{opportunity.title}</h3>
-                      <p className="text-gray-600 leading-relaxed">{opportunity.description}</p>
+                      <h3 className="text-2xl font-semibold mb-2 text-ink">{opportunity.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed">{opportunity.description}</p>
                     </div>
                   </div>
                   
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Time Commitment:</span>
-                      <span className="text-gray-800">{opportunity.commitment}</span>
+                      <span className="text-muted-foreground">Time Commitment:</span>
+                      <span className="text-ink">{opportunity.commitment}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Skills Needed:</span>
-                      <span className="text-gray-800">{opportunity.skills}</span>
+                      <span className="text-muted-foreground">Skills Needed:</span>
+                      <span className="text-ink">{opportunity.skills}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Contact:</span>
-                      <span className="text-gray-800">{opportunity.contact}</span>
+                      <span className="text-muted-foreground">Contact:</span>
+                      <span className="text-ink">{opportunity.contact}</span>
                     </div>
                   </div>
                   
@@ -198,7 +197,7 @@ export default function SupportPage() {
                     <Button
                       type="button"
                       onClick={() => setVolunteerRole(opportunity.title)}
-                      className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                      className="w-full bg-navy text-white hover:bg-navy/90 rounded-full"
                     >
                       Apply to Volunteer
                     </Button>
@@ -211,30 +210,30 @@ export default function SupportPage() {
       </section>
 
       {/* Financial Support */}
-      <section className="py-12 border-t border-gray-200">
+      <section className="py-12 border-t border-border">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Financial Support</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Financial Support</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Your financial partnership helps us reach more students and expand our ministry impact.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {contributionOptions.map((option, index) => (
-              <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div key={index} className="rounded-2xl bg-white border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#0f2d6e]/10 mb-4">
-                    <DollarSign className="w-6 h-6 text-[#0f2d6e]" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-navy/10 mb-4">
+                    <DollarSign className="w-6 h-6 text-navy" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 text-[#0B0F12]">{option.title}</h3>
-                  <div className="text-2xl font-bold text-[#0f2d6e] mb-3">{option.amount}</div>
-                  <p className="text-gray-600 text-sm leading-relaxed">{option.description}</p>
+                  <h3 className="text-xl font-semibold mb-2 text-ink">{option.title}</h3>
+                  <div className="text-2xl font-bold text-navy mb-3">{option.amount}</div>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{option.description}</p>
                 </div>
                 
                 <div className="mb-6">
-                  <h4 className="font-semibold text-gray-800 mb-3 text-sm">Benefits:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
+                  <h4 className="font-semibold text-ink mb-3 text-sm">Benefits:</h4>
+                  <ul className="text-muted-foreground text-sm space-y-1">
                     {option.benefits.map((benefit, idx) => (
                       <li key={idx}>• {benefit}</li>
                     ))}
@@ -251,7 +250,7 @@ export default function SupportPage() {
                   <Button
                     type="button"
                     onClick={() => setPledgeFor(option.title)}
-                    className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                    className="w-full bg-navy text-white hover:bg-navy/90 rounded-full"
                   >
                     Pledge Support
                   </Button>
@@ -263,9 +262,9 @@ export default function SupportPage() {
       </section>
 
       {/* Prayer Support */}
-      <section className="py-12 border-t border-gray-200">
+      <section className="py-12 border-t border-border">
         <div className="max-w-4xl mx-auto">
-          <div className="rounded-3xl bg-gradient-to-br from-[#0f2d6e] to-[#1a3a7a] p-12 text-center text-white shadow-xl">
+          <div className="rounded-3xl bg-gradient-to-br from-navy to-navy p-12 text-center text-white shadow-xl">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/15 mb-6">
               <Heart className="w-8 h-8 text-white" />
             </div>
@@ -279,16 +278,16 @@ export default function SupportPage() {
                 size="lg"
                 type="button"
                 onClick={joinPrayerTeam}
-                className="bg-white text-[#0f2d6e] hover:bg-white/90 rounded-full px-8 font-semibold shadow-lg"
+                className="bg-white text-navy hover:bg-white/90 rounded-full px-8 font-semibold shadow-lg"
               >
                 Join Prayer Team
               </Button>
-              <Button size="lg" variant="outline" className="border-2 border-white/40 text-white hover:bg-white/15 hover:border-white/60 rounded-full px-8 font-semibold" asChild>
+              <Button size="lg" variant="light" asChild>
                 <Link href="/prayer-request">Submit Prayer Request</Link>
               </Button>
             </div>
             {volunteerRole === "Prayer Team" && (
-              <div id="prayer-team-apply" className="mt-8 text-left text-gray-900 max-w-xl mx-auto">
+              <div id="prayer-team-apply" className="mt-8 text-left text-ink max-w-xl mx-auto">
                 <VolunteerApplyForm role="Prayer Team" defaultHours={1} onCancel={() => setVolunteerRole(null)} />
               </div>
             )}
@@ -297,18 +296,18 @@ export default function SupportPage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-12 border-t border-gray-200">
+      <section className="py-12 border-t border-border">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="rounded-3xl bg-white ring-1 ring-gray-200 p-12 shadow-sm">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[#0B0F12]">Ready to Get Involved?</h2>
-            <p className="text-lg text-gray-600 mb-8">
+          <div className="rounded-3xl bg-white border border-border p-12 shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-ink">Ready to Get Involved?</h2>
+            <p className="text-lg text-muted-foreground mb-8">
               Contact our ministry team to learn more about volunteer opportunities and how you can support our mission.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full px-8 font-semibold" asChild>
+              <Button size="lg" className="bg-navy text-white hover:bg-navy/90 rounded-full px-8 font-semibold" asChild>
                 <a href={`mailto:${BRAND.email}?subject=${encodeURIComponent("Getting involved")}`}>Contact Ministry Team</a>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 border-gray-300" asChild>
+              <Button size="lg" variant="outline" className="rounded-full px-8 border-border" asChild>
                 <a href={`mailto:${BRAND.email}?subject=${encodeURIComponent("Meeting request")}`}>Schedule Meeting</a>
               </Button>
             </div>

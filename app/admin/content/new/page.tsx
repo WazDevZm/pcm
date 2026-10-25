@@ -96,7 +96,7 @@ export default function NewPostPage() {
             asChild
             variant="outline"
             size="sm"
-            className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50 self-start"
+            className="bg-white ring-1 ring-border backdrop-blur border-0 text-ink hover:bg-canvas self-start"
           >
             <Link href="/admin/content">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -105,7 +105,7 @@ export default function NewPostPage() {
           </Button>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Create New Post</h1>
-            <p className="text-white/70 text-sm">Share news, testimonies, and ministry updates</p>
+            <p className="text-muted-foreground text-sm">Share news, testimonies, and ministry updates</p>
           </div>
         </div>
         
@@ -115,7 +115,7 @@ export default function NewPostPage() {
             onClick={() => setShowPreview(v => !v)}
             variant="outline"
             aria-pressed={showPreview}
-            className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"
+            className="bg-white ring-1 ring-border backdrop-blur border-0 text-ink hover:bg-canvas"
           >
             {showPreview ? <EyeOff className="w-4 h-4 sm:mr-2" /> : <Eye className="w-4 h-4 sm:mr-2" />}
             <span className="hidden sm:inline">{showPreview ? 'Hide Preview' : 'Preview'}</span>
@@ -124,7 +124,7 @@ export default function NewPostPage() {
             form="post-form"
             type="submit"
             disabled={loading || uploading}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-navy hover:bg-navy-deep"
           >
             <Save className="w-4 h-4 mr-2" />
             {loading ? 'Publishing...' : 'Publish'}
@@ -133,18 +133,18 @@ export default function NewPostPage() {
       </div>
 
       {showPreview && (
-        <article className="mb-8 bg-white/5 ring-1 ring-white/10 rounded-lg overflow-hidden">
+        <article className="mb-8 bg-white ring-1 ring-border rounded-lg overflow-hidden">
           {formData.image_url && (
             <img src={formData.image_url} alt="" className="w-full max-h-80 object-cover" />
           )}
           <div className="p-6 md:p-8">
-            <span className="inline-block px-2 py-1 mb-3 rounded-full text-xs font-medium bg-white/10 text-white/80 capitalize">
+            <span className="inline-block px-2 py-1 mb-3 rounded-full text-xs font-medium bg-muted text-ink/85 capitalize">
               {formData.category}
             </span>
             <h2 className="text-2xl md:text-3xl font-bold mb-3">{formData.title || 'Untitled post'}</h2>
-            {formData.excerpt && <p className="text-white/70 mb-6">{formData.excerpt}</p>}
-            <div className="text-white/90 whitespace-pre-wrap leading-relaxed">
-              {formData.content || <span className="text-white/40">No content yet.</span>}
+            {formData.excerpt && <p className="text-muted-foreground mb-6">{formData.excerpt}</p>}
+            <div className="text-ink whitespace-pre-wrap leading-relaxed">
+              {formData.content || <span className="text-muted-foreground">No content yet.</span>}
             </div>
           </div>
         </article>
@@ -154,8 +154,8 @@ export default function NewPostPage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Title */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="title" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="title" className="block text-sm font-medium text-ink mb-2">
               Post Title *
             </label>
             <input
@@ -165,14 +165,14 @@ export default function NewPostPage() {
               value={formData.title}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-xl font-semibold"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-ink placeholder:text-[#8a93a3] focus:outline-none focus:ring-2 focus:ring-navy/20 text-xl font-semibold"
               placeholder="Enter post title..."
             />
           </div>
 
           {/* Excerpt */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="excerpt" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="excerpt" className="block text-sm font-medium text-ink mb-2">
               Excerpt *
             </label>
             <textarea
@@ -182,17 +182,17 @@ export default function NewPostPage() {
               onChange={handleInputChange}
               required
               rows={3}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-ink placeholder:text-[#8a93a3] focus:outline-none focus:ring-2 focus:ring-navy/20 resize-none"
               placeholder="Brief summary of the post (will be shown in previews)..."
             />
-            <div className="text-right text-sm text-white/50 mt-1">
+            <div className="text-right text-sm text-muted-foreground mt-1">
               {formData.excerpt.length}/200 characters
             </div>
           </div>
 
           {/* Content */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="content" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="content" className="block text-sm font-medium text-ink mb-2">
               Content *
             </label>
             <textarea
@@ -202,10 +202,10 @@ export default function NewPostPage() {
               onChange={handleInputChange}
               required
               rows={15}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-ink placeholder:text-[#8a93a3] focus:outline-none focus:ring-2 focus:ring-navy/20 resize-none"
               placeholder="Write your post content here..."
             />
-            <div className="text-right text-sm text-white/50 mt-1">
+            <div className="text-right text-sm text-muted-foreground mt-1">
               {formData.content.length} characters
             </div>
           </div>
@@ -214,8 +214,8 @@ export default function NewPostPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Category */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label htmlFor="category" className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label htmlFor="category" className="block text-sm font-medium text-ink mb-2">
               Category *
             </label>
             <select
@@ -224,10 +224,10 @@ export default function NewPostPage() {
               value={formData.category}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-navy/20"
             >
               {categories.map(category => (
-                <option key={category.value} value={category.value} className="bg-gray-800">
+                <option key={category.value} value={category.value} className="bg-white">
                   {category.label}
                 </option>
               ))}
@@ -235,8 +235,8 @@ export default function NewPostPage() {
           </div>
 
           {/* Featured Image */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <label className="block text-sm font-medium text-white/90 mb-2">
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <label className="block text-sm font-medium text-ink mb-2">
               Featured Image
             </label>
             
@@ -256,9 +256,9 @@ export default function NewPostPage() {
                 </button>
               </div>
             ) : (
-              <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center">
-                <Upload className="w-8 h-8 text-white/50 mx-auto mb-2" />
-                <p className="text-white/70 text-sm mb-2">{uploading ? 'Uploading...' : 'Upload an image'}</p>
+              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground text-sm mb-2">{uploading ? 'Uploading...' : 'Upload an image'}</p>
                 <input
                   type="file"
                   accept="image/*"
@@ -272,7 +272,7 @@ export default function NewPostPage() {
                   disabled={uploading}
                   variant="outline"
                   size="sm"
-                  className="bg-black/40 ring-1 ring-white/20 backdrop-blur border-0 text-white hover:bg-black/50"
+                  className="bg-white ring-1 ring-border backdrop-blur border-0 text-ink hover:bg-canvas"
                 >
                   Choose File
                 </Button>
@@ -281,31 +281,31 @@ export default function NewPostPage() {
           </div>
 
           {/* Publishing Options */}
-          <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-            <h3 className="text-sm font-medium text-white/90 mb-4">Publishing Options</h3>
+          <div className="bg-white ring-1 ring-border rounded-lg p-6">
+            <h3 className="text-sm font-medium text-ink mb-4">Publishing Options</h3>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-white/70 text-sm">Status</span>
-                <span className="text-green-400 text-sm">Ready to Publish</span>
+                <span className="text-muted-foreground text-sm">Status</span>
+                <span className="text-emerald-700 text-sm">Ready to Publish</span>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-white/70 text-sm">Visibility</span>
-                <span className="text-white/90 text-sm">Public</span>
+                <span className="text-muted-foreground text-sm">Visibility</span>
+                <span className="text-ink text-sm">Public</span>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-white/70 text-sm">Publish Date</span>
-                <span className="text-white/90 text-sm">Immediately</span>
+                <span className="text-muted-foreground text-sm">Publish Date</span>
+                <span className="text-ink text-sm">Immediately</span>
               </div>
             </div>
           </div>
 
           {/* Tips */}
-          <div className="bg-blue-500/10 ring-1 ring-blue-500/20 rounded-lg p-6">
-            <h3 className="text-sm font-medium text-blue-300 mb-2">Writing Tips</h3>
-            <ul className="text-blue-200/80 text-sm space-y-1">
+          <div className="bg-navy-soft ring-1 ring-navy/20 rounded-lg p-6">
+            <h3 className="text-sm font-medium text-navy mb-2">Writing Tips</h3>
+            <ul className="text-navy text-sm space-y-1">
               <li>• Keep titles clear and engaging</li>
               <li>• Write compelling excerpts</li>
               <li>• Use personal stories in testimonies</li>

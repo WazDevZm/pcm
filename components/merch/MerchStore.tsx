@@ -63,7 +63,7 @@ export function MerchStore() {
   }, [category, search, sort, inStockOnly])
 
   return (
-    <div className="min-h-screen bg-[#f4f5f7] text-[#0B0F12]">
+    <div className="min-h-screen bg-[#f4f5f7] text-ink">
       <header className="relative min-h-[min(520px,70vh)] border-b border-white/10 text-white isolate">
         <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
           <Image
@@ -74,8 +74,8 @@ export function MerchStore() {
             className="object-cover object-center"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F12]/95 via-[#0B0F12]/75 to-[#0B0F12]/55" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F12] via-transparent to-[#0B0F12]/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/75 to-ink/55" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/40" />
           <div className="absolute inset-0 bg-[url('/merch/pattern.svg')] opacity-[0.08]" aria-hidden />
         </div>
 
@@ -120,7 +120,7 @@ export function MerchStore() {
               <Link
                 key={p.id}
                 href={`/merch/${p.slug}`}
-                className="relative aspect-[4/3] rounded-xl overflow-hidden ring-1 ring-gray-200 shadow-lg bg-white group"
+                className="relative aspect-[4/3] rounded-xl overflow-hidden border border-border shadow-lg bg-white group"
               >
                 <Image
                   src={p.image}
@@ -129,7 +129,7 @@ export function MerchStore() {
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   sizes="(max-width: 768px) 50vw, 25vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F12]/80 via-[#0B0F12]/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
                 <span className="absolute bottom-3 left-3 right-3 text-sm font-semibold text-white truncate">
                   {p.name}
                 </span>
@@ -141,27 +141,27 @@ export function MerchStore() {
 
       <div
         className={cn(
-          'sticky top-16 z-30 bg-[#f4f5f7]/95 backdrop-blur-lg border-b border-gray-200',
+          'sticky top-16 z-30 bg-[#f4f5f7]/95 backdrop-blur-lg border-b border-border',
           featured.length > 0 && 'mt-8'
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-4">
           <div className="flex flex-col md:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a93a3]" />
               <input
                 type="search"
                 placeholder="Search products..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2d6e]/20 focus:border-[#0f2d6e]"
+                className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy"
               />
             </div>
             <div className="flex gap-2">
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortOption)}
-                className="h-11 px-3 rounded-xl border border-gray-200 bg-white text-sm min-w-[140px]"
+                className="h-11 px-3 rounded-xl border border-border bg-white text-sm min-w-[140px]"
                 aria-label="Sort products"
               >
                 <option value="featured">Featured</option>
@@ -169,12 +169,12 @@ export function MerchStore() {
                 <option value="price-desc">Price: high to low</option>
                 <option value="name">Name A–Z</option>
               </select>
-              <label className="flex items-center gap-2 h-11 px-3 rounded-xl border border-gray-200 bg-white text-sm cursor-pointer whitespace-nowrap">
+              <label className="flex items-center gap-2 h-11 px-3 rounded-xl border border-border bg-white text-sm cursor-pointer whitespace-nowrap">
                 <input
                   type="checkbox"
                   checked={inStockOnly}
                   onChange={(e) => setInStockOnly(e.target.checked)}
-                  className="rounded border-gray-300"
+                  className="rounded border-border"
                 />
                 In stock
               </label>
@@ -190,8 +190,8 @@ export function MerchStore() {
                 className={cn(
                   'shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors',
                   category === cat.id
-                    ? 'bg-[#0B0F12] text-white'
-                    : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'
+                    ? 'bg-ink text-white'
+                    : 'bg-white text-muted-foreground border border-border hover:bg-canvas'
                 )}
               >
                 {cat.label}
@@ -203,15 +203,15 @@ export function MerchStore() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             <SlidersHorizontal className="w-4 h-4 inline mr-1.5 -mt-0.5" />
             {filtered.length} product{filtered.length !== 1 ? 's' : ''}
           </p>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="text-center py-20 rounded-2xl bg-white ring-1 ring-gray-200">
-            <p className="text-gray-600 mb-4">No products match your filters.</p>
+          <div className="text-center py-20 rounded-2xl bg-white border border-border">
+            <p className="text-muted-foreground mb-4">No products match your filters.</p>
             <button
               type="button"
               onClick={() => {
@@ -219,7 +219,7 @@ export function MerchStore() {
                 setCategory('all')
                 setInStockOnly(false)
               }}
-              className="text-[#0f2d6e] font-medium hover:underline"
+              className="text-navy font-medium hover:underline"
             >
               Clear filters
             </button>
@@ -233,7 +233,7 @@ export function MerchStore() {
         )}
       </main>
 
-      <section className="bg-white border-t border-gray-200 py-16">
+      <section className="bg-white border-t border-border py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="text-2xl font-bold text-center mb-10">How checkout works</h2>
           <div className="grid md:grid-cols-4 gap-6">
@@ -244,11 +244,11 @@ export function MerchStore() {
               { step: '4', title: 'Pickup', text: 'Receive your order ID. Collect on campus after confirmation.' },
             ].map((item) => (
               <div key={item.step} className="text-center p-6 rounded-2xl bg-[#f4f5f7]">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#0f2d6e]/10 text-[#0f2d6e] font-bold text-sm mb-3">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy/10 text-navy font-bold text-sm mb-3">
                   {item.step}
                 </span>
                 <h3 className="font-semibold mb-2">{item.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{item.text}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.text}</p>
               </div>
             ))}
           </div>

@@ -28,6 +28,8 @@ export type AdminCountKey =
   | 'pendingVolunteers'
   | 'resources'
   | 'pendingOrders'
+  | 'messages'
+  | 'gallery'
 
 /** Each count is null when that table could not be read (missing table, RLS, offline). */
 export type AdminCounts = Record<AdminCountKey, number | null>
@@ -46,7 +48,7 @@ export async function getAdminCounts(): Promise<AdminCounts> {
     return error ? null : n ?? 0
   }
 
-  const [users, posts, upcomingEvents, pendingPrayers, pendingCounseling, pendingVolunteers, resources, pendingOrders] =
+  const [users, posts, upcomingEvents, pendingPrayers, pendingCounseling, pendingVolunteers, resources, pendingOrders, messages, gallery] =
     await Promise.all([
       count('users'),
       count('posts'),
@@ -56,9 +58,11 @@ export async function getAdminCounts(): Promise<AdminCounts> {
       count('volunteers', (q) => q.eq('status', 'pending')),
       count('resources'),
       count('orders', (q) => q.eq('status', 'pending')),
+      count('contact_submissions'),
+      count('gallery_items'),
     ])
 
-  return { users, posts, upcomingEvents, pendingPrayers, pendingCounseling, pendingVolunteers, resources, pendingOrders }
+  return { users, posts, upcomingEvents, pendingPrayers, pendingCounseling, pendingVolunteers, resources, pendingOrders, messages, gallery }
 }
 
 // ───────────────────────── Users & roles ─────────────────────────
@@ -279,4 +283,14 @@ export async function getBandCounts(bandId: string): Promise<{ members: number |
     members: members.error || typeof members.data !== 'number' ? null : members.data,
     activeVolunteers: volunteers.error ? null : volunteers.count ?? 0,
   }
+}
+
+export type Office = 'developer' | 'chairperson' | 'vice_chairperson'
+
+/** Leadership office; the database only lets admins change it and only admins hold one */
+export async function setUserOffice(userId: string, office: Office | null): Promise<User> {
+  const updates = office ? { office, role: 'admin' as const } : { office: null }
+  const { data, error } = await db().from('users').update(updates).eq('id', userId).select().single()
+  fail(error)
+  return data as User
 }

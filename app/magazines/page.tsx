@@ -5,7 +5,6 @@ import { BookOpen, Download, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 import { ministryImage } from "@/lib/site-images"
 
 const magazinesBase = [
@@ -56,19 +55,19 @@ export default function MagazinesPage() {
   return (
     <MinistryPageShell
       heroImage="/Slider/KCM_0799.jpg"
-      title="Magazines & Resources"
+      eyebrow="Read"
+      title="Magazines"
       subtitle="Spiritual publications and study materials for your faith journey."
     >
-      <ScrollToBottom targetId="magazines-content" label="Scroll" />
       <MinistryContent>
         <div id="magazines-content" className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {magazines.map((magazine, index) => (
               <div
                 key={index}
-                className="rounded-2xl bg-white ring-1 ring-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                className="rounded-2xl bg-white border border-border overflow-hidden hover:shadow-md transition-shadow"
               >
-                <div className="relative aspect-[3/4] bg-gray-100">
+                <div className="relative aspect-[3/4] bg-muted">
                   <Image
                     src={magazine.cover}
                     alt={magazine.title}
@@ -79,16 +78,16 @@ export default function MagazinesPage() {
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <BookOpen className="w-5 h-5 text-[#0f2d6e]" />
-                    <span className="text-sm text-gray-500">{magazine.issue}</span>
+                    <BookOpen className="w-5 h-5 text-navy" />
+                    <span className="text-sm text-muted-foreground">{magazine.issue}</span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 text-[#0B0F12]">{magazine.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">{magazine.description}</p>
+                  <h3 className="text-xl font-semibold mb-2 text-ink">{magazine.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">{magazine.description}</p>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {magazine.topics.map((topic) => (
                       <span
                         key={topic}
-                        className="px-2 py-1 bg-[#0f2d6e]/10 rounded-full text-xs text-[#0f2d6e]"
+                        className="px-2 py-1 bg-navy/10 rounded-full text-xs text-navy"
                       >
                         {topic}
                       </span>
@@ -97,7 +96,7 @@ export default function MagazinesPage() {
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      className="flex-1 bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                      className="flex-1 bg-navy text-white hover:bg-navy/90 rounded-full"
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       Read
@@ -105,7 +104,7 @@ export default function MagazinesPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="rounded-full border-gray-300"
+                      className="rounded-full border-border"
                     >
                       <Download className="w-4 h-4" />
                     </Button>

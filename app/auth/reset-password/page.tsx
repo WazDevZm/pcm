@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Lock } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { SiteNav } from '@/components/layout/SiteNav'
+import { AuthLayout } from '@/components/auth/AuthLayout'
+import { Notice, fieldClass, labelClass } from '@/components/ui/haven'
 import { updatePassword } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
-const inputClass =
-  'w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent'
+const inputClass = `${fieldClass} pr-12`
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -70,95 +70,65 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F12] text-white">
-      <SiteNav variant="minimal" />
-      <div className="max-w-md mx-auto px-6 py-16">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Set a new password</h1>
-          <p className="text-white/70">Choose a new password for your account.</p>
+    <AuthLayout subtitle="Choose a new password for your account.">
+      {session === 'checking' && <p className="text-center text-muted-foreground text-sm">Verifying your reset link…</p>}
+
+      {session === 'missing' && (
+        <div className="space-y-4 text-center">
+          <Notice tone="error">
+            This reset link is invalid or has expired. Request a new one from the sign-in page using &ldquo;Forgot password?&rdquo;.
+          </Notice>
+          <Button asChild size="lg" className="w-full">
+            <Link href="/login">Back to sign in</Link>
+          </Button>
         </div>
+      )}
 
-        {session === 'checking' && (
-          <p className="text-center text-white/60 text-sm">Verifying your reset link…</p>
-        )}
+      {session === 'ready' && done && <Notice tone="success">Your password has been updated. Taking you to your dashboard…</Notice>}
 
-        {session === 'missing' && (
-          <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 text-center space-y-4">
-            <p className="text-white/80 text-sm leading-relaxed">
-              This reset link is invalid or has expired. Request a new one from the sign-in page using
-              &ldquo;Forgot your password?&rdquo;.
-            </p>
-            <Button asChild className="rounded-full bg-white text-black hover:bg-white/90">
-              <Link href="/login">Back to sign in</Link>
-            </Button>
-          </div>
-        )}
-
-        {session === 'ready' && done && (
-          <div className="p-4 bg-green-500/20 border border-green-500/30 rounded-lg text-green-200 text-sm text-center">
-            Your password has been updated. Taking you to your dashboard…
-          </div>
-        )}
-
-        {session === 'ready' && !done && (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {[
-              { id: 'password', label: 'New password', value: password, set: setPassword },
-              { id: 'confirm', label: 'Confirm new password', value: confirm, set: setConfirm },
-            ].map((field) => (
-              <div key={field.id}>
-                <label htmlFor={field.id} className="block text-sm font-medium text-white/90 mb-2">
-                  {field.label}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                  <input
-                    id={field.id}
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    required
-                    minLength={6}
-                    value={field.value}
-                    onChange={(e) => field.set(e.target.value)}
-                    className={inputClass}
-                    placeholder={field.label}
-                  />
-                  {field.id === 'password' && (
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/70"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  )}
-                </div>
+      {session === 'ready' && !done && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {[
+            { id: 'password', label: 'New password', value: password, set: setPassword },
+            { id: 'confirm', label: 'Confirm new password', value: confirm, set: setConfirm },
+          ].map((field) => (
+            <div key={field.id}>
+              <label htmlFor={field.id} className={labelClass}>
+                {field.label}
+              </label>
+              <div className="relative">
+                <input
+                  id={field.id}
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  value={field.value}
+                  onChange={(e) => field.set(e.target.value)}
+                  className={inputClass}
+                  placeholder="At least 6 characters"
+                />
+                {field.id === 'password' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-ink"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                )}
               </div>
-            ))}
+            </div>
+          ))}
 
-            {error && (
-              <div role="alert" className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm">
-                {error}
-              </div>
-            )}
+          {error && <Notice tone="error">{error}</Notice>}
 
-            <Button
-              type="submit"
-              disabled={saving}
-              className="w-full bg-white text-black hover:bg-white/90 rounded-lg py-3 font-semibold"
-            >
-              {saving ? 'Saving…' : 'Update password'}
-            </Button>
-          </form>
-        )}
-
-        <p className="text-center text-white/50 text-sm mt-8">
-          <Link href="/login" className="hover:text-white">
-            ← Back to sign in
-          </Link>
-        </p>
-      </div>
-    </div>
+          <Button type="submit" size="lg" disabled={saving} className="w-full">
+            {saving ? 'Saving…' : 'Update password'}
+          </Button>
+        </form>
+      )}
+    </AuthLayout>
   )
 }

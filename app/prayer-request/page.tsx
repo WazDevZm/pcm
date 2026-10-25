@@ -7,7 +7,6 @@ import { useAuth } from "@/components/auth/AuthProvider"
 import { friendlyError, submitPrayerRequest, type PrayerCategory } from "@/lib/data/forms"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 
 export default function PrayerRequestPage() {
   const { user, profile } = useAuth()
@@ -83,27 +82,27 @@ export default function PrayerRequestPage() {
   return (
     <MinistryPageShell
       heroImage="/Features/KCM_0729.jpg"
-      title="Prayer Requests"
+      eyebrow="We pray with you"
+      title="Prayer requests"
       subtitle="Submit your prayer requests and join our community in lifting each other up in prayer and faith."
     >
-      <ScrollToBottom targetId="prayer-content" label="Scroll" />
       <MinistryContent>
       <section id="prayer-content" className="py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-balance text-gray-900">Submit Prayer Request</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto text-pretty">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-balance text-ink">Submit Prayer Request</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
               Our prayer team is committed to praying for your needs. All requests are kept confidential.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             <div className="lg:col-span-2">
-              <div className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 p-8">
+              <div className="rounded-2xl bg-white border border-border shadow-[0_4px_12px_rgba(11,15,18,0.04)] p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-700">
+                      <label htmlFor="name" className="block text-sm font-medium mb-2 text-ink/80">
                         Name (Optional)
                       </label>
                       <input
@@ -112,12 +111,12 @@ export default function PrayerRequestPage() {
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                         disabled={formData.anonymous}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+                        className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-muted disabled:text-[#8a93a3]"
                         placeholder="Your name"
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-700">
+                      <label htmlFor="email" className="block text-sm font-medium mb-2 text-ink/80">
                         Email (Optional)
                       </label>
                       <input
@@ -126,14 +125,14 @@ export default function PrayerRequestPage() {
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         disabled={formData.anonymous}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+                        className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-muted disabled:text-[#8a93a3]"
                         placeholder="your.email@example.com"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="requestType" className="block text-sm font-medium mb-2 text-gray-700">
+                    <label htmlFor="requestType" className="block text-sm font-medium mb-2 text-ink/80">
                       Prayer Category
                     </label>
                     <select
@@ -141,7 +140,7 @@ export default function PrayerRequestPage() {
                       value={formData.requestType}
                       onChange={(e) => setFormData({...formData, requestType: e.target.value})}
                       required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent"
+                      className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-navy focus:border-transparent"
                     >
                       <option value="">Select a category</option>
                       <option value="health">Health & Healing</option>
@@ -155,7 +154,7 @@ export default function PrayerRequestPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium mb-2 text-gray-700">
+                    <label htmlFor="message" className="block text-sm font-medium mb-2 text-ink/80">
                       Prayer Request
                     </label>
                     <textarea
@@ -163,7 +162,7 @@ export default function PrayerRequestPage() {
                       rows={6}
                       value={formData.message}
                       onChange={(e) => setFormData({...formData, message: e.target.value})}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-navy focus:border-transparent resize-none"
                       placeholder="Please share your prayer request..."
                       required
                     />
@@ -175,9 +174,9 @@ export default function PrayerRequestPage() {
                       id="anonymous"
                       checked={formData.anonymous}
                       onChange={(e) => setFormData({...formData, anonymous: e.target.checked})}
-                      className="w-4 h-4 text-[#0f2d6e] border-gray-300 rounded focus:ring-[#0f2d6e]"
+                      className="w-4 h-4 text-navy border-border rounded focus:ring-navy"
                     />
-                    <label htmlFor="anonymous" className="text-sm text-gray-700">
+                    <label htmlFor="anonymous" className="text-sm text-ink/80">
                       Submit this request anonymously (your name, email and account are not attached)
                     </label>
                   </div>
@@ -192,7 +191,7 @@ export default function PrayerRequestPage() {
                       {error}
                     </p>
                   )}
-                  <Button type="submit" disabled={submitting} className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-lg py-3 font-normal text-base">
+                  <Button type="submit" disabled={submitting} className="w-full bg-navy text-white hover:bg-navy/90 rounded-lg py-3 font-normal text-base">
                     <Send className="w-4 h-4 mr-2" />
                     {submitting ? 'Submitting...' : 'Submit Prayer Request'}
                   </Button>
@@ -201,14 +200,14 @@ export default function PrayerRequestPage() {
             </div>
 
             <div className="space-y-6">
-              <div className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 p-6">
-                <h3 className="text-lg font-semibold mb-4 text-gray-900">Prayer Categories</h3>
+              <div className="rounded-2xl bg-white border border-border shadow-[0_4px_12px_rgba(11,15,18,0.04)] p-6">
+                <h3 className="text-lg font-semibold mb-4 text-ink">Prayer Categories</h3>
                 <div className="space-y-3">
                   {prayerCategories.map((category, index) => {
                     const IconComponent = category.icon
                     return (
-                      <div key={index} className="flex items-center gap-3 text-gray-700">
-                        <IconComponent className="w-5 h-5 text-[#0f2d6e]" />
+                      <div key={index} className="flex items-center gap-3 text-ink/80">
+                        <IconComponent className="w-5 h-5 text-navy" />
                         <span className="text-sm">{category.name}</span>
                       </div>
                     )
@@ -216,16 +215,16 @@ export default function PrayerRequestPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 p-6">
-                <h3 className="text-lg font-semibold mb-4 text-gray-900">Prayer Promise</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+              <div className="rounded-2xl bg-white border border-border shadow-[0_4px_12px_rgba(11,15,18,0.04)] p-6">
+                <h3 className="text-lg font-semibold mb-4 text-ink">Prayer Promise</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   "Therefore I tell you, whatever you ask for in prayer, believe that you have received it, and it will be yours." - Mark 11:24
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 p-6">
-                <h3 className="text-lg font-semibold mb-4 text-gray-900">Confidentiality</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+              <div className="rounded-2xl bg-white border border-border shadow-[0_4px_12px_rgba(11,15,18,0.04)] p-6">
+                <h3 className="text-lg font-semibold mb-4 text-ink">Confidentiality</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   All prayer requests are kept strictly confidential and shared only with our prayer team.
                 </p>
               </div>

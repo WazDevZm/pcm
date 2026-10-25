@@ -51,31 +51,31 @@ export default function NewEventPage() {
           placeholder="Title"
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          className="bg-black/40 border-white/20"
+          className="bg-white border-border"
           required
         />
         <Textarea
           placeholder="Description"
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-          className="bg-black/40 border-white/20"
+          className="bg-white border-border"
           required
         />
         <Input
           type="datetime-local"
           value={form.date}
           onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-          className="bg-black/40 border-white/20"
+          className="bg-white border-border"
           required
         />
         <Input
           placeholder="Location"
           value={form.location}
           onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-          className="bg-black/40 border-white/20"
+          className="bg-white border-border"
           required
         />
-        <Button type="submit" disabled={loading} className="rounded-full bg-white text-black">
+        <Button type="submit" disabled={loading} className="rounded-full bg-navy text-white">
           Create event
         </Button>
       </form>

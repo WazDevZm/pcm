@@ -1,173 +1,211 @@
-"use client"
+'use client'
 
 import { useEffect, useState } from 'react'
-import {
-  Users, Calendar, FileText, Heart, Image, BookOpen,
-  MessageCircle, HandHeart, ShoppingBag, AlertCircle
-} from 'lucide-react'
 import Link from 'next/link'
-import { ScrollToBottom } from '@/components/ui/scroll-to-bottom'
+import {
+  ArrowRight,
+  BookOpen,
+  Calendar,
+  FileText,
+  HandHeart,
+  Heart,
+  Image as ImageIcon,
+  Mail,
+  MessageCircle,
+  Plus,
+  ShoppingBag,
+  Upload,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
+import { AdminPage } from '@/components/admin/kit'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { Badge, IconTile, Notice, cardClass, cardHoverClass } from '@/components/ui/haven'
+import { Button } from '@/components/ui/button'
 import { getAdminCounts, type AdminCounts, type AdminCountKey } from '@/lib/data/admin'
+import { getAllBandAdmins, getMemberCounts, type PersonRow } from '@/lib/data/queues'
+import { getBands } from '@/lib/bands'
+import type { Band } from '@/lib/supabase'
+import { OFFICE_LABEL } from '@/lib/brand'
+import { cn } from '@/lib/utils'
+
+type Tile = { key: AdminCountKey; label: string; icon: LucideIcon; href: string; attention?: boolean }
+
+const LEADER_TILES: Tile[] = [
+  { key: 'users', label: 'Members', icon: Users, href: '/admin/users' },
+  { key: 'upcomingEvents', label: 'Upcoming events', icon: Calendar, href: '/admin/events' },
+  { key: 'posts', label: 'Posts', icon: FileText, href: '/admin/content' },
+  { key: 'pendingPrayers', label: 'Active prayers', icon: Heart, href: '/admin/prayers', attention: true },
+  { key: 'pendingCounseling', label: 'Pending counseling', icon: MessageCircle, href: '/admin/counseling', attention: true },
+  { key: 'pendingVolunteers', label: 'Pending volunteers', icon: HandHeart, href: '/admin/volunteers', attention: true },
+  { key: 'pendingOrders', label: 'Pending orders', icon: ShoppingBag, href: '/admin/orders', attention: true },
+  { key: 'messages', label: 'Messages', icon: Mail, href: '/admin/messages' },
+]
+
+const CONTENT_TILES: Tile[] = [
+  { key: 'posts', label: 'Posts & news', icon: FileText, href: '/admin/content' },
+  { key: 'upcomingEvents', label: 'Upcoming events', icon: Calendar, href: '/admin/events' },
+  { key: 'gallery', label: 'Gallery photos', icon: ImageIcon, href: '/admin/gallery' },
+  { key: 'resources', label: 'Resources', icon: BookOpen, href: '/admin/resources' },
+]
+
+const PUBLISH = [
+  { label: 'New post', href: '/admin/content/new', icon: Plus },
+  { label: 'New event', href: '/admin/events/new', icon: Calendar },
+  { label: 'Upload photos', href: '/admin/gallery/upload', icon: Upload },
+  { label: 'New resource', href: '/admin/resources/new', icon: BookOpen },
+]
+
+function StatTile({ tile, value }: { tile: Tile; value: number | null | undefined }) {
+  const hot = tile.attention && (value ?? 0) > 0
+  return (
+    <Link
+      href={tile.href}
+      className={cn(cardClass, cardHoverClass, 'p-5 flex flex-col gap-3', hot && 'bg-gold-soft border-gold/60')}
+    >
+      <IconTile icon={tile.icon} className={hot ? 'bg-gold text-ink' : undefined} />
+      <span className="font-serif text-3xl leading-none text-ink">{value === undefined ? '…' : value ?? '—'}</span>
+      <span className="text-sm text-muted-foreground">{tile.label}</span>
+    </Link>
+  )
+}
+
+function BandsOverview() {
+  const [bands, setBands] = useState<Band[] | null>(null)
+  const [heads, setHeads] = useState<Record<string, PersonRow[]>>({})
+  const [members, setMembers] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    getBands().then(setBands)
+    getAllBandAdmins().then(setHeads).catch(() => {})
+    getMemberCounts().then(setMembers).catch(() => {})
+  }, [])
+
+  return (
+    <section className="mt-12">
+      <div className="mb-4 flex items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow text-navy mb-1">Oversight</p>
+          <h2 className="text-2xl text-ink">Bands & committees</h2>
+        </div>
+        <Link href="/admin/bands" className="text-sm font-semibold text-navy hover:underline">
+          Assign heads →
+        </Link>
+      </div>
+      <div className={cn(cardClass, 'overflow-hidden')}>
+        <div className="hidden md:grid grid-cols-[1.4fr_1.4fr_0.6fr_auto] gap-4 border-b border-border bg-canvas px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <span>Band</span>
+          <span>Head(s)</span>
+          <span>Members</span>
+          <span />
+        </div>
+        {!bands ? (
+          <p className="px-5 py-8 text-center text-muted-foreground">Loading…</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {bands.map((b) => {
+              const h = heads[b.id] ?? []
+              return (
+                <li key={b.id} className="grid gap-2 px-5 py-4 md:grid-cols-[1.4fr_1.4fr_0.6fr_auto] md:items-center md:gap-4">
+                  <div>
+                    <p className="font-bold text-ink">{b.name}</p>
+                    <p className="text-xs text-muted-foreground">{b.meeting_time}</p>
+                  </div>
+                  <div className="text-sm">
+                    {h.length ? (
+                      h.map((p) => (
+                        <p key={p.id} className="truncate">
+                          {p.name} <span className="text-muted-foreground">· {p.email}</span>
+                        </p>
+                      ))
+                    ) : (
+                      <Badge tone="gold">No head assigned</Badge>
+                    )}
+                  </div>
+                  <p className="text-sm">
+                    <span className="font-serif text-xl text-ink">{members[b.id] ?? 0}</span>
+                    <span className="md:hidden text-muted-foreground"> members</span>
+                  </p>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={`/band-admin/${b.slug}`}>
+                      Dashboard <ArrowRight />
+                    </Link>
+                  </Button>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
+    </section>
+  )
+}
 
 export default function AdminDashboard() {
+  const { profile, isLeader } = useAuth()
   const [counts, setCounts] = useState<AdminCounts | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     getAdminCounts()
       .then(setCounts)
-      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Could not load dashboard data.'))
-      .finally(() => setLoading(false))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Could not load counts'))
   }, [])
 
-  const quickActions = [
-    { name: 'Create Post', href: '/admin/content/new', icon: FileText, color: 'bg-blue-500' },
-    { name: 'Add Event', href: '/admin/events/new', icon: Calendar, color: 'bg-green-500' },
-    { name: 'Upload Media', href: '/admin/gallery/upload', icon: Image, color: 'bg-purple-500' },
-    { name: 'Add Resource', href: '/admin/resources/new', icon: BookOpen, color: 'bg-orange-500' }
-  ]
-
-  const statCards: { key: AdminCountKey; name: string; icon: typeof Users; color: string; href: string }[] = [
-    { key: 'users', name: 'Users', icon: Users, color: 'text-blue-400', href: '/admin/users' },
-    { key: 'posts', name: 'Posts', icon: FileText, color: 'text-green-400', href: '/admin/content' },
-    { key: 'upcomingEvents', name: 'Upcoming Events', icon: Calendar, color: 'text-purple-400', href: '/admin/events' },
-    { key: 'resources', name: 'Resources', icon: BookOpen, color: 'text-cyan-400', href: '/admin/resources' }
-  ]
-
-  const pendingItems: { key: AdminCountKey; name: string; icon: typeof Users; href: string; unit: string }[] = [
-    { key: 'pendingPrayers', name: 'Prayer Requests', icon: Heart, href: '/admin/prayers', unit: 'active' },
-    { key: 'pendingCounseling', name: 'Counseling Requests', icon: MessageCircle, href: '/admin/counseling', unit: 'pending' },
-    { key: 'pendingVolunteers', name: 'Volunteer Applications', icon: HandHeart, href: '/admin/volunteers', unit: 'pending review' },
-    { key: 'pendingOrders', name: 'Merch Orders', icon: ShoppingBag, href: '/admin', unit: 'pending' }
-  ]
-
-  const show = (key: AdminCountKey) => {
-    const value = counts?.[key]
-    return value === null || value === undefined ? '—' : value
-  }
-
-  const unavailable = counts ? Object.values(counts).filter((v) => v === null).length : 0
-
-  if (loading) {
-    return (
-      <div className="p-4 md:p-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-white/10 rounded w-64 mb-8"></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-32 bg-white/10 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const first = (profile?.name || 'there').split(' ')[0]
+  const office = profile?.office ? OFFICE_LABEL[profile.office] : null
+  const tiles = isLeader ? LEADER_TILES : CONTENT_TILES
 
   return (
-    <div className="p-4 md:p-8 relative min-h-screen">
-      <ScrollToBottom targetId="dashboard-content" label="Scroll down" />
+    <AdminPage
+      eyebrow={office ?? (isLeader ? 'The Haven leadership' : 'Publicity Committee')}
+      title={`Welcome, ${first}`}
+      description={
+        isLeader
+          ? 'Everything that needs your attention across the ministry. Gold tiles have items waiting.'
+          : 'You run what visitors see. Posts, events, photos and resources you publish appear on the landing page, across the website and in The Haven app.'
+      }
+      actions={
+        !isLeader || profile?.office ? (
+          <>
+            {PUBLISH.slice(0, 2).map((p) => (
+              <Button key={p.href} asChild variant={p.href.includes('content') ? 'default' : 'outline'}>
+                <Link href={p.href}>
+                  <p.icon /> {p.label}
+                </Link>
+              </Button>
+            ))}
+          </>
+        ) : undefined
+      }
+    >
+      {error && <Notice tone="error" className="mb-6">{error}</Notice>}
 
-      {/* Header */}
-      <div id="dashboard-content" className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-white/70 text-sm md:text-base">Welcome back! Here&apos;s what&apos;s happening with your ministry.</p>
+      <div className={cn('grid gap-4', isLeader ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-2 lg:grid-cols-4')}>
+        {tiles.map((t) => (
+          <StatTile key={t.key + t.href} tile={t} value={counts ? counts[t.key] : undefined} />
+        ))}
       </div>
 
-      {(error || unavailable > 0) && (
-        <div className="mb-8 flex items-start gap-3 p-4 bg-yellow-500/10 ring-1 ring-yellow-500/20 rounded-lg text-sm">
-          <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0" />
-          <p className="text-white/80">
-            {error
-              ? `Could not reach the database: ${error}`
-              : 'Some figures could not be loaded (shown as —). The database tables may not be set up yet.'}
-          </p>
-        </div>
+      {!isLeader && (
+        <section className="mt-10">
+          <h2 className="text-2xl text-ink mb-4">Publish</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {PUBLISH.map((p) => (
+              <Link key={p.href} href={p.href} className={cn(cardClass, cardHoverClass, 'flex items-center gap-3 p-4')}>
+                <IconTile icon={p.icon} />
+                <span className="font-semibold text-ink">{p.label}</span>
+              </Link>
+            ))}
+          </div>
+          <Notice className="mt-6">
+            Where things appear: <b>events</b> show on the landing page (next three) and the Events page; <b>posts</b> show
+            under “Latest news” on the landing page and on News; <b>photos</b> in Gallery; <b>resources</b> in Resources.
+          </Notice>
+        </section>
       )}
 
-      {/* Quick Actions */}
-      <div className="mb-8">
-        <h2 className="text-lg md:text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {quickActions.map((action) => {
-            const IconComponent = action.icon
-            return (
-              <Link
-                key={action.name}
-                href={action.href}
-                className="flex items-center gap-2 md:gap-3 p-3 md:p-4 bg-white/5 ring-1 ring-white/10 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                <div className={`p-2 rounded-lg ${action.color} shrink-0`}>
-                  <IconComponent className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                </div>
-                <span className="font-medium text-sm md:text-base">{action.name}</span>
-              </Link>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="mb-8">
-        <h2 className="text-lg md:text-xl font-semibold mb-4">Overview</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-          {statCards.map((stat) => {
-            const IconComponent = stat.icon
-            return (
-              <Link
-                key={stat.key}
-                href={stat.href}
-                className="bg-white/5 ring-1 ring-white/10 rounded-lg p-4 md:p-6 hover:bg-white/10 transition-colors"
-              >
-                <div className="mb-3 md:mb-4">
-                  <div className="inline-flex p-2 rounded-lg bg-white/10">
-                    <IconComponent className={`w-5 h-5 md:w-6 md:h-6 ${stat.color}`} />
-                  </div>
-                </div>
-                <div className="text-xl md:text-2xl font-bold mb-1">{show(stat.key)}</div>
-                <div className="text-white/70 text-xs md:text-sm">{stat.name}</div>
-              </Link>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Pending Items */}
-      <div className="bg-white/5 ring-1 ring-white/10 rounded-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold">Needs Attention</h3>
-          <AlertCircle className="w-5 h-5 text-yellow-400" />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {pendingItems.map((item) => {
-            const IconComponent = item.icon
-            const value = show(item.key)
-            const content = (
-              <>
-                <div className="flex items-center gap-3">
-                  <IconComponent className="w-5 h-5 text-white/60" />
-                  <div>
-                    <p className="text-white/90 text-sm">{item.name}</p>
-                    <p className="text-white/50 text-xs">
-                      {value === '—' ? 'Unavailable' : `${value} ${item.unit}`}
-                    </p>
-                  </div>
-                </div>
-                <span className="text-xl font-bold">{value}</span>
-              </>
-            )
-            const cls = 'flex items-center justify-between p-3 bg-white/5 ring-1 ring-white/10 rounded-lg'
-            return item.key === 'pendingOrders' ? (
-              <div key={item.key} className={cls}>{content}</div>
-            ) : (
-              <Link key={item.key} href={item.href} className={`${cls} hover:bg-white/10 transition-colors`}>
-                {content}
-              </Link>
-            )
-          })}
-        </div>
-      </div>
-    </div>
+      {isLeader && <BandsOverview />}
+    </AdminPage>
   )
 }

@@ -6,7 +6,8 @@ import { Calendar, Clock, MapPin, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
+import { Badge, Notice, cardClass } from "@/components/ui/haven"
+import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth/AuthProvider"
 import type { Event } from "@/lib/supabase"
 import {
@@ -28,6 +29,8 @@ type EventCard = {
   description: string
   attendees: string
   full: boolean
+  month: string
+  day: string
 }
 
 const FALLBACK: EventCard[] = [
@@ -35,6 +38,8 @@ const FALLBACK: EventCard[] = [
     id: null,
     title: "Campus Revival Week",
     date: "February 15-22, 2025",
+    month: "Feb",
+    day: "15",
     time: "7:00 PM Daily",
     location: "Main Auditorium",
     description: "A week of spiritual renewal with guest speakers, worship, and prayer.",
@@ -45,6 +50,8 @@ const FALLBACK: EventCard[] = [
     id: null,
     title: "Bible Study Marathon",
     date: "March 5, 2025",
+    month: "Mar",
+    day: "5",
     time: "9:00 AM - 6:00 PM",
     location: "Student Center",
     description: "Intensive Bible study covering the book of Revelation.",
@@ -55,6 +62,8 @@ const FALLBACK: EventCard[] = [
     id: null,
     title: "Community Service Day",
     date: "March 12, 2025",
+    month: "Mar",
+    day: "12",
     time: "8:00 AM - 4:00 PM",
     location: "Various Locations",
     description: "Serve the local community through various outreach projects.",
@@ -65,6 +74,8 @@ const FALLBACK: EventCard[] = [
     id: null,
     title: "Youth Retreat Weekend",
     date: "March 25-27, 2025",
+    month: "Mar",
+    day: "25",
     time: "Friday 6 PM - Sunday 4 PM",
     location: "Mountain View Camp",
     description: "Weekend retreat for spiritual growth and fellowship.",
@@ -87,6 +98,8 @@ function toCard(e: Event): EventCard {
     description: e.description,
     attendees: e.max_attendees ? `${count} / ${e.max_attendees} attending` : `${count} attending`,
     full: Boolean(e.max_attendees && count >= e.max_attendees),
+    month: new Date(e.date).toLocaleDateString("en-GB", { month: "short" }),
+    day: String(new Date(e.date).getDate()),
   }
 }
 
@@ -148,82 +161,75 @@ export default function EventsPage() {
   return (
     <MinistryPageShell
       heroImage="/Features/KCM_0741.jpg"
-      title="Ministry Events"
-      subtitle="Join us for inspiring events that strengthen faith, build community, and serve others in Christ's love."
+      eyebrow="Coming up"
+      title="Events"
+      subtitle="Worship, study nights, outreach and fellowship. RSVP so we know you're coming."
     >
-      <ScrollToBottom targetId="events-content" label="Scroll" />
       <MinistryContent>
         <div id="events-content" className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-balance text-gray-900">Upcoming Events</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto text-pretty">
-              Mark your calendar for these exciting ministry events and spiritual gatherings.
-            </p>
-          </div>
+          {!events && (
+            <div className="space-y-4">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className={cn(cardClass, "h-40 animate-pulse")} />
+              ))}
+            </div>
+          )}
 
-          {!events && <p className="text-center text-gray-500">Loading events...</p>}
-
-          <div className="space-y-6">
+          <div className="space-y-4">
             {(events ?? []).map((event, index) => {
               const attending = event.id ? myEvents.has(event.id) : false
               return (
-                <div key={event.id ?? index} className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 p-8">
-                  <h3 className="text-2xl font-semibold mb-4 text-gray-900">{event.title}</h3>
-                  <p className="text-gray-600 leading-relaxed mb-6">{event.description}</p>
-
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center gap-3 text-gray-700">
-                      <Calendar className="w-5 h-5" />
-                      <span>{event.date}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-gray-700">
-                      <Clock className="w-5 h-5" />
-                      <span>{event.time}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-gray-700">
-                      <MapPin className="w-5 h-5" />
-                      <span>{event.location}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-gray-700">
-                      <Users className="w-5 h-5" />
-                      <span>{event.attendees}</span>
-                    </div>
+                <article key={event.id ?? index} className={cn(cardClass, "p-5 sm:p-6 flex flex-col sm:flex-row gap-5")}>
+                  <div className="flex sm:flex-col items-center sm:justify-center gap-3 sm:gap-0 sm:h-20 sm:w-20 shrink-0 rounded-2xl sm:bg-navy sm:text-white">
+                    <span className="flex h-14 w-14 sm:h-auto sm:w-auto flex-col items-center justify-center rounded-2xl bg-navy text-white sm:bg-transparent">
+                      <span className="eyebrow !text-[10px] text-gold">{event.month}</span>
+                      <span className="font-serif text-2xl sm:text-3xl leading-none">{event.day}</span>
+                    </span>
+                    {attending && <Badge tone="success" className="sm:hidden">Attending</Badge>}
                   </div>
 
-                  {event.id && !authLoading && (
-                    <div className="flex flex-wrap items-center gap-4">
-                      {!user ? (
-                        <Button className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6" asChild>
-                          <Link href="/login?next=/events">Sign in to RSVP</Link>
-                        </Button>
-                      ) : attending ? (
-                        <>
-                          <span className="text-sm font-medium text-[#0f2d6e]">You&apos;re attending</span>
-                          <Button
-                            variant="outline"
-                            className="rounded-full px-6 border-gray-300"
-                            disabled={pending === event.id}
-                            onClick={() => toggleRsvp(event.id!)}
-                          >
-                            {pending === event.id ? "Cancelling..." : "Cancel RSVP"}
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6"
-                          disabled={event.full || pending === event.id}
-                          onClick={() => toggleRsvp(event.id!)}
-                        >
-                          {event.full ? "Event Full" : pending === event.id ? "Saving..." : "RSVP"}
-                        </Button>
-                      )}
-                      {message?.id === event.id && <p className="text-sm text-red-600">{message.text}</p>}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="text-xl font-bold text-ink">{event.title}</h3>
+                      {attending && <Badge tone="success" className="hidden sm:inline-flex shrink-0">Attending</Badge>}
+                      {event.full && !attending && <Badge tone="muted" className="shrink-0">Full</Badge>}
                     </div>
-                  )}
-                </div>
+                    <p className="mt-2 text-muted-foreground leading-relaxed">{event.description}</p>
+
+                    <ul className="mt-4 grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                      <li className="flex items-center gap-2 text-ink/80"><Calendar className="h-4 w-4 text-navy shrink-0" />{event.date}</li>
+                      <li className="flex items-center gap-2 text-ink/80"><Clock className="h-4 w-4 text-navy shrink-0" />{event.time}</li>
+                      <li className="flex items-center gap-2 text-ink/80"><MapPin className="h-4 w-4 text-navy shrink-0" />{event.location}</li>
+                      <li className="flex items-center gap-2 text-ink/80"><Users className="h-4 w-4 text-navy shrink-0" />{event.attendees}</li>
+                    </ul>
+
+                    {event.id && !authLoading && (
+                      <div className="mt-5 flex flex-wrap items-center gap-3">
+                        {!user ? (
+                          <Button asChild>
+                            <Link href="/login?next=/events">Sign in to RSVP</Link>
+                          </Button>
+                        ) : attending ? (
+                          <Button variant="outline" disabled={pending === event.id} onClick={() => toggleRsvp(event.id!)}>
+                            {pending === event.id ? "Cancelling…" : "Cancel RSVP"}
+                          </Button>
+                        ) : (
+                          <Button disabled={event.full || pending === event.id} onClick={() => toggleRsvp(event.id!)}>
+                            {event.full ? "Event full" : pending === event.id ? "Saving…" : "RSVP"}
+                          </Button>
+                        )}
+                        {message?.id === event.id && <p className="text-sm text-destructive">{message.text}</p>}
+                      </div>
+                    )}
+                  </div>
+                </article>
               )
             })}
           </div>
+
+          {events && events.length > 0 && events.every((e) => !e.id) && (
+            <Notice className="mt-6">These are example events. Live events appear here as soon as leaders post them.</Notice>
+          )}
         </div>
       </MinistryContent>
     </MinistryPageShell>

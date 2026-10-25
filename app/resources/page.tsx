@@ -5,7 +5,6 @@ import { BookOpen, Play, Download, FileText, Headphones, Video } from "lucide-re
 import { Button } from "@/components/ui/button"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 import type { Resource } from "@/lib/supabase"
 import { formatDate, getResources } from "@/lib/data/content"
 
@@ -196,7 +195,7 @@ function MetaList({ meta }: { meta: Meta[] }) {
     <dl className="space-y-1 mb-6 text-sm">
       {meta.map(([label, value]) => (
         <div key={label} className="flex justify-between">
-          <dt className="text-gray-500">{label}</dt>
+          <dt className="text-muted-foreground">{label}</dt>
           <dd>{value}</dd>
         </div>
       ))}
@@ -220,10 +219,10 @@ export default function ResourcesPage() {
   function SectionHeader({ icon: Icon, title }: { icon: typeof BookOpen; title: string }) {
     return (
       <div className="flex items-center gap-4 mb-10">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#0f2d6e]/10 shrink-0">
-          <Icon className="w-6 h-6 text-[#0f2d6e]" />
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-navy/10 shrink-0">
+          <Icon className="w-6 h-6 text-navy" />
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold text-[#0B0F12]">{title}</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-ink">{title}</h2>
       </div>
     )
   }
@@ -231,13 +230,13 @@ export default function ResourcesPage() {
   return (
     <MinistryPageShell
       heroImage="/Slider/KCM_0822.jpg"
+      eyebrow="Grow deeper"
       title="Resources"
       subtitle="Deepen your faith with our collection of Bible studies, sermons, devotionals, and ministry materials."
     >
-      <ScrollToBottom targetId="resources-content" label="Scroll" />
       <MinistryContent>
         <div id="resources-content">
-          {!groups && <p className="max-w-4xl mx-auto py-8 text-center text-gray-500">Loading resources...</p>}
+          {!groups && <p className="max-w-4xl mx-auto py-8 text-center text-muted-foreground">Loading resources...</p>}
         </div>
 
         {groups && groups.studies.length > 0 && (
@@ -245,12 +244,12 @@ export default function ResourcesPage() {
           <SectionHeader icon={BookOpen} title="Bible Studies" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {groups.studies.map((study) => (
-              <div key={study.key} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-lg font-semibold mb-2 text-[#0B0F12]">{study.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{study.description}</p>
+              <div key={study.key} className="rounded-2xl bg-white border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="text-lg font-semibold mb-2 text-ink">{study.title}</h3>
+                <p className="text-muted-foreground text-sm mb-4">{study.description}</p>
                 <MetaList meta={study.meta} />
                 {study.url && (
-                  <Button size="sm" className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full" asChild>
+                  <Button size="sm" className="w-full bg-navy text-white hover:bg-navy/90 rounded-full" asChild>
                     <a href={study.url} target="_blank" rel="noopener noreferrer">
                       <Download className="w-4 h-4 mr-1" />
                       Open Study
@@ -264,24 +263,24 @@ export default function ResourcesPage() {
         )}
 
         {groups && groups.sermons.length > 0 && (
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border">
           <SectionHeader icon={Headphones} title="Recent Sermons" />
           <div className="space-y-6">
             {groups.sermons.map((sermon) => (
-              <div key={sermon.key} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div key={sermon.key} className="rounded-2xl bg-white border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between gap-4 mb-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-[#0B0F12]">{sermon.title}</h3>
-                    <p className="text-gray-500 text-sm">{sermon.subtitle}</p>
+                    <h3 className="text-lg font-semibold text-ink">{sermon.title}</h3>
+                    <p className="text-muted-foreground text-sm">{sermon.subtitle}</p>
                   </div>
                   {sermon.badge && (
-                    <span className="shrink-0 px-3 py-1 h-fit bg-[#0f2d6e]/10 text-[#0f2d6e] rounded-full text-xs">
+                    <span className="shrink-0 px-3 py-1 h-fit bg-navy/10 text-navy rounded-full text-xs">
                       {sermon.badge}
                     </span>
                   )}
                 </div>
                 {sermon.url && (
-                  <Button size="sm" className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full" asChild>
+                  <Button size="sm" className="w-full bg-navy text-white hover:bg-navy/90 rounded-full" asChild>
                     <a href={sermon.url} target="_blank" rel="noopener noreferrer">
                       <Play className="w-4 h-4 mr-1" />
                       Listen
@@ -295,16 +294,16 @@ export default function ResourcesPage() {
         )}
 
         {groups && groups.devotionals.length > 0 && (
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border">
           <SectionHeader icon={FileText} title="Devotionals" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {groups.devotionals.map((devotional) => (
-              <div key={devotional.key} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-lg font-semibold mb-2 text-[#0B0F12]">{devotional.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{devotional.description}</p>
+              <div key={devotional.key} className="rounded-2xl bg-white border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="text-lg font-semibold mb-2 text-ink">{devotional.title}</h3>
+                <p className="text-muted-foreground text-sm mb-4">{devotional.description}</p>
                 <MetaList meta={devotional.meta} />
                 {devotional.url && (
-                  <Button className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full" asChild>
+                  <Button className="w-full bg-navy text-white hover:bg-navy/90 rounded-full" asChild>
                     <a href={devotional.url} target="_blank" rel="noopener noreferrer">Access Devotional</a>
                   </Button>
                 )}
@@ -315,16 +314,16 @@ export default function ResourcesPage() {
         )}
 
         {groups && groups.materials.length > 0 && (
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border">
           <SectionHeader icon={Video} title="Ministry Materials" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {groups.materials.map((material) => (
-              <div key={material.key} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-lg font-semibold mb-2 text-[#0B0F12]">{material.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{material.description}</p>
+              <div key={material.key} className="rounded-2xl bg-white border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="text-lg font-semibold mb-2 text-ink">{material.title}</h3>
+                <p className="text-muted-foreground text-sm mb-4">{material.description}</p>
                 <MetaList meta={material.meta} />
                 {material.url && (
-                  <Button size="sm" className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full" asChild>
+                  <Button size="sm" className="w-full bg-navy text-white hover:bg-navy/90 rounded-full" asChild>
                     <a href={material.url} target="_blank" rel="noopener noreferrer">
                       <Download className="w-4 h-4 mr-1" />
                       Download
@@ -337,10 +336,10 @@ export default function ResourcesPage() {
         </section>
         )}
 
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200 text-center">
-          <div className="rounded-2xl bg-white ring-1 ring-gray-200 p-10 shadow-sm">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Need More Resources?</h2>
-            <p className="text-lg text-gray-600">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border text-center">
+          <div className="rounded-2xl bg-white border border-border p-10 shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Need More Resources?</h2>
+            <p className="text-lg text-muted-foreground">
               Contact our ministry team for additional materials and personalized study guides.
             </p>
           </div>

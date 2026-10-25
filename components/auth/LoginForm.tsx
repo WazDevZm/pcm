@@ -7,17 +7,19 @@ import { supabase } from '@/lib/supabase'
 import { FRONTEND_ONLY } from '@/lib/config'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock, User, Eye, EyeOff, Users, Crown } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
+import { Notice, fieldClass, labelClass } from '@/components/ui/haven'
 
 interface LoginFormProps {
+  /** Start on the create-account form */
+  signup?: boolean
   /** Where to go after signing in (e.g. the page that sent the user to /login) */
   next?: string
 }
 
-export function LoginForm({ next }: LoginFormProps) {
+export function LoginForm({ next, signup = false }: LoginFormProps) {
   const router = useRouter()
-  const [isLogin, setIsLogin] = useState(true)
-  const [loginType, setLoginType] = useState<'member' | 'leader'>('member')
+  const [isLogin, setIsLogin] = useState(!signup)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -29,7 +31,6 @@ export function LoginForm({ next }: LoginFormProps) {
     email: '',
     password: '',
     name: '',
-    role: 'student' as 'student' | 'leader'
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,10 +46,10 @@ export function LoginForm({ next }: LoginFormProps) {
         
         // Back to where the user came from, otherwise their dashboard
         const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null
-        router.push(safeNext ?? (loginType === 'leader' ? '/band-admin' : '/member-dashboard'))
+        router.push(safeNext ?? '/member-dashboard')
       } else {
-        const role = loginType === 'leader' ? 'leader' : 'student'
-        await signUp(formData.email, formData.password, formData.name, role)
+        // Everyone starts as a student; admins grant leader access
+        await signUp(formData.email, formData.password, formData.name)
         setSuccess('Account created! Please check your email to verify your account.')
       }
     } catch (err: any) {
@@ -63,7 +64,7 @@ export function LoginForm({ next }: LoginFormProps) {
     setSuccess('')
     const email = formData.email.trim()
     if (!email) {
-      setError('Enter your email address above, then tap "Forgot your password?" again.')
+      setError('Enter your email address above, then choose "Forgot password?" again.')
       return
     }
     setResetting(true)
@@ -105,187 +106,123 @@ export function LoginForm({ next }: LoginFormProps) {
 
   if (FRONTEND_ONLY) {
     return (
-      <div className="w-full max-w-md mx-auto text-center rounded-2xl bg-white/5 ring-1 ring-white/10 p-8">
-        <h2 className="text-2xl font-bold text-white mb-3">Login unavailable</h2>
-        <p className="text-white/70 text-sm mb-6 leading-relaxed">
-          The site is running in frontend-only mode. Member login and admin auth are
-          turned off until Supabase is connected.
-        </p>
-        <Button asChild className="rounded-full bg-white text-black">
-          <Link href="/">Back to home</Link>
-        </Button>
-      </div>
+      <Notice>Sign-in is turned off while the site runs without Supabase.</Notice>
     )
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">
-          {isLogin ? 'Welcome Back' : 'Join Our Ministry'}
-        </h2>
-        <p className="text-white/70">
-          {isLogin ? 'Sign in to your account' : 'Create your account to get started'}
-        </p>
+    <div className="space-y-5">
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={googleLoading}
+        className="w-full min-h-12 flex items-center justify-center gap-3 rounded-full border border-border bg-white font-semibold text-ink hover:bg-canvas transition-colors disabled:opacity-60"
+      >
+        <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M21.6 12.23c0-.68-.06-1.36-.18-2.02H12v3.83h5.39a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.9-1.75 2.98-4.32 2.98-7.33Z" />
+          <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.43l-3.23-2.5c-.9.6-2.04.95-3.39.95-2.6 0-4.81-1.76-5.6-4.12H3.07v2.58A10 10 0 0 0 12 22Z" />
+          <path fill="#FBBC05" d="M6.4 13.9a6 6 0 0 1 0-3.8V7.52H3.07a10 10 0 0 0 0 8.96L6.4 13.9Z" />
+          <path fill="#EA4335" d="M12 5.98c1.47 0 2.79.5 3.83 1.5l2.86-2.86A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.52L6.4 10.1C7.19 7.74 9.4 5.98 12 5.98Z" />
+        </svg>
+        {googleLoading ? 'Redirecting…' : 'Continue with Google'}
+      </button>
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-sm text-muted-foreground">or use email</span>
+        <div className="h-px flex-1 bg-border" />
       </div>
 
-      {/* Login Type Toggle */}
-      {isLogin && (
-        <div className="flex gap-2 mb-6 p-1 bg-white/5 rounded-lg">
-          <button
-            type="button"
-            onClick={() => setLoginType('member')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
-              loginType === 'member'
-                ? 'bg-white text-black'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            Member Login
-          </button>
-          <button
-            type="button"
-            onClick={() => setLoginType('leader')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
-              loginType === 'leader'
-                ? 'bg-white text-black'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <Crown className="w-4 h-4" />
-            Leader Login
-          </button>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {!isLogin && (
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-white/90 mb-2">
-              Full Name
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required={!isLogin}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
-                placeholder="Enter your full name"
-              />
-            </div>
+            <label htmlFor="name" className={labelClass}>Full name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              autoComplete="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              className={fieldClass}
+              placeholder="Your name"
+            />
           </div>
         )}
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-2">
-            Email Address
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
-              placeholder="Enter your email"
-            />
-          </div>
+          <label htmlFor="email" className={labelClass}>Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+            className={fieldClass}
+            placeholder="you@example.com"
+          />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-white/90 mb-2">
-            Password
-          </label>
+          <label htmlFor="password" className={labelClass}>Password</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
             <input
               type={showPassword ? 'text' : 'password'}
               id="password"
               name="password"
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+              minLength={6}
               value={formData.password}
               onChange={handleInputChange}
               required
-              className="w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
-              placeholder="Enter your password"
+              className={`${fieldClass} pr-12`}
+              placeholder="At least 6 characters"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/70"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-ink"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
         </div>
 
-        {error && (
-          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm">
-            {error}
-          </div>
-        )}
+        {error && <Notice tone="error">{error}</Notice>}
+        {success && <Notice tone="success">{success}</Notice>}
 
-        {success && (
-          <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg text-green-200 text-sm">
-            {success}
-          </div>
-        )}
-
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-white text-black hover:bg-white/90 rounded-lg py-3 font-semibold"
-        >
-          {loading ? 'Please wait...' : (isLogin ? `${loginType === 'leader' ? 'Leader' : 'Member'} Sign In` : 'Create Account')}
+        <Button type="submit" size="lg" disabled={loading} className="w-full">
+          {loading ? 'Please wait…' : isLogin ? 'Sign in' : 'Create account'}
         </Button>
       </form>
 
-      <div className="flex items-center gap-3 my-6">
-        <div className="h-px flex-1 bg-white/15" />
-        <span className="text-xs uppercase tracking-wider text-white/50">or</span>
-        <div className="h-px flex-1 bg-white/15" />
-      </div>
-
-      <button
-        type="button"
-        onClick={handleGoogleSignIn}
-        disabled={googleLoading}
-        className="w-full flex items-center justify-center gap-3 py-3 rounded-lg bg-white/10 border border-white/20 text-white font-medium hover:bg-white/15 transition-colors disabled:opacity-60"
-      >
-        <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.66 4.1-5.5 4.1-3.31 0-6-2.74-6-6.2s2.69-6.2 6-6.2c1.88 0 3.15.8 3.87 1.49l2.64-2.54C16.84 3.2 14.65 2.2 12 2.2 6.48 2.2 2 6.68 2 12s4.48 9.8 10 9.8c5.77 0 9.6-4.06 9.6-9.77 0-.66-.07-1.16-.16-1.66H12z" />
-        </svg>
-        {googleLoading ? 'Redirecting…' : 'Continue with Google'}
-      </button>
-
-      <div className="mt-6 text-center">
+      <div className="flex flex-col items-center gap-3 pt-1 text-sm font-semibold">
         <button
-          onClick={() => setIsLogin(!isLogin)}
-          className="text-white/70 hover:text-white text-sm"
+          type="button"
+          onClick={() => {
+            setIsLogin(!isLogin)
+            setError('')
+            setSuccess('')
+          }}
+          className="text-navy hover:text-navy-deep"
         >
-          {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+          {isLogin ? 'New here? Create an account' : 'Already have an account? Sign in'}
         </button>
-      </div>
-
-      {isLogin && (
-        <div className="mt-4 text-center">
+        {isLogin && (
           <button
             type="button"
             onClick={handleForgotPassword}
             disabled={resetting}
-            className="text-white/70 hover:text-white text-sm disabled:opacity-60"
+            className="text-navy hover:text-navy-deep disabled:opacity-60"
           >
-            {resetting ? 'Sending reset link…' : 'Forgot your password?'}
+            {resetting ? 'Sending reset link…' : 'Forgot password?'}
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

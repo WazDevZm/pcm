@@ -22,10 +22,10 @@ export function PcmEndorsement({ tone = 'onDark', className }: { tone?: 'onDark'
     <span className={cn('inline-flex items-center gap-3', className)}>
       <PcmShield className="h-12" />
       <span className="leading-tight">
-        <span className={cn('block text-[10px] font-semibold uppercase tracking-[0.2em]', tone === 'onDark' ? 'text-white/45' : 'text-gray-500')}>
+        <span className={cn('eyebrow block !text-[10px]', tone === 'onDark' ? 'text-white/55' : 'text-muted-foreground')}>
           A ministry of
         </span>
-        <span className={cn('block text-sm font-semibold', tone === 'onDark' ? 'text-white/85' : 'text-[#0f2d6e]')}>
+        <span className={cn('block text-sm font-bold mt-0.5', tone === 'onDark' ? 'text-white' : 'text-navy')}>
           {BRAND.ministryShort}
         </span>
       </span>

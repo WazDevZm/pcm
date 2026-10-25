@@ -17,7 +17,7 @@ export function HeroSlider({ className }: { className?: string }) {
     if (!mounted) return
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDER_IMAGES.length)
-    }, 5000)
+    }, 5500)
     return () => clearInterval(interval)
   }, [mounted])
 
@@ -37,8 +37,8 @@ export function HeroSlider({ className }: { className?: string }) {
           <div
             key={src}
             className={cn(
-              'absolute inset-0 transition-opacity duration-1000 ease-in-out',
-              isCurrent ? 'opacity-100' : 'opacity-0'
+              'absolute inset-0 transition-[opacity,transform] duration-[1400ms] ease-out',
+              isCurrent ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.04]'
             )}
           >
             <Image
@@ -54,7 +54,7 @@ export function HeroSlider({ className }: { className?: string }) {
           </div>
         )
       })}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/80" />
+      <div className="absolute inset-0 photo-overlay" />
     </div>
   )
 }

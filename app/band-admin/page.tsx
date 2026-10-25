@@ -21,7 +21,7 @@ export default function BandAdminIndexPage() {
   useEffect(() => {
     if (loading) return
     if (!FRONTEND_ONLY && !user) {
-      router.push('/login?redirect=/band-admin')
+      router.push('/login?next=/band-admin')
       return
     }
 
@@ -43,7 +43,7 @@ export default function BandAdminIndexPage() {
 
   if (loading || !ready) {
     return (
-      <div className="min-h-screen bg-[#0B0F12] flex items-center justify-center text-white">
+      <div className="min-h-screen bg-canvas flex items-center justify-center text-ink">
         <div className="animate-pulse">Loading...</div>
       </div>
     )
@@ -52,7 +52,7 @@ export default function BandAdminIndexPage() {
   const manageable = bands.filter((b) => b.slug && allowedSlugs.includes(b.slug))
 
   return (
-    <div className="min-h-screen bg-[#0B0F12] text-white p-6 md:p-10">
+    <div className="min-h-screen bg-canvas text-ink p-6 md:p-10">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-10">
           <div>
@@ -60,30 +60,30 @@ export default function BandAdminIndexPage() {
               <LayoutDashboard className="w-8 h-8" />
               Band Admin
             </h1>
-            <p className="text-white/60 mt-1">Manage your band or committee page</p>
+            <p className="text-muted-foreground mt-1">Manage your band or committee page</p>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline" className="border-white/20 bg-transparent">
+            <Button asChild variant="outline" className="border-border bg-transparent">
               <Link href="/">Site</Link>
             </Button>
-            <Button onClick={signOut} variant="outline" className="border-red-500/30 text-red-200">
+            <Button onClick={signOut} variant="outline" className="border-red-200 text-red-700">
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
         {profile?.role === 'admin' && (
-          <p className="mb-6 text-sm text-amber-400/90 rounded-lg bg-amber-500/10 p-3 ring-1 ring-amber-500/20">
+          <p className="mb-6 text-sm text-amber-700 rounded-lg bg-amber-50 p-3 ring-1 ring-amber-200">
             You have site admin access and can manage all bands.
           </p>
         )}
 
         {manageable.length === 0 ? (
-          <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-8 text-center">
-            <p className="text-white/70 mb-4">
+          <div className="rounded-2xl bg-white ring-1 ring-border p-8 text-center">
+            <p className="text-muted-foreground mb-4">
               You are not assigned as a band leader yet. Contact the ministry admin to get access.
             </p>
-            <p className="text-sm text-white/50">
+            <p className="text-sm text-muted-foreground">
               Available bands: {DEFAULT_BANDS.map((b) => b.name).join(', ')}
             </p>
           </div>
@@ -93,10 +93,10 @@ export default function BandAdminIndexPage() {
               <Link
                 key={band.id}
                 href={`/band-admin/${band.slug}`}
-                className="block rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/10 transition-colors"
+                className="block rounded-2xl bg-white ring-1 ring-border p-6 hover:bg-muted transition-colors"
               >
                 <h2 className="text-xl font-semibold">{band.name}</h2>
-                <p className="text-white/60 text-sm mt-1">Edit announcements, events, and leadership info</p>
+                <p className="text-muted-foreground text-sm mt-1">Edit announcements, events, and leadership info</p>
               </Link>
             ))}
           </div>

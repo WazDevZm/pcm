@@ -15,6 +15,7 @@ export interface User {
   email: string
   name: string
   role: 'student' | 'leader' | 'admin'
+  office?: 'developer' | 'chairperson' | 'vice_chairperson' | null
   phone?: string
   created_at: string
   updated_at: string

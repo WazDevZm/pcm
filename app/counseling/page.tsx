@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import {
   Heart,
   Shield,
@@ -20,10 +19,9 @@ import {
 } from "@/lib/data/forms"
 import { MinistryPageShell } from "@/components/layout/MinistryPageShell"
 import { MinistryContent } from "@/components/layout/MinistryContent"
-import { ScrollToBottom } from "@/components/ui/scroll-to-bottom"
 
 const inputClass =
-  "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#0f2d6e] focus:border-transparent"
+  "w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-navy focus:border-transparent"
 
 const SERVICE_OPTIONS: { value: CounselingService; label: string }[] = [
   { value: "personal", label: "Personal Counseling" },
@@ -200,10 +198,10 @@ export default function CounselingPage() {
   return (
     <MinistryPageShell
       heroImage="/Slider/KCM_0681.jpg"
-      title="Counseling Services"
-      subtitle="Professional counseling and spiritual guidance for students seeking support, healing, and personal growth in a safe, confidential environment."
+      eyebrow="Confidential care"
+      title="Counseling"
+      subtitle="Confidential spiritual guidance for academic, personal and faith concerns — in a safe place, with people who care."
     >
-      <ScrollToBottom targetId="counseling-content" label="Scroll" />
       <MinistryContent>
         <div className="max-w-4xl mx-auto mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 ring-1 ring-red-200 text-red-800 text-sm font-medium">
@@ -214,8 +212,8 @@ export default function CounselingPage() {
 
         <section id="counseling-content" className="max-w-4xl mx-auto py-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Our Services</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Our Services</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Comprehensive counseling services addressing the whole person — mind, body, and spirit.
             </p>
           </div>
@@ -223,34 +221,34 @@ export default function CounselingPage() {
             {counselingServices.map((service, index) => {
               const Icon = service.icon
               return (
-                <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div key={index} className="rounded-2xl bg-white border border-border p-8 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4 mb-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#0f2d6e]/10 flex-shrink-0">
-                      <Icon className="w-6 h-6 text-[#0f2d6e]" />
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-navy/10 flex-shrink-0">
+                      <Icon className="w-6 h-6 text-navy" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2 text-[#0B0F12]">{service.title}</h3>
-                      <p className="text-gray-600 leading-relaxed">{service.description}</p>
+                      <h3 className="text-xl font-semibold mb-2 text-ink">{service.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed">{service.description}</p>
                     </div>
                   </div>
                   <dl className="space-y-2 mb-6 text-sm">
                     <div className="flex justify-between gap-4">
-                      <dt className="text-gray-500">Session Length</dt>
-                      <dd className="text-gray-800">{service.duration}</dd>
+                      <dt className="text-muted-foreground">Session Length</dt>
+                      <dd className="text-ink">{service.duration}</dd>
                     </div>
                     <div className="flex justify-between gap-4">
-                      <dt className="text-gray-500">Availability</dt>
-                      <dd className="text-gray-800">{service.availability}</dd>
+                      <dt className="text-muted-foreground">Availability</dt>
+                      <dd className="text-ink">{service.availability}</dd>
                     </div>
                     <div className="flex justify-between gap-4">
-                      <dt className="text-gray-500">Approach</dt>
-                      <dd className="text-gray-800 text-right">{service.approach}</dd>
+                      <dt className="text-muted-foreground">Approach</dt>
+                      <dd className="text-ink text-right">{service.approach}</dd>
                     </div>
                   </dl>
                   <Button
                     type="button"
                     onClick={() => openForm({ service_type: service.type })}
-                    className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                    className="w-full bg-navy text-white hover:bg-navy/90 rounded-full"
                   >
                     Schedule Appointment
                   </Button>
@@ -260,36 +258,36 @@ export default function CounselingPage() {
           </div>
         </section>
 
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Our Counselors</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Our Counselors</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Licensed professionals committed to integrating faith and mental health care.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {counselors.map((counselor, index) => (
-              <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-8 text-center shadow-sm hover:shadow-md transition-shadow">
-                <div className="relative h-24 w-24 rounded-full overflow-hidden bg-[#0f2d6e]/10 mx-auto mb-4 ring-2 ring-gray-200">
-                  <Image src="/placeholder-user.svg" alt="" fill className="object-cover" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#0B0F12]">{counselor.name}</h3>
-                <p className="text-gray-500 text-sm mb-4">{counselor.title}</p>
+              <div key={index} className="rounded-2xl bg-white border border-border p-8 text-center shadow-sm hover:shadow-md transition-shadow">
+                <span className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-navy font-serif text-2xl text-white">
+                  {counselor.name.replace(/^(Dr\.|Pastor)\s+/, "").split(" ").map((p) => p[0]).slice(0, 2).join("")}
+                </span>
+                <h3 className="text-xl font-semibold text-ink">{counselor.name}</h3>
+                <p className="text-muted-foreground text-sm mb-4">{counselor.title}</p>
                 <div className="flex flex-wrap gap-2 justify-center mb-4">
                   {counselor.specialties.map((s) => (
                     <span
                       key={s}
-                      className="px-3 py-1 bg-[#0f2d6e]/10 text-[#0f2d6e] rounded-full text-xs"
+                      className="px-3 py-1 bg-navy/10 text-navy rounded-full text-xs"
                     >
                       {s}
                     </span>
                   ))}
                 </div>
-                <p className="text-sm text-gray-600 mb-4">{counselor.education}</p>
+                <p className="text-sm text-muted-foreground mb-4">{counselor.education}</p>
                 <Button
                   type="button"
                   onClick={() => openForm({ preferred_counselor: counselor.name })}
-                  className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                  className="w-full bg-navy text-white hover:bg-navy/90 rounded-full"
                 >
                   Book with {counselor.name.split(" ")[1]}
                 </Button>
@@ -298,26 +296,26 @@ export default function CounselingPage() {
           </div>
         </section>
 
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Support Groups</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Support Groups</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Connect with others facing similar challenges in a supportive, faith-based environment.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {supportGroups.map((group, index) => (
-              <div key={index} className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-lg font-semibold mb-2 text-[#0B0F12]">{group.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{group.description}</p>
+              <div key={index} className="rounded-2xl bg-white border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="text-lg font-semibold mb-2 text-ink">{group.name}</h3>
+                <p className="text-muted-foreground text-sm mb-4">{group.description}</p>
                 <dl className="space-y-2 mb-4 text-sm">
                   <div className="flex justify-between">
-                    <dt className="text-gray-500">Schedule</dt>
-                    <dd className="text-gray-800">{group.schedule}</dd>
+                    <dt className="text-muted-foreground">Schedule</dt>
+                    <dd className="text-ink">{group.schedule}</dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-gray-500">Facilitator</dt>
-                    <dd className="text-gray-800">{group.facilitator}</dd>
+                    <dt className="text-muted-foreground">Facilitator</dt>
+                    <dd className="text-ink">{group.facilitator}</dd>
                   </div>
                 </dl>
                 <Button
@@ -329,7 +327,7 @@ export default function CounselingPage() {
                       message: `I'd like to join the ${group.name} group (${group.schedule}).`,
                     })
                   }
-                  className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full"
+                  className="w-full bg-navy text-white hover:bg-navy/90 rounded-full"
                 >
                   Join Group
                 </Button>
@@ -341,20 +339,20 @@ export default function CounselingPage() {
         <section
           ref={formRef}
           id="request-form"
-          className="max-w-4xl mx-auto py-12 border-t border-gray-200 scroll-mt-24"
+          className="max-w-4xl mx-auto py-12 border-t border-border scroll-mt-24"
         >
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Request a Session</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Request a Session</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Tell us a little about what you need. A counselor will contact you to arrange a time.
               Your request is seen only by our counseling team.
             </p>
           </div>
-          <div className="rounded-2xl bg-gray-50 ring-1 ring-gray-200 p-8">
+          <div className="rounded-2xl bg-white border border-border shadow-[0_4px_12px_rgba(11,15,18,0.04)] p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="c-name" className="block text-sm font-medium mb-2 text-gray-700">Name</label>
+                  <label htmlFor="c-name" className="block text-sm font-medium mb-2 text-ink/80">Name</label>
                   <input
                     id="c-name"
                     type="text"
@@ -366,7 +364,7 @@ export default function CounselingPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="c-email" className="block text-sm font-medium mb-2 text-gray-700">Email</label>
+                  <label htmlFor="c-email" className="block text-sm font-medium mb-2 text-ink/80">Email</label>
                   <input
                     id="c-email"
                     type="email"
@@ -378,7 +376,7 @@ export default function CounselingPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="c-phone" className="block text-sm font-medium mb-2 text-gray-700">Phone (Optional)</label>
+                  <label htmlFor="c-phone" className="block text-sm font-medium mb-2 text-ink/80">Phone (Optional)</label>
                   <input
                     id="c-phone"
                     type="tel"
@@ -389,7 +387,7 @@ export default function CounselingPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="c-service" className="block text-sm font-medium mb-2 text-gray-700">Type of Support</label>
+                  <label htmlFor="c-service" className="block text-sm font-medium mb-2 text-ink/80">Type of Support</label>
                   <select
                     id="c-service"
                     required
@@ -405,7 +403,7 @@ export default function CounselingPage() {
                 </div>
               </div>
               <div>
-                <label htmlFor="c-counselor" className="block text-sm font-medium mb-2 text-gray-700">
+                <label htmlFor="c-counselor" className="block text-sm font-medium mb-2 text-ink/80">
                   Preferred Counselor (Optional)
                 </label>
                 <select
@@ -421,7 +419,7 @@ export default function CounselingPage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="c-message" className="block text-sm font-medium mb-2 text-gray-700">How can we help?</label>
+                <label htmlFor="c-message" className="block text-sm font-medium mb-2 text-ink/80">How can we help?</label>
                 <textarea
                   id="c-message"
                   rows={5}
@@ -450,7 +448,7 @@ export default function CounselingPage() {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-lg py-3 font-normal text-base"
+                className="w-full bg-navy text-white hover:bg-navy/90 rounded-lg py-3 font-normal text-base"
               >
                 <Send className="w-4 h-4 mr-2" />
                 {submitting ? "Sending..." : "Send Request"}
@@ -459,8 +457,8 @@ export default function CounselingPage() {
           </div>
         </section>
 
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
-          <div className="rounded-3xl bg-gradient-to-br from-[#0f2d6e] to-[#1a3a7a] p-10 md:p-12 text-white text-center shadow-xl">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border">
+          <div className="rounded-3xl bg-gradient-to-br from-navy to-navy p-10 md:p-12 text-white text-center shadow-xl">
             <Shield className="w-12 h-12 mx-auto mb-6 opacity-90" />
             <h2 className="text-2xl md:text-3xl font-bold mb-6">Confidential, faith-integrated care</h2>
             <p className="text-white/85 leading-relaxed max-w-2xl mx-auto">
@@ -470,20 +468,20 @@ export default function CounselingPage() {
           </div>
         </section>
 
-        <section className="max-w-4xl mx-auto py-12 border-t border-gray-200">
-          <div className="rounded-2xl bg-white ring-1 ring-gray-200 p-10 md:p-12 text-center shadow-sm">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0B0F12]">Get Help Today</h2>
-            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+        <section className="max-w-4xl mx-auto py-12 border-t border-border">
+          <div className="rounded-2xl bg-white border border-border p-10 md:p-12 text-center shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-ink">Get Help Today</h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Taking the first step toward healing and growth is courageous. We&apos;re here to support you.
             </p>
             <div className="grid grid-cols-1 max-w-xs mx-auto gap-4 mb-8">
               {[
                 { icon: Mail, label: "Email", value: "counseling@cbusda.org" },
               ].map((item) => (
-                <div key={item.label} className="p-4 rounded-xl bg-[#fafbfc] ring-1 ring-gray-200">
-                  <item.icon className="w-7 h-7 text-[#0f2d6e] mx-auto mb-2" />
-                  <p className="font-medium text-[#0B0F12]">{item.label}</p>
-                  <p className="text-sm text-gray-600">{item.value}</p>
+                <div key={item.label} className="p-4 rounded-xl bg-canvas border border-border">
+                  <item.icon className="w-7 h-7 text-navy mx-auto mb-2" />
+                  <p className="font-medium text-ink">{item.label}</p>
+                  <p className="text-sm text-muted-foreground">{item.value}</p>
                 </div>
               ))}
             </div>
@@ -492,7 +490,7 @@ export default function CounselingPage() {
                 size="lg"
                 type="button"
                 onClick={() => openForm()}
-                className="bg-[#0f2d6e] text-white hover:bg-[#0f2d6e]/90 rounded-full px-8 font-semibold"
+                className="bg-navy text-white hover:bg-navy/90 rounded-full px-8 font-semibold"
               >
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedule Appointment
@@ -504,7 +502,7 @@ export default function CounselingPage() {
                 onClick={() =>
                   document.getElementById("counseling-content")?.scrollIntoView({ behavior: "smooth" })
                 }
-                className="rounded-full px-8 border-gray-300"
+                className="rounded-full px-8 border-border"
               >
                 Learn More
               </Button>

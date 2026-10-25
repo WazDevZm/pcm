@@ -21,3 +21,10 @@ export const BRAND_COLORS = {
   light: '#fafbfc',
   gold: '#d9a441',
 } as const
+
+/** Leadership offices (public.users.office) */
+export const OFFICE_LABEL: Record<string, string> = {
+  developer: 'Developer',
+  chairperson: 'PCM Chairperson',
+  vice_chairperson: 'PCM Vice Chairperson',
+}

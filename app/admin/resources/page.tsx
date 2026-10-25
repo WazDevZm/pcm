@@ -16,14 +16,14 @@ export default function AdminResourcesPage() {
 
   return (
     <AdminSection title="Resources" description="Bible studies, sermons, and ministry materials.">
-      <Button asChild className="mb-6 rounded-full bg-white text-black">
+      <Button asChild className="mb-6 rounded-full bg-navy text-white">
         <Link href="/admin/resources/new">Add Resource</Link>
       </Button>
       <ul className="space-y-3">
         {resources.map((r) => (
-          <li key={r.id} className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4">
+          <li key={r.id} className="rounded-xl bg-white ring-1 ring-border p-4">
             <p className="font-medium">{r.title}</p>
-            <p className="text-sm text-white/60">{r.type} · {r.author}</p>
+            <p className="text-sm text-muted-foreground">{r.type} · {r.author}</p>
           </li>
         ))}
       </ul>
