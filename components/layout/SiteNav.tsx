@@ -20,6 +20,7 @@ import {
   Menu,
   MessagesSquare,
   Newspaper,
+  Palette,
   ShieldCheck,
   ShoppingBag,
   Sparkles,
@@ -215,6 +216,13 @@ function AccountMenu() {
             </Link>
           </DropdownMenuItem>
         )}
+        {(FRONTEND_ONLY || isPublicity) && (
+          <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
+            <Link href="/studio">
+              <Palette className="text-navy" /> Studio (posters)
+            </Link>
+          </DropdownMenuItem>
+        )}
         {(FRONTEND_ONLY || isLeader || managedBands.length > 0) && (
           <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
             <Link href={managedBands.length === 1 && !isLeader ? `/band-admin/${managedBands[0]}` : '/band-admin'}>
@@ -315,6 +323,9 @@ function MobileSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: 
               <SheetRow item={{ name: 'My dashboard', href: '/member-dashboard', icon: LayoutDashboard }} onNavigate={close} />
               {(FRONTEND_ONLY || isPublicity) && (
                 <SheetRow item={{ name: isLeader ? 'Admin dashboard' : 'Website content', href: '/admin', icon: ShieldCheck }} onNavigate={close} />
+              )}
+              {(FRONTEND_ONLY || isPublicity) && (
+                <SheetRow item={{ name: 'Studio (posters)', href: '/studio', icon: Palette }} onNavigate={close} />
               )}
               {(FRONTEND_ONLY || isLeader || managedBands.length > 0) && (
                 <SheetRow

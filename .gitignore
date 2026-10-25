@@ -30,3 +30,7 @@ next-env.d.ts
 
 # private hand-over files
 *.local.md
+*.local.json
+*.local.sql
+*.local.pdf
+reports/

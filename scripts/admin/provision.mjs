@@ -8,14 +8,15 @@
  *
  * Reads SUPABASE_ACCESS_TOKEN (+ optional GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET) from .env.admin.local.
  * The service key is fetched in memory and never written to disk.
- * Writes the logins to CREDENTIALS.local.md (git-ignored). Safe to run again: existing accounts get new passwords.
+ * Writes the logins to CREDENTIALS.local.md (git-ignored). Safe to run again: passwords come from
+ * credentials.local.json (see accounts.mjs); pass --rotate for new ones.
  *
- *   node scripts/admin/provision.mjs [--site https://your-site.vercel.app] [--skip-migration]
+ *   node scripts/admin/provision.mjs [--site https://your-site.vercel.app] [--skip-migration] [--rotate]
  */
 import fs from 'node:fs'
 import path from 'node:path'
-import crypto from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
+import { withPasswords, writeHandover } from './accounts.mjs'
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..')
 const readEnv = (file) =>
@@ -52,29 +53,6 @@ const api = async (method, p, body) => {
 const sql = (query) => api('POST', '/database/query', { query })
 const lit = (v) => (v == null ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`)
 
-const LEADERSHIP = [
-  { email: 'developer@thehaven.test', name: 'Haven Developer', office: 'developer', title: 'Developer' },
-  { email: 'chairperson@thehaven.test', name: 'PCM Chairperson', office: 'chairperson', title: 'PCM Chairperson' },
-  { email: 'vice.chairperson@thehaven.test', name: 'PCM Vice Chairperson', office: 'vice_chairperson', title: 'PCM Vice Chairperson' },
-]
-const HEADS = [
-  { email: 'welfare@thehaven.test', name: 'Welfare Band Head', band: 'welfare-band' },
-  { email: 'witnessing@thehaven.test', name: 'Witnessing Band Head', band: 'witnessing-band' },
-  { email: 'stumm@thehaven.test', name: 'Stu-MM Head', band: 'stu-mm' },
-  { email: 'creativity@thehaven.test', name: 'Creativity & Arts Band Head', band: 'creativity-arts-band' },
-  { email: 'education@thehaven.test', name: 'Education Committee Head', band: 'education-committee' },
-  { email: 'catering@thehaven.test', name: 'Catering Committee Head', band: 'catering-committee' },
-  { email: 'publicity@thehaven.test', name: 'Publicity Committee Head', band: 'publicity-committee' },
-]
-
-const password = () => {
-  // Readable but strong: 4 groups, no ambiguous characters
-  const abc = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
-  const bytes = crypto.randomBytes(16)
-  const chars = [...bytes].map((b) => abc[b % abc.length]).join('')
-  return `${chars.slice(0, 4)}-${chars.slice(4, 8)}-${chars.slice(8, 12)}-${chars.slice(12, 16)}`
-}
-
 async function main() {
   // 1. Migration
   if (!args.includes('--skip-migration')) {
@@ -99,8 +77,8 @@ async function main() {
   }
 
   const created = []
-  for (const acct of [...LEADERSHIP, ...HEADS]) {
-    const pw = password()
+  for (const acct of withPasswords({ rotate: args.includes('--rotate') })) {
+    const pw = acct.password
     let user = existing.get(acct.email)
     if (user) {
       const { data, error } = await admin.auth.admin.updateUserById(user.id, { password: pw, email_confirm: true })
@@ -159,27 +137,7 @@ async function main() {
   console.log('  Redirect URLs:', patch.uri_allow_list)
 
   // 5. Hand-over file
-  const siteUrl = site ?? 'http://localhost:3000'
-  const row = (a) => `| ${a.title ?? a.name} | \`${a.email}\` | \`${a.password}\` | ${a.office ? `${siteUrl}/admin` : `${siteUrl}/band-admin/${a.band}`} |`
-  const md = `# The Haven — test logins (PRIVATE, do not commit or share publicly)
-
-Generated ${new Date().toISOString()} by \`scripts/admin/provision.mjs\`. Running it again issues new passwords.
-These are test accounts on \`@thehaven.test\` (not real inboxes), so password-reset emails won't arrive; re-run the script instead.
-They work on the website and in the app.
-
-## Leadership (admins)
-
-| Office | Email | Password | Dashboard |
-|---|---|---|---|
-${created.filter((a) => a.office).map(row).join('\n')}
-
-## Band & committee heads
-
-| Band / committee | Email | Password | Dashboard |
-|---|---|---|---|
-${created.filter((a) => a.band).map(row).join('\n')}
-`
-  fs.writeFileSync(path.join(root, 'CREDENTIALS.local.md'), md)
+  writeHandover(created, site ?? 'https://pcm-pi.vercel.app')
   console.log('✓ Wrote CREDENTIALS.local.md')
 }
 

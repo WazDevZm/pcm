@@ -12,7 +12,7 @@ app/ lib/    Next.js website (repo root)
 supabase/    Database schema, migrations and seed data
 brand-kit/   Text-only logo, monogram, app icon, splash, PCM shield, colours, fonts and posters
 scripts/     admin/provision.mjs (database + test logins) and brand/build.mjs (all brand assets)
-presentation/ Team intro deck and screenshots of every app and website screen
+presentation/ Team intro deck (pre-redesign)
 ```
 
 ## What's in the app

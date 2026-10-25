@@ -182,6 +182,11 @@ export default function MemberDashboard() {
                   </Link>
                 </Button>
               )}
+              {isPublicity && (
+                <Button asChild variant="light">
+                  <Link href="/studio">Studio (posters)</Link>
+                </Button>
+              )}
               {managedBands.map((slug) => (
                 <Button key={slug} asChild variant="light">
                   <Link href={`/band-admin/${slug}`}>

@@ -15,6 +15,7 @@ import {
   LogOut,
   Mail,
   Menu,
+  Palette,
   MessageCircle,
   ShoppingBag,
   Terminal,
@@ -45,6 +46,7 @@ const NAV: { label: string; items: NavItem[] }[] = [
       { name: 'Events', href: '/admin/events', icon: Calendar, access: 'content' },
       { name: 'Gallery', href: '/admin/gallery', icon: ImageIcon, access: 'content' },
       { name: 'Resources', href: '/admin/resources', icon: BookOpen, access: 'content' },
+      { name: 'Studio (posters)', href: '/studio', icon: Palette, access: 'content' },
     ],
   },
   {
