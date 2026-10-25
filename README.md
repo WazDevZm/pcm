@@ -107,20 +107,31 @@ Pull to refresh or reopen the app. **More → Leadership → Admin dashboard** w
 | **Band / committee heads** | a `band_admins` row (assign under *Admin → Bands & committees*) | `/band-admin/<band>`: announcements, events, details, members |
 | **Publicity Committee heads** | head of `publicity-committee` | also `/admin` with **website content only**: posts, events, gallery, resources (what the landing page and app show) |
 
-To apply migration `006` and create pre-confirmed test logins for all of these (Welfare, Witnessing, Stu-MM, Creativity & Arts, Education, Catering and Publicity heads, plus Developer, Chairperson and Vice Chairperson), put a Supabase personal access token in `.env.admin.local` (git-ignored) and run:
+**Sign-in policy:** members sign in with **Google** only (their account is created on first sign-in). Leaders, the PCM executive and committee heads use the **email and password issued to them**, under *Leadership sign-in*. There is no public email sign-up.
 
-```bash
-npm run provision -- --site https://pcm-pi.vercel.app
-```
+The 11 dashboard logins (Developer, Chairperson, Vice Chairperson, Publicity head, Studio, and the Welfare, Witnessing, Stu-MM, Creativity & Arts, Education and Catering heads) are listed in `scripts/admin/accounts.mjs`. Passwords are generated once into `credentials.local.json` (git-ignored). Switch them on either way:
 
-It writes the emails and passwords to `CREDENTIALS.local.md` (git-ignored). Running it again issues new passwords. If `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are also in `.env.admin.local`, it turns on Google sign-in and sets the redirect URLs too.
+- **Paste one file:** `npm run logins:sql` writes `supabase/provision.local.sql` (git-ignored). Paste it into **Supabase → SQL Editor → Run**. It applies migration `006` and creates every login, pre-confirmed, with its role, office and band.
+- **Or with a token:** put a Supabase personal access token in `.env.admin.local` (git-ignored) and run `npm run provision -- --site https://pcm-pi.vercel.app`. This also sets the Site URL and redirect URLs, applies the branded emails, and turns on Google if `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are present.
+
+Both write the hand-over table to `CREDENTIALS.local.md` (git-ignored). Add `--rotate` for new passwords.
+
+## 7. The Studio (posters)
+
+`/studio` is for the Publicity Committee, leaders and admins. Pick a template (Happy New Week, Happy Sabbath, 19:30 Prayer Meetings, Wednesday or Friday Vespers, Launch countdown), fill in the details, upload photos and download a 1080 px PNG in portrait, square or story size. Branding is locked to the CBU SDA PCM shield and the ministry's full name. Templates live in `components/studio/posters.tsx`.
+
+## 8. Emails and the status report
+
+- `npm run emails` writes branded Supabase auth emails to `supabase/email-templates/` (welcome/confirm, reset password, magic link, invite, email change). Paste them into **Supabase → Authentication → Email Templates**, or let `npm run provision` apply them.
+- `npm run report` writes the Publicity Committee status report PDFs to `reports/` (git-ignored): a confidential copy with logins and a shareable copy without.
 
 ---
 
 ## Test checklist
 
 - [ ] Sign in with Google, then sign out and back in. The session persists after closing the app.
-- [ ] Sign up with email and password, then confirm the email.
+- [ ] Sign in with a leadership login under *Leadership sign-in*; the right dashboard appears.
+- [ ] As Publicity, make a poster in the Studio and download it.
 - [ ] RSVP to an event: the count goes up. Cancel: it goes back down.
 - [ ] Join a band, see it under *My dashboard*, then leave the band.
 - [ ] Send an anonymous prayer request and a named one. As an admin, mark one answered.

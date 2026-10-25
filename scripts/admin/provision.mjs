@@ -17,6 +17,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { withPasswords, writeHandover } from './accounts.mjs'
+import { authEmailConfig } from './email-templates.mjs'
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..')
 const readEnv = (file) =>
@@ -123,8 +124,10 @@ async function main() {
   const allow = new Set((auth.uri_allow_list || '').split(',').map((s) => s.trim()).filter(Boolean))
   ;['http://localhost:3000/**', 'exp://**', 'thehaven://**'].forEach((u) => allow.add(u))
   if (site) allow.add(`${site}/**`)
-  const patch = { uri_allow_list: [...allow].join(',') }
-  if (site) patch.site_url = site
+  // Email links (confirm, reset) land on the live site, not localhost
+  const siteUrl = site ?? 'https://pcm-pi.vercel.app'
+  allow.add(`${siteUrl}/**`)
+  const patch = { uri_allow_list: [...allow].join(','), site_url: siteUrl, ...authEmailConfig() }
   if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
     Object.assign(patch, {
       external_google_enabled: true,
@@ -133,7 +136,7 @@ async function main() {
     })
   }
   await api('PATCH', '/config/auth', patch)
-  console.log(`✓ Auth settings updated${patch.external_google_enabled ? ' (Google sign-in on)' : ' (Google credentials not set — skipped)'}`)
+  console.log(`✓ Auth settings updated: site URL ${siteUrl}, branded emails${patch.external_google_enabled ? ', Google sign-in on' : ' (Google credentials not set — Google left as is)'}`)
   console.log('  Redirect URLs:', patch.uri_allow_list)
 
   // 5. Hand-over file

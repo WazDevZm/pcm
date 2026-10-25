@@ -6,12 +6,15 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cardClass, cardHoverClass, fieldClass, labelClass } from '@/components/ui/haven'
 import { cn } from '@/lib/utils'
+import { studioFontVariables } from './fonts'
 import {
   FORMATS,
+  HEADLINE_FONTS,
   STUDIO_PHOTOS,
   TEMPLATES,
   initialState,
   type Field,
+  type FontId,
   type FormatId,
   type PosterState,
   type Template,
@@ -308,6 +311,27 @@ function Editor({ template, onBack }: { template: Template; onBack: () => void }
             </div>
           </div>
           <div>
+            <span className={labelClass}>Headline font</span>
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.keys(HEADLINE_FONTS) as FontId[]).map((f) => {
+                const font = HEADLINE_FONTS[f]
+                const active = (state.headlineFont ?? 'fraunces') === f
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setState((s) => ({ ...s, headlineFont: f }))}
+                    className={cn('rounded-xl border px-2 py-2.5 transition-colors', active ? 'border-navy bg-navy text-white' : 'border-border hover:border-navy/30')}
+                  >
+                    <span className="block text-2xl leading-none" style={{ ...font.style, fontSize: 26 * font.scale, letterSpacing: 0 }}>
+                      Aa
+                    </span>
+                    <span className={cn('mt-1 block text-[11px] font-semibold', active ? 'text-white/75' : 'text-muted-foreground')}>{font.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          <div>
             <span className={labelClass}>Ministry name</span>
             <div className="grid grid-cols-2 gap-2">
               {(['side', 'below'] as const).map((l) => (
@@ -397,5 +421,9 @@ export function Studio() {
     window.scrollTo({ top: 0 })
   }
 
-  return template ? <Editor key={template.id} template={template} onBack={() => pick(null)} /> : <Gallery onPick={pick} />
+  return (
+    <div className={studioFontVariables}>
+      {template ? <Editor key={template.id} template={template} onBack={() => pick(null)} /> : <Gallery onPick={pick} />}
+    </div>
+  )
 }

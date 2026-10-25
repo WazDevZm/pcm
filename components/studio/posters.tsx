@@ -50,6 +50,23 @@ export interface PosterState {
   format: FormatId
   /** Where the ministry name sits next to the shield */
   brandLayout: 'side' | 'below'
+  /** Font for the big headline words */
+  headlineFont?: FontId
+}
+
+export type FontId = 'fraunces' | 'playfair' | 'bebas' | 'montserrat' | 'vibes'
+export const HEADLINE_FONTS: Record<FontId, { label: string; style: CSSProperties; scale: number }> = {
+  fraunces: { label: 'Fraunces', style: { fontFamily: 'var(--font-serif), Georgia, serif', fontWeight: 700, letterSpacing: '-0.03em' }, scale: 1 },
+  playfair: { label: 'Playfair', style: { fontFamily: 'var(--font-playfair), Georgia, serif', fontWeight: 800, letterSpacing: '-0.02em' }, scale: 0.95 },
+  bebas: { label: 'Bebas', style: { fontFamily: 'var(--font-bebas), Impact, sans-serif', fontWeight: 400, letterSpacing: '0.01em', textTransform: 'uppercase' }, scale: 1.18 },
+  montserrat: { label: 'Montserrat', style: { fontFamily: 'var(--font-montserrat), "Arial Black", sans-serif', fontWeight: 900, letterSpacing: '-0.04em' }, scale: 0.86 },
+  vibes: { label: 'Script', style: { fontFamily: 'var(--font-vibes), cursive', fontWeight: 400, letterSpacing: '0' }, scale: 1.12 },
+}
+
+/** Style for the big headline words in the chosen font, at a base size */
+function headline(state: PosterState, size: number, extra?: CSSProperties): CSSProperties {
+  const f = HEADLINE_FONTS[state.headlineFont ?? 'fraunces']
+  return { ...f.style, fontSize: size * f.scale, lineHeight: state.headlineFont === 'vibes' ? 1.15 : 0.92, ...extra }
 }
 
 // ───────────────────────── Shared pieces ─────────────────────────
@@ -57,12 +74,12 @@ export interface PosterState {
 const serif = 'var(--font-serif), Georgia, serif'
 const sans = 'var(--font-sans), -apple-system, "Helvetica Neue", Arial, sans-serif'
 
-function MinistryMark({ layout, align = 'left' }: { layout: 'side' | 'below'; align?: 'left' | 'center' }) {
+function MinistryMark({ layout, align = 'left', dark = false }: { layout: 'side' | 'below'; align?: 'left' | 'center'; dark?: boolean }) {
   const name = (
-    <div style={{ fontFamily: sans, fontWeight: 800, fontSize: 21, lineHeight: 1.3, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#fff', textAlign: layout === 'below' ? 'center' : 'left' }}>
+    <div style={{ fontFamily: sans, fontWeight: 800, fontSize: 21, lineHeight: 1.3, letterSpacing: '0.14em', textTransform: 'uppercase', color: dark ? NAVY : '#fff', textAlign: layout === 'below' ? 'center' : 'left' }}>
       {MINISTRY_LINES[0]}
       <br />
-      <span style={{ color: 'rgba(255,255,255,0.78)' }}>{MINISTRY_LINES[1]}</span>
+      <span style={{ color: dark ? 'rgba(15,45,110,0.78)' : 'rgba(255,255,255,0.78)' }}>{MINISTRY_LINES[1]}</span>
     </div>
   )
   return (
@@ -118,6 +135,22 @@ function Verse({ text, reference, align = 'center', size = 38 }: { text?: string
           {reference}
         </div>
       )}
+    </div>
+  )
+}
+
+/** Labelled facts in a row of cells, e.g. hymn number and special song */
+function ProgramStrip({ items, s, align = 'center' }: { items: [string, string | undefined][]; s: number; align?: 'center' | 'left' }) {
+  const shown = items.filter(([, v]) => v && v.trim())
+  if (!shown.length) return null
+  return (
+    <div style={{ display: 'flex', gap: 14, justifyContent: align === 'center' ? 'center' : 'flex-start', flexWrap: 'wrap' }}>
+      {shown.map(([label, value]) => (
+        <div key={label} style={{ minWidth: 220, maxWidth: 460, padding: '18px 26px', borderRadius: 22, background: 'rgba(255,255,255,0.10)', border: '1.5px solid rgba(255,255,255,0.22)', textAlign: align }}>
+          <div style={{ fontFamily: sans, fontWeight: 800, fontSize: 19 * s, letterSpacing: '0.18em', textTransform: 'uppercase', color: GOLD }}>{label}</div>
+          <div style={{ fontFamily: sans, fontWeight: 700, fontSize: 32 * s, lineHeight: 1.2, marginTop: 6, color: '#fff' }}>{value}</div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -234,7 +267,7 @@ function NewWeek({ state }: { state: PosterState }) {
         <Spacer />
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: serif, fontStyle: 'italic', color: GOLD, fontSize: 120 * s, lineHeight: 1 }}>{v.greeting}</div>
-          <div style={{ fontFamily: serif, fontWeight: 700, fontSize: 196 * s, lineHeight: 0.92, letterSpacing: '-0.03em', marginTop: 8 }}>{v.title}</div>
+          <div style={headline(state, 196 * s, { marginTop: 8 })}>{v.title}</div>
           {v.message && (
             <div style={{ margin: '44px auto 0', maxWidth: 820, fontSize: 36 * s, lineHeight: 1.4, color: 'rgba(255,255,255,0.88)' }}>{v.message}</div>
           )}
@@ -243,6 +276,7 @@ function NewWeek({ state }: { state: PosterState }) {
         <div style={{ width: 120, height: 4, background: GOLD, margin: '0 auto 44px', borderRadius: 4 }} />
         <Verse text={v.verse} reference={v.reference} size={36 * s} />
         <Spacer />
+        <ProgramStrip s={s} items={[['Hymn', v.hymn], ['Special song', v.specialSong]]} />
       </Page>
     </Frame>
   )
@@ -259,7 +293,7 @@ function Sabbath({ state }: { state: PosterState }) {
         <Spacer />
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: serif, fontStyle: 'italic', color: GOLD, fontSize: 128 * s, lineHeight: 1 }}>{v.greeting}</div>
-          <div style={{ fontFamily: serif, fontWeight: 700, fontSize: 210 * s, lineHeight: 0.92, letterSpacing: '-0.03em', marginTop: 4 }}>{v.title}</div>
+          <div style={headline(state, 210 * s, { marginTop: 4 })}>{v.title}</div>
           {v.subtitle && (
             <div style={{ marginTop: 36, fontSize: 38 * s, lineHeight: 1.35, color: 'rgba(255,255,255,0.88)' }}>{v.subtitle}</div>
           )}
@@ -267,6 +301,8 @@ function Sabbath({ state }: { state: PosterState }) {
         <div style={{ height: 64 * s }} />
         <Verse text={v.verse} reference={v.reference} size={36 * s} />
         <Spacer />
+        <ProgramStrip s={s} items={[['Hymn', v.hymn], ['Special song', v.specialSong]]} />
+        {(v.hymn || v.specialSong) && v.detail && <div style={{ height: 22 }} />}
         {v.detail && (
           <div style={{ alignSelf: 'center', padding: '20px 40px', borderRadius: 999, border: `2px solid ${GOLD}`, fontWeight: 800, fontSize: 28 * s, letterSpacing: '0.04em', color: '#fff', background: 'rgba(11,15,18,0.35)' }}>
             {v.detail}
@@ -289,7 +325,7 @@ function Prayer({ state }: { state: PosterState }) {
         <Spacer />
         <div style={{ fontFamily: sans, fontWeight: 800, fontSize: 26 * s, letterSpacing: '0.22em', textTransform: 'uppercase', color: GOLD }}>{v.host}</div>
         <div style={{ fontFamily: serif, fontWeight: 700, fontSize: 250 * s, lineHeight: 0.9, letterSpacing: '-0.04em', color: GOLD, marginTop: 18 }}>{v.time}</div>
-        <div style={{ fontFamily: serif, fontWeight: 700, fontSize: 118 * s, lineHeight: 0.98, letterSpacing: '-0.02em', marginTop: 10 }}>{v.title}</div>
+        <div style={headline(state, 118 * s, { lineHeight: 0.98, marginTop: 10 })}>{v.title}</div>
         {days.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 44 * s }}>
             {days.map((d) => (
@@ -303,8 +339,20 @@ function Prayer({ state }: { state: PosterState }) {
             {v.venue}
           </div>
         )}
-        <div style={{ height: 52 * s }} />
-        <Verse text={v.verse} reference={v.reference} align="left" size={34 * s} />
+        {v.topic && (
+          <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 50 * s, lineHeight: 1.15, color: '#fff', marginTop: 40 * s }}>“{v.topic}”</div>
+        )}
+        {(v.presenter || v.moderator) && (
+          <div style={{ marginTop: 26 * s }}>
+            <ProgramStrip s={s} align="left" items={[['Presenter', v.presenter], ['Moderator', v.moderator]]} />
+          </div>
+        )}
+        {!(state.format === 'square' && (v.topic || v.presenter || v.moderator)) && (
+          <>
+            <div style={{ height: 44 * s }} />
+            <Verse text={v.verse} reference={v.reference} align="left" size={32 * s} />
+          </>
+        )}
         <Spacer />
         {v.note && (
           <div style={{ paddingTop: 26, borderTop: '2px solid rgba(255,255,255,0.18)', fontWeight: 800, fontSize: 24 * s, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' }}>{v.note}</div>
@@ -330,7 +378,7 @@ function Vespers({ state }: { state: PosterState }) {
         <MinistryMark layout={state.brandLayout} />
         <Spacer />
         <div style={{ fontFamily: sans, fontWeight: 800, fontSize: 30 * s, letterSpacing: '0.24em', textTransform: 'uppercase', color: GOLD }}>{v.day}</div>
-        <div style={{ fontFamily: serif, fontWeight: 700, fontSize: 200 * s, lineHeight: 0.9, letterSpacing: '-0.035em', marginTop: 8 }}>{v.title}</div>
+        <div style={headline(state, 200 * s, { lineHeight: 0.9, marginTop: 8 })}>{v.title}</div>
         {v.topic && (
           <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 58 * s, lineHeight: 1.12, color: GOLD, marginTop: 22, maxWidth: 920 }}>“{v.topic}”</div>
         )}
@@ -366,6 +414,86 @@ function Vespers({ state }: { state: PosterState }) {
   )
 }
 
+/** Launch countdown: big number, product name, and a phone showing the real site */
+function Countdown({ state }: { state: PosterState }) {
+  const v = state.values
+  const s = k(state)
+  const n = (v.days || '3').trim()
+  const one = n === '1'
+  // Each day steps up: navy → night → gold on launch eve
+  const theme = one
+    ? { bg: `radial-gradient(900px 700px at 85% 15%, #f3c76a 0%, ${GOLD} 45%, #b9842a 100%)`, ink: NAVY, accent: NAVY, soft: 'rgba(15,45,110,0.75)', chip: NAVY, chipInk: '#fff' }
+    : n === '2'
+      ? { bg: `radial-gradient(900px 700px at 85% 10%, rgba(217,164,65,0.28), transparent 60%), linear-gradient(170deg, #121820 0%, ${INK} 100%)`, ink: '#fff', accent: GOLD, soft: 'rgba(255,255,255,0.75)', chip: 'rgba(255,255,255,0.12)', chipInk: '#fff' }
+      : { bg: `radial-gradient(900px 700px at 85% 10%, rgba(217,164,65,0.25), transparent 60%), linear-gradient(170deg, ${NAVY} 0%, ${NAVY_DEEP} 100%)`, ink: '#fff', accent: GOLD, soft: 'rgba(255,255,255,0.75)', chip: 'rgba(255,255,255,0.12)', chipInk: '#fff' }
+  const features = (v.features || '').split(/[·,|]/).map((f) => f.trim()).filter(Boolean)
+  const phoneW = state.format === 'story' ? 520 : state.format === 'square' ? 330 : 430
+  const custom = state.background.kind === 'photo' && state.background.src ? state.background.src : null
+  return (
+    <Frame state={state} style={{ background: theme.bg, color: theme.ink }}>
+      <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }} viewBox="0 0 1080 1350" preserveAspectRatio="xMaxYMin slice">
+        {[160, 280, 400, 520, 640].map((r, i) => (
+          <circle key={r} cx="980" cy="180" r={r} fill="none" stroke={one ? NAVY : '#fff'} strokeOpacity={0.09 - i * 0.015} strokeWidth="2" />
+        ))}
+      </svg>
+
+      {/* Phone */}
+      <div
+        style={{
+          position: 'absolute',
+          right: state.format === 'square' ? 40 : -30,
+          bottom: state.format === 'story' ? 120 : -70,
+          width: phoneW,
+          height: phoneW * 2.05,
+          borderRadius: phoneW * 0.15,
+          background: '#0B0F12',
+          padding: phoneW * 0.035,
+          transform: 'rotate(-7deg)',
+          boxShadow: '0 40px 80px rgba(0,0,0,0.45), 0 0 0 2px rgba(255,255,255,0.08)',
+        }}
+      >
+        <div style={{ width: '100%', height: '100%', borderRadius: phoneW * 0.12, overflow: 'hidden', background: NAVY_DEEP }}>
+          <img src={custom ?? '/studio/launch-phone.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `50% ${state.background.kind === 'photo' ? state.background.focus : 0}%` }} />
+        </div>
+      </div>
+
+      <Page>
+        <MinistryMark layout={state.brandLayout} dark={one} />
+        <Spacer />
+        <div style={{ maxWidth: state.format === 'square' ? 600 : 620 }}>
+          <div style={{ fontFamily: sans, fontWeight: 800, fontSize: 26 * s, letterSpacing: '0.24em', textTransform: 'uppercase', color: theme.accent }}>
+            {one ? v.eyebrowLast || 'Tomorrow' : v.eyebrow}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, marginTop: 6 }}>
+            <div style={{ fontFamily: serif, fontWeight: 700, fontSize: 400 * s, lineHeight: 0.8, letterSpacing: '-0.06em', color: theme.accent }}>{n}</div>
+            <div style={{ fontFamily: sans, fontWeight: 900, fontSize: 64 * s, lineHeight: 0.95, textTransform: 'uppercase', paddingBottom: 18 * s }}>
+              {one ? 'Day' : 'Days'}
+              <br />
+              to go
+            </div>
+          </div>
+          <div style={headline(state, 150 * s, { marginTop: 38 * s, color: theme.ink })}>{v.title}</div>
+          {v.tagline && <div style={{ fontSize: 38 * s, lineHeight: 1.3, marginTop: 20 * s, color: theme.soft, fontWeight: 600 }}>{v.tagline}</div>}
+          {features.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 34 * s }}>
+              {features.map((f) => (
+                <span key={f} style={{ padding: '12px 24px', borderRadius: 999, background: theme.chip, color: theme.chipInk, fontWeight: 800, fontSize: 26 * s, border: one ? 'none' : '1.5px solid rgba(255,255,255,0.2)' }}>
+                  {f}
+                </span>
+              ))}
+            </div>
+          )}
+          {v.date && <div style={{ marginTop: 34 * s, fontWeight: 800, fontSize: 32 * s }}>{v.date}</div>}
+        </div>
+        <Spacer />
+        {v.cta && (
+          <div style={{ alignSelf: 'flex-start', padding: '20px 38px', borderRadius: 999, background: one ? NAVY : GOLD, color: one ? '#fff' : INK, fontWeight: 800, fontSize: 30 * s }}>{v.cta}</div>
+        )}
+      </Page>
+    </Frame>
+  )
+}
+
 // ───────────────────────── Registry ─────────────────────────
 
 export interface Template {
@@ -381,6 +509,11 @@ export interface Template {
 const verseFields: Field[] = [
   { key: 'verse', label: 'Bible verse', type: 'textarea', max: 120, hint: 'Leave empty to hide' },
   { key: 'reference', label: 'Verse reference', type: 'text', placeholder: 'e.g. Psalm 23:1' },
+]
+
+const serviceFields: Field[] = [
+  { key: 'hymn', label: 'Hymn number', type: 'text', max: 24, placeholder: 'e.g. SDAH 100', hint: 'Optional' },
+  { key: 'specialSong', label: 'Special song of the day', type: 'text', max: 40, placeholder: 'e.g. “It Is Well” · Creativity & Arts Band', hint: 'Optional' },
 ]
 
 const vespersFields: Field[] = [
@@ -404,7 +537,8 @@ export const TEMPLATES: Template[] = [
       { key: 'title', label: 'Headline', type: 'text', max: 12 },
       { key: 'message', label: 'Message', type: 'textarea', max: 110 },
       ...verseFields,
-      { key: 'background', label: 'Background', type: 'background' },
+      ...serviceFields,
+      { key: 'background', label: 'Background', type: 'background', hint: 'Keep our design, pick one of our photos, or upload your own' },
     ],
     defaults: {
       greeting: 'Happy',
@@ -425,8 +559,9 @@ export const TEMPLATES: Template[] = [
       { key: 'title', label: 'Headline', type: 'text', max: 10 },
       { key: 'subtitle', label: 'Line under the headline', type: 'text', max: 60 },
       ...verseFields,
+      ...serviceFields,
       { key: 'detail', label: 'Service times (optional)', type: 'text', max: 50, placeholder: 'e.g. Divine Service · 10:00' },
-      { key: 'background', label: 'Background', type: 'background' },
+      { key: 'background', label: 'Background', type: 'background', hint: 'Keep our design, pick one of our photos, or upload your own' },
     ],
     defaults: {
       greeting: 'Happy',
@@ -449,6 +584,9 @@ export const TEMPLATES: Template[] = [
       { key: 'title', label: 'Headline', type: 'text', max: 20 },
       { key: 'days', label: 'Days', type: 'text', hint: 'Separate days with ·  or commas' },
       { key: 'venue', label: 'Venue', type: 'text', max: 40 },
+      { key: 'topic', label: 'Topic', type: 'text', max: 40, hint: 'Optional' },
+      { key: 'presenter', label: 'Presenter', type: 'text', max: 30, hint: 'Optional' },
+      { key: 'moderator', label: 'Moderator', type: 'text', max: 30, hint: 'Optional' },
       ...verseFields,
       { key: 'note', label: 'Footer note', type: 'text', max: 40 },
       { key: 'background', label: 'Background', type: 'background' },
@@ -504,8 +642,36 @@ export const TEMPLATES: Template[] = [
     background: { kind: 'photo', src: '/Slider/KCM_0822.jpg', focus: 40 },
     render: Vespers,
   },
+  {
+    id: 'launch-countdown',
+    name: 'Launch countdown',
+    blurb: 'The Haven goes live · 3, 2, 1 days to go',
+    fields: [
+      { key: 'days', label: 'Days to go', type: 'text', max: 2, hint: 'Type 3, 2 or 1 — the colours change each day' },
+      { key: 'eyebrow', label: 'Small heading', type: 'text', max: 28 },
+      { key: 'eyebrowLast', label: 'Small heading on the last day', type: 'text', max: 28 },
+      { key: 'title', label: 'Headline', type: 'text', max: 14 },
+      { key: 'tagline', label: 'Tagline', type: 'text', max: 44 },
+      { key: 'features', label: 'Features', type: 'text', hint: 'Separate with · or commas' },
+      { key: 'date', label: 'Launch date (optional)', type: 'text', max: 32, placeholder: 'e.g. Launching Saturday 1 November' },
+      { key: 'cta', label: 'Button text', type: 'text', max: 28 },
+      { key: 'background', label: 'Phone screen', type: 'background', hint: '“Brand” shows the website’s home screen; or pick or upload a screenshot' },
+    ],
+    defaults: {
+      days: '3',
+      eyebrow: 'The countdown is on',
+      eyebrowLast: 'Tomorrow',
+      title: 'The Haven',
+      tagline: 'Your ministry, all in one place.',
+      features: 'Events · Bands · Prayer · Merch',
+      date: '',
+      cta: 'pcm-pi.vercel.app',
+    },
+    background: { kind: 'brand' },
+    render: Countdown,
+  },
 ]
 
 export function initialState(t: Template): PosterState {
-  return { values: { ...t.defaults }, background: t.background, format: 'portrait', brandLayout: 'side' }
+  return { values: { ...t.defaults }, background: t.background, format: 'portrait', brandLayout: 'side', headlineFont: 'fraunces' }
 }

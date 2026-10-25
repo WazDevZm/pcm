@@ -2,15 +2,18 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Search, SlidersHorizontal, Truck, Smartphone, Banknote } from 'lucide-react'
-import { SiteNav } from '@/components/layout/SiteNav'
+import { ArrowRight, Banknote, PackageCheck, Search, ShoppingBag, Smartphone, Truck, X } from 'lucide-react'
+import { MinistryPageShell } from '@/components/layout/MinistryPageShell'
+import { MinistryContent } from '@/components/layout/MinistryContent'
 import { MerchProductCard } from '@/components/merch/MerchProductCard'
+import { ProductArt } from '@/components/merch/ProductArt'
+import { EmptyState, IconTile, SectionHeader } from '@/components/ui/haven'
 import {
   MERCH_PRODUCTS,
   MERCH_CATEGORIES,
   MERCH_HERO_IMAGE,
   formatZmw,
+  productArt,
   FREE_DELIVERY_THRESHOLD_ZMW,
   type MerchCategory,
   type MerchProduct,
@@ -19,29 +22,56 @@ import { cn } from '@/lib/utils'
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name'
 
+const PERKS = [
+  { icon: Smartphone, label: 'Mobile Money' },
+  { icon: Banknote, label: 'Cash on pickup' },
+  { icon: Truck, label: `Free campus delivery over ${formatZmw(FREE_DELIVERY_THRESHOLD_ZMW)}` },
+]
+
+const STEPS = [
+  { icon: ShoppingBag, title: 'Choose', text: 'Pick a size, colour and quantity on the product page.' },
+  { icon: PackageCheck, title: 'Order', text: 'Check out with your details. Code PCM10 takes 10% off.' },
+  { icon: Smartphone, title: 'Pay', text: 'Pay by Mobile Money or cash when you collect.' },
+  { icon: Truck, title: 'Collect', text: 'We confirm your order, then you pick it up on campus.' },
+]
+
+function FeaturedCard({ product }: { product: MerchProduct }) {
+  const art = productArt(product)
+  return (
+    <Link href={`/merch/${product.slug}`} className="group relative block overflow-hidden rounded-3xl">
+      <div className="aspect-[4/3] transition-transform duration-500 group-hover:scale-[1.03]">
+        <ProductArt kind={art.kind} color={art.color} rounded={false} />
+      </div>
+      <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-2xl bg-white/90 px-4 py-3 backdrop-blur">
+        <div className="min-w-0">
+          <p className="truncate font-bold text-ink">{product.name}</p>
+          <p className="text-sm font-semibold text-navy">{formatZmw(product.priceZmw)}</p>
+        </div>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-white transition-transform group-hover:translate-x-0.5">
+          <ArrowRight className="h-4 w-4" />
+        </span>
+      </div>
+    </Link>
+  )
+}
+
 export function MerchStore() {
   const [category, setCategory] = useState<MerchCategory | 'all'>('all')
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<SortOption>('featured')
   const [inStockOnly, setInStockOnly] = useState(false)
 
-  const featured = MERCH_PRODUCTS.filter((p) => p.featured && p.inStock).slice(0, 4)
+  const featured = MERCH_PRODUCTS.filter((p) => p.featured && p.inStock).slice(0, 3)
+  const filtering = category !== 'all' || search.trim() !== '' || inStockOnly
 
   const filtered = useMemo(() => {
     let list: MerchProduct[] = [...MERCH_PRODUCTS]
-
     if (category !== 'all') list = list.filter((p) => p.category === category)
     if (inStockOnly) list = list.filter((p) => p.inStock)
     if (search.trim()) {
       const q = search.toLowerCase()
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.category.includes(q)
-      )
+      list = list.filter((p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.category.includes(q))
     }
-
     switch (sort) {
       case 'price-asc':
         list.sort((a, b) => a.priceZmw - b.priceZmw)
@@ -53,207 +83,148 @@ export function MerchStore() {
         list.sort((a, b) => a.name.localeCompare(b.name))
         break
       default:
-        list.sort((a, b) => {
-          if (a.featured && !b.featured) return -1
-          if (!a.featured && b.featured) return 1
-          return 0
-        })
+        list.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || Number(b.inStock) - Number(a.inStock))
     }
     return list
   }, [category, search, sort, inStockOnly])
 
+  const clear = () => {
+    setSearch('')
+    setCategory('all')
+    setInStockOnly(false)
+  }
+
   return (
-    <div className="min-h-screen bg-[#f4f5f7] text-ink">
-      <header className="relative min-h-[min(520px,70vh)] border-b border-white/10 text-white isolate">
-        <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
-          <Image
-            src={MERCH_HERO_IMAGE}
-            alt=""
-            fill
-            priority
-            className="object-cover object-center"
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/75 to-ink/55" />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/40" />
-          <div className="absolute inset-0 bg-[url('/merch/pattern.svg')] opacity-[0.08]" aria-hidden />
+    <MinistryPageShell
+      heroImage={MERCH_HERO_IMAGE}
+      eyebrow="PCM official store"
+      title="Merch store"
+      subtitle="Wear the message. Apparel, drinkware, stationery and gifts — priced in Kwacha and collected on campus."
+      heroExtra={
+        <div className="mt-7 flex flex-wrap gap-2">
+          {PERKS.map(({ icon: Icon, label }) => (
+            <span key={label} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-sm font-medium text-white backdrop-blur">
+              <Icon className="h-4 w-4 text-gold" /> {label}
+            </span>
+          ))}
         </div>
-
-        <div className="relative z-20">
-          <SiteNav />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-14 md:pb-20 pt-2 md:pt-4">
-            <div className="max-w-2xl">
-              <p className="text-sky-300 text-sm font-semibold uppercase tracking-wider mb-3">
-                PCM Official Store
-              </p>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-balance">
-                Ministry Merch Shop
-              </h1>
-              <p className="text-lg text-white/80 leading-relaxed max-w-xl text-pretty">
-                Apparel, drinkware, stationery, bags, and gifts — all priced in{' '}
-                <strong className="text-white font-semibold">Zambian Kwacha</strong>. Free campus
-                delivery on orders over {formatZmw(FREE_DELIVERY_THRESHOLD_ZMW)}.
-              </p>
-              <div className="flex flex-wrap gap-3 mt-8">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/15 text-sm text-white/90 backdrop-blur-sm">
-                  <Smartphone className="w-4 h-4 text-sky-300 shrink-0" />
-                  Mobile Money
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/15 text-sm text-white/90 backdrop-blur-sm">
-                  <Banknote className="w-4 h-4 text-sky-300 shrink-0" />
-                  Cash on pickup
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/15 text-sm text-white/90 backdrop-blur-sm">
-                  <Truck className="w-4 h-4 text-sky-300 shrink-0" />
-                  CBU delivery
-                </span>
+      }
+    >
+      <MinistryContent>
+        <div className="max-w-6xl mx-auto">
+          {featured.length > 0 && !filtering && (
+            <section className="mb-14">
+              <SectionHeader eyebrow="Best sellers" title="Student favourites" className="!mb-6" />
+              <div className="grid gap-4 sm:grid-cols-3">
+                {featured.map((p) => (
+                  <FeaturedCard key={p.id} product={p} />
+                ))}
               </div>
-            </div>
-          </div>
-        </div>
-      </header>
+            </section>
+          )}
 
-      {featured.length > 0 && (
-        <section className="relative z-20 -mt-10 max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {featured.map((p) => (
-              <Link
-                key={p.id}
-                href={`/merch/${p.slug}`}
-                className="relative aspect-[4/3] rounded-xl overflow-hidden border border-border shadow-lg bg-white group"
-              >
-                <Image
-                  src={p.image}
-                  alt={p.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
-                <span className="absolute bottom-3 left-3 right-3 text-sm font-semibold text-white truncate">
-                  {p.name}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <div
-        className={cn(
-          'sticky top-16 z-30 bg-[#f4f5f7]/95 backdrop-blur-lg border-b border-border',
-          featured.length > 0 && 'mt-8'
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-4">
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a93a3]" />
-              <input
-                type="search"
-                placeholder="Search products..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy"
-              />
-            </div>
-            <div className="flex gap-2">
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortOption)}
-                className="h-11 px-3 rounded-xl border border-border bg-white text-sm min-w-[140px]"
-                aria-label="Sort products"
-              >
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: low to high</option>
-                <option value="price-desc">Price: high to low</option>
-                <option value="name">Name A–Z</option>
-              </select>
-              <label className="flex items-center gap-2 h-11 px-3 rounded-xl border border-border bg-white text-sm cursor-pointer whitespace-nowrap">
+          {/* Toolbar */}
+          <div className="sticky top-[4.5rem] z-30 -mx-5 sm:-mx-6 mb-8 bg-canvas/90 px-5 sm:px-6 py-4 backdrop-blur-lg">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a93a3]" />
                 <input
-                  type="checkbox"
-                  checked={inStockOnly}
-                  onChange={(e) => setInStockOnly(e.target.checked)}
-                  className="rounded border-border"
+                  type="search"
+                  placeholder="Search merch…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="h-11 w-full rounded-full border border-border bg-white pl-11 pr-4 text-sm focus:border-navy focus:outline-none focus:ring-[3px] focus:ring-navy/15"
                 />
-                In stock
-              </label>
+              </div>
+              <div className="flex gap-2">
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as SortOption)}
+                  className="h-11 min-w-[150px] rounded-full border border-border bg-white px-4 text-sm font-medium"
+                  aria-label="Sort products"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="price-asc">Price: low to high</option>
+                  <option value="price-desc">Price: high to low</option>
+                  <option value="name">Name A–Z</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setInStockOnly((v) => !v)}
+                  aria-pressed={inStockOnly}
+                  className={cn(
+                    'h-11 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition-colors',
+                    inStockOnly ? 'border-navy bg-navy text-white' : 'border-border bg-white text-ink hover:border-navy/30'
+                  )}
+                >
+                  In stock
+                </button>
+              </div>
+            </div>
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-0.5">
+              {MERCH_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setCategory(cat.id)}
+                  className={cn(
+                    'shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors',
+                    category === cat.id ? 'border-navy bg-navy text-white' : 'border-border bg-white text-ink hover:border-navy/30'
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {MERCH_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setCategory(cat.id)}
-                className={cn(
-                  'shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors',
-                  category === cat.id
-                    ? 'bg-ink text-white'
-                    : 'bg-white text-muted-foreground border border-border hover:bg-canvas'
-                )}
-              >
-                {cat.label}
+          <div className="mb-5 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              <b className="text-ink">{filtered.length}</b> {filtered.length === 1 ? 'item' : 'items'}
+            </p>
+            {filtering && (
+              <button type="button" onClick={clear} className="inline-flex items-center gap-1 text-sm font-semibold text-navy hover:underline">
+                <X className="h-4 w-4" /> Clear filters
               </button>
-            ))}
+            )}
           </div>
-        </div>
-      </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-muted-foreground">
-            <SlidersHorizontal className="w-4 h-4 inline mr-1.5 -mt-0.5" />
-            {filtered.length} product{filtered.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon={Search}
+              title="Nothing matches"
+              body="Try another word or category."
+              action={
+                <button type="button" onClick={clear} className="text-sm font-semibold text-navy hover:underline">
+                  Clear filters
+                </button>
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 md:gap-x-6">
+              {filtered.map((product) => (
+                <MerchProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
 
-        {filtered.length === 0 ? (
-          <div className="text-center py-20 rounded-2xl bg-white border border-border">
-            <p className="text-muted-foreground mb-4">No products match your filters.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('')
-                setCategory('all')
-                setInStockOnly(false)
-              }}
-              className="text-navy font-medium hover:underline"
-            >
-              Clear filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
-            {filtered.map((product) => (
-              <MerchProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </main>
-
-      <section className="bg-white border-t border-border py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-center mb-10">How checkout works</h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              { step: '1', title: 'Browse & customize', text: 'Pick size, colour, and quantity on each product page.' },
-              { step: '2', title: 'Cart & promo', text: 'Review your cart. Try code PCM10 for 10% off.' },
-              { step: '3', title: 'Checkout', text: 'Enter details and choose Mobile Money or cash on collection.' },
-              { step: '4', title: 'Pickup', text: 'Receive your order ID. Collect on campus after confirmation.' },
-            ].map((item) => (
-              <div key={item.step} className="text-center p-6 rounded-2xl bg-[#f4f5f7]">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy/10 text-navy font-bold text-sm mb-3">
-                  {item.step}
-                </span>
-                <h3 className="font-semibold mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.text}</p>
-              </div>
-            ))}
-          </div>
+          <section className="mt-20 rounded-[2rem] bg-white border border-border p-6 md:p-10">
+            <SectionHeader eyebrow="How it works" title="Order online, collect on campus" className="!mb-8" />
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {STEPS.map((s, i) => (
+                <div key={s.title}>
+                  <div className="flex items-center gap-3">
+                    <IconTile icon={s.icon} />
+                    <span className="font-serif text-2xl text-navy-soft">0{i + 1}</span>
+                  </div>
+                  <h3 className="mt-4 font-bold text-ink">{s.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{s.text}</p>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
-      </section>
-    </div>
+      </MinistryContent>
+    </MinistryPageShell>
   )
 }

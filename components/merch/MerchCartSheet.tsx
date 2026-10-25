@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
   Minus,
@@ -16,8 +15,11 @@ import { useMerchCart } from './MerchCartProvider'
 import type { PlacedOrder } from './MerchCartProvider'
 import {
   formatZmw,
+  productArt,
+  MERCH_PRODUCTS,
   FREE_DELIVERY_THRESHOLD_ZMW,
 } from '@/lib/merch-data'
+import { ProductArt } from './ProductArt'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { friendlyError } from '@/lib/data/forms'
@@ -326,7 +328,10 @@ export function MerchCartSheet() {
                       className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-muted"
                       onClick={() => setCartOpen(false)}
                     >
-                      <Image src={item.image} alt="" fill className="object-cover" sizes="80px" />
+                      {(() => {
+                        const art = productArt(MERCH_PRODUCTS.find((p) => p.id === item.productId) ?? { slug: item.productSlug }, item.color?.hex)
+                        return <ProductArt kind={art.kind} color={art.color} rounded={false} />
+                      })()}
                     </Link>
                     <div className="flex-1 min-w-0">
                       <Link

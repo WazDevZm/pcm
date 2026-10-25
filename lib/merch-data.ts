@@ -1,4 +1,5 @@
 import { ministryImage } from './site-images'
+import type { ArtKind } from '@/components/merch/ProductArt'
 
 export type MerchCategory =
   | 'apparel'
@@ -71,7 +72,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     name: 'PCM Hoodie',
     description: 'Fleece-lined hoodie with front logo and kangaroo pocket.',
     longDescription:
-      'Stay warm during Lusaka evenings with our premium hoodie. Features ribbed cuffs, adjustable drawstring, and bold PCM branding.',
+      'Stay warm on cool Kitwe evenings with our premium hoodie. Features ribbed cuffs, adjustable drawstring, and bold PCM branding.',
     category: 'apparel',
     priceZmw: 450,
     image: ministryImage(3),
@@ -282,6 +283,34 @@ export function formatZmw(amount: number): string {
 
 export function getProductById(id: string): MerchProduct | undefined {
   return MERCH_PRODUCTS.find((p) => p.id === id)
+}
+
+/** Illustration kind and default colour for each product (components/merch/ProductArt) */
+const PRODUCT_ART: Record<string, { kind: ArtKind; color: string }> = {
+  'pcm-classic-tee': { kind: 'tee', color: '#0f2d6e' },
+  'pcm-hoodie': { kind: 'hoodie', color: '#0f2d6e' },
+  'pcm-polo-shirt': { kind: 'polo', color: '#0f2d6e' },
+  'pcm-cap': { kind: 'cap', color: '#0f2d6e' },
+  'pcm-crew-sweatshirt': { kind: 'sweatshirt', color: '#5b6472' },
+  'branded-water-bottle': { kind: 'bottle', color: '#0f2d6e' },
+  'pcm-travel-mug': { kind: 'mug', color: '#0B0F12' },
+  'canvas-tote-bag': { kind: 'tote', color: '#e9dcc3' },
+  'drawstring-gym-bag': { kind: 'drawstring', color: '#0B0F12' },
+  'branded-pen-set': { kind: 'pens', color: '#0f2d6e' },
+  'ministry-notebook': { kind: 'notebook', color: '#0f2d6e' },
+  'prayer-journal': { kind: 'journal', color: '#7f1d1d' },
+  'sticker-pack': { kind: 'stickers', color: '#0f2d6e' },
+  'silicone-wristbands': { kind: 'wristbands', color: '#ffffff' },
+  'pcm-lanyard': { kind: 'lanyard', color: '#0f2d6e' },
+  'enamel-pin-badge': { kind: 'pin', color: '#0f2d6e' },
+  'ministry-scarf': { kind: 'scarf', color: '#7f1d1d' },
+  'branded-usb-drive': { kind: 'usb', color: '#0f2d6e' },
+}
+
+/** Illustration for a product, in the chosen colour when there is one */
+export function productArt(product: Pick<MerchProduct, 'slug' | 'colors'>, colorHex?: string) {
+  const art = PRODUCT_ART[product.slug] ?? { kind: 'tee' as ArtKind, color: '#0f2d6e' }
+  return { kind: art.kind, color: colorHex ?? product.colors?.[0]?.hex ?? art.color }
 }
 
 export function getProductBySlug(slug: string): MerchProduct | undefined {

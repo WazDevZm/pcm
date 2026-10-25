@@ -8,7 +8,10 @@
     "lint": "next lint",
     "start": "next start",
     "brand": "node scripts/brand/build.mjs",
-    "provision": "node scripts/admin/provision.mjs"
+    "provision": "node scripts/admin/provision.mjs",
+    "emails": "node scripts/admin/email-templates.mjs",
+    "logins:sql": "node scripts/admin/make-sql.mjs",
+    "report": "node scripts/report/build.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.1.4",

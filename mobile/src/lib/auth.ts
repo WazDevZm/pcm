@@ -57,18 +57,6 @@ export async function signInWithEmail(email: string, password: string) {
   if (error) throw new Error(error.message);
 }
 
-/** Returns true when the account still needs email confirmation */
-export async function signUpWithEmail(name: string, email: string, password: string) {
-  if (!isSupabaseConfigured) throw new Error('Sign-up needs Supabase configured in .env.');
-  const { data, error } = await supabase.auth.signUp({
-    email: email.trim(),
-    password,
-    options: { data: { full_name: name.trim() }, emailRedirectTo: authRedirectUrl },
-  });
-  if (error) throw new Error(error.message);
-  return !data.session;
-}
-
 export async function sendPasswordReset(email: string) {
   if (!isSupabaseConfigured) throw new Error('Password reset needs Supabase configured in .env.');
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: authRedirectUrl });

@@ -201,6 +201,11 @@ async function main() {
     }
   }
 
+  // Email logo (PNG — email apps don't show SVG): white wordmark on transparent, 2× for sharp screens
+  const emailLogo = svgDoc(wordmarkInner('white'), bounds.wordmark, 2)
+  const ew = 480, eh = Math.round(480 * ((bounds.wordmark.h + 4) / (bounds.wordmark.w + 4)))
+  await png(page, page100(emailLogo, ew, eh), r('public/email/the-haven-white.png'), ew, eh, { transparent: true })
+
   // Website favicon and in-code mark
   write(r('app/icon.svg'), squareDoc(monogramInner('white'), bounds.monogram, 64, 0.62, C.navy, 14))
 

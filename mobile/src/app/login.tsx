@@ -5,7 +5,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { HavenMonogram, HavenWordmark, PcmEndorsement } from '@/components/brand';
 import { Button, Field, Notice, Screen, Txt } from '@/components/ui';
-import { sendPasswordReset, signInWithEmail, signInWithGoogle, signUpWithEmail } from '@/lib/auth';
+import { sendPasswordReset, signInWithEmail, signInWithGoogle } from '@/lib/auth';
 import { errorMessage, isValidEmail } from '@/lib/format';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { colors, radius, space } from '@/theme';
@@ -21,11 +21,12 @@ function GoogleG() {
   );
 }
 
-type Mode = 'signin' | 'signup' | 'reset';
+/** Members use Google; email sign-in is for the credentials issued to leaders and committee heads */
+type Mode = 'signin' | 'reset';
 
 export default function LoginScreen() {
   const [mode, setMode] = useState<Mode>('signin');
-  const [name, setName] = useState('');
+  const [leaders, setLeaders] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState<'google' | 'email' | null>(null);
@@ -51,18 +52,11 @@ export default function LoginScreen() {
     setInfo(null);
     if (!isValidEmail(email)) return setError('Enter a valid email address.');
     if (mode !== 'reset' && password.length < 6) return setError('Password must be at least 6 characters.');
-    if (mode === 'signup' && !name.trim()) return setError('Tell us your name.');
     setBusy('email');
     try {
       if (mode === 'signin') {
         await signInWithEmail(email, password);
         done();
-      } else if (mode === 'signup') {
-        const needsConfirm = await signUpWithEmail(name, email, password);
-        if (needsConfirm) {
-          setInfo('Check your inbox to confirm your email, then sign in.');
-          setMode('signin');
-        } else done();
       } else {
         await sendPasswordReset(email);
         setInfo('If that email has an account, a reset link is on its way.');
@@ -85,7 +79,7 @@ export default function LoginScreen() {
           <HavenWordmark size={34} />
           <PcmEndorsement height={36} />
           <Txt color={colors.textMuted} center>
-            {mode === 'signup' ? 'Create your account to join bands, RSVP and more.' : 'Sign in to RSVP, join bands and track your requests.'}
+            Sign in to RSVP, join bands and track your requests.
           </Txt>
         </View>
 
@@ -104,54 +98,54 @@ export default function LoginScreen() {
           <Txt style={{ fontWeight: '700', fontSize: 16 }}>{busy === 'google' ? 'Opening Google…' : 'Continue with Google'}</Txt>
         </Pressable>
 
-        <View style={styles.orRow}>
+        <Txt variant="small" color={colors.textMuted} center>
+          New here? Continue with Google and your account is created for you.
+        </Txt>
+
+        <Pressable onPress={() => setLeaders((v) => !v)} accessibilityRole="button" style={styles.orRow}>
           <View style={styles.line} />
-          <Txt variant="small" color={colors.textFaint}>
-            or use email
+          <Txt variant="small" color={colors.navy} style={{ fontWeight: '700' }}>
+            {leaders ? 'Hide leadership sign-in' : 'Leaders & committee heads'}
           </Txt>
           <View style={styles.line} />
-        </View>
+        </Pressable>
 
-        {mode === 'signup' ? (
-          <Field label="Full name" value={name} onChangeText={setName} autoComplete="name" placeholder="Your name" />
+        {leaders ? (
+          <>
+            <Field
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
+              placeholder="you@thehaven.test"
+            />
+            {mode !== 'reset' ? (
+              <Field
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="current-password"
+                placeholder="Your issued password"
+              />
+            ) : null}
+            <Button
+              label={mode === 'signin' ? 'Sign in' : 'Send reset link'}
+              onPress={submit}
+              loading={busy === 'email'}
+              disabled={busy === 'google'}
+            />
+            <View style={{ alignItems: 'center' }}>
+              {mode === 'signin' ? (
+                <Button label="Forgot password?" variant="ghost" small onPress={() => setMode('reset')} />
+              ) : (
+                <Button label="Back to sign in" variant="ghost" small onPress={() => setMode('signin')} />
+              )}
+            </View>
+          </>
         ) : null}
-        <Field
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          placeholder="you@example.com"
-        />
-        {mode !== 'reset' ? (
-          <Field
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            placeholder="At least 6 characters"
-          />
-        ) : null}
-
-        <Button
-          label={mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send reset link'}
-          onPress={submit}
-          loading={busy === 'email'}
-          disabled={busy === 'google'}
-        />
-
-        <View style={{ alignItems: 'center', gap: space.sm }}>
-          {mode === 'signin' ? (
-            <>
-              <Button label="New here? Create an account" variant="ghost" small onPress={() => setMode('signup')} />
-              <Button label="Forgot password?" variant="ghost" small onPress={() => setMode('reset')} />
-            </>
-          ) : (
-            <Button label="Back to sign in" variant="ghost" small onPress={() => setMode('signin')} />
-          )}
-        </View>
       </Screen>
     </KeyboardAvoidingView>
   );

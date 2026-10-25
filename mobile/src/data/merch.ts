@@ -71,7 +71,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     name: 'Haven Hoodie',
     description: 'Fleece-lined hoodie with front logo and kangaroo pocket.',
     longDescription:
-      'Stay warm during Lusaka evenings with our premium hoodie. Features ribbed cuffs, adjustable drawstring, and bold Haven branding.',
+      'Stay warm on cool Kitwe evenings with our premium hoodie. Features ribbed cuffs, adjustable drawstring, and bold Haven branding.',
     category: 'apparel',
     priceZmw: 450,
     image: ministryImage(3),
