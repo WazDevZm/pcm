@@ -1,12 +1,17 @@
 # The Haven
 
-The mobile app and website for **The Haven**, a Christ-centred campus ministry at the Copperbelt University. The app is built with **Expo (React Native)** and the website with **Next.js**. Both use the **same Supabase project** for the database, storage and sign-in, so one account works in both places.
+The mobile app and website for **The Haven**, a Christ-centred campus ministry of **The Copperbelt University SDA Public Campus Ministries (CBU SDA PCM)**.
+
+**Live website:** https://pcm-pi.vercel.app (Vercel project `pcm`, deployed from this repo with `vercel deploy --prod`).
+
+ The app is built with **Expo (React Native)** and the website with **Next.js**. Both use the **same Supabase project** for the database, storage and sign-in, so one account works in both places.
 
 ```text
 mobile/      Expo app (iOS + Android)
 app/ lib/    Next.js website (repo root)
 supabase/    Database schema, migrations and seed data
-brand-kit/   Logos, symbol, app icon, splash, PCM shield, colours, fonts and posters
+brand-kit/   Text-only logo, monogram, app icon, splash, PCM shield, colours, fonts and posters
+scripts/     admin/provision.mjs (database + test logins) and brand/build.mjs (all brand assets)
 presentation/ Team intro deck and screenshots of every app and website screen
 ```
 
@@ -29,8 +34,9 @@ presentation/ Team intro deck and screenshots of every app and website screen
 ## 1. Set up Supabase (about 10 minutes)
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor → New query**, paste the whole of `supabase/setup.sql`, and click **Run**. It creates every table, security rule, trigger and the `media` storage bucket, and adds the five bands. It's meant for a new, empty project.
-   - `setup.sql` combines `schema.sql`, `migrations/002`–`004` and `seed-bands.sql`. If you'd rather run them one at a time, use that order.
+2. Open **SQL Editor → New query**, paste the whole of `supabase/setup.sql`, and click **Run**. It creates every table, security rule, trigger and the `media` storage bucket, and adds the nine bands and committees. It’s meant for a new, empty project.
+   - `setup.sql` combines `schema.sql`, `migrations/002`–`004`, `seed-bands.sql` and `migrations/006`. If you’d rather run them one at a time, use that order.
+   - Existing project (set up before 25 Oct 2026)? Run `supabase/migrations/006_leadership_and_publicity.sql` once, or `npm run provision`.
    - Optional: run `supabase/seed.sql` afterwards for sample posts and events to test with.
    - Ran `setup.sql` before 18 Oct 2026 and see *"infinite recursion detected in policy"*? Run `supabase/migrations/005_fix_policy_recursion.sql` once.
 3. Go to **Project Settings → API** and copy the **Project URL** and the **publishable (anon) key**.
@@ -91,6 +97,24 @@ UPDATE public.users SET role = 'admin' WHERE email = 'you@example.com';
 
 Pull to refresh or reopen the app. **More → Leadership → Admin dashboard** will appear. From there, admins can promote other users to **leader** or **admin** under *Users*. Only admins can change roles, and the database enforces this.
 
+## 6. Roles, dashboards and test logins
+
+| Who | How they're set up | Website dashboard |
+|---|---|---|
+| **Developer** | `role = admin`, `office = developer` | `/admin` plus **Developer** (system checks) |
+| **PCM Chairperson / Vice Chairperson** | `role = admin`, `office = chairperson` / `vice_chairperson` | `/admin`: every queue, plus oversight of all bands and their heads |
+| **Leaders** | `role = leader` | `/admin` (content, care queues, orders) |
+| **Band / committee heads** | a `band_admins` row (assign under *Admin → Bands & committees*) | `/band-admin/<band>`: announcements, events, details, members |
+| **Publicity Committee heads** | head of `publicity-committee` | also `/admin` with **website content only**: posts, events, gallery, resources (what the landing page and app show) |
+
+To apply migration `006` and create pre-confirmed test logins for all of these (Welfare, Witnessing, Stu-MM, Creativity & Arts, Education, Catering and Publicity heads, plus Developer, Chairperson and Vice Chairperson), put a Supabase personal access token in `.env.admin.local` (git-ignored) and run:
+
+```bash
+npm run provision -- --site https://pcm-pi.vercel.app
+```
+
+It writes the emails and passwords to `CREDENTIALS.local.md` (git-ignored). Running it again issues new passwords. If `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are also in `.env.admin.local`, it turns on Google sign-in and sets the redirect URLs too.
+
 ---
 
 ## Test checklist
@@ -124,8 +148,9 @@ The first time you run this, EAS asks to link an Expo project. Build profiles ar
 - Students can read public content and manage only their own RSVPs, band memberships, requests and orders.
 - Prayer and counseling requests are visible only to the person who sent them and to leaders.
 - Leaders and admins manage content. Only admins change roles or delete messages.
-- Uploads go to the public `media` bucket. Only leaders can upload.
+- Publicity Committee heads manage posts, events, gallery and resources; band heads manage only their own band.
+- Uploads go to the public `media` bucket. Leaders, Publicity heads and band heads can upload.
 
 ## Brand
 
-See [`brand-kit/README.md`](brand-kit/README.md) for the logo, symbol, colours (Haven Navy `#0f2d6e`, Lamp Gold `#d9a441`), typography (Fraunces) and posters.
+See [`brand-kit/README.md`](brand-kit/README.md) for the text-only logo, colours (Haven Navy `#0f2d6e`, Lamp Gold `#d9a441`), typography (Fraunces) and posters. Regenerate every brand asset (kit, favicon, app icon, splash, posters for web and app) with `npm run brand`.
