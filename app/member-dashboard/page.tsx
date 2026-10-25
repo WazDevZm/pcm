@@ -6,7 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { HavenMark, HavenWordmark } from '@/components/brand/HavenLogo'
+import { HavenWordmark } from '@/components/brand/HavenLogo'
 import { Input } from '@/components/ui/input'
 import { getMemberData, updateMyProfile, type MemberData } from '@/lib/data/admin'
 import {
@@ -165,8 +165,7 @@ export default function MemberDashboard() {
         <div className="relative max-w-6xl mx-auto px-4 md:px-6 pt-6 pb-10">
           <div className="flex items-center justify-between gap-3">
             <Link href="/" className="inline-flex items-center gap-2" aria-label="The Haven home">
-              <HavenMark tone="onDark" className="h-8 w-8" />
-              <HavenWordmark tone="onDark" className="text-xl" />
+              <HavenWordmark tone="onDark" className="text-2xl" />
             </Link>
             <Button variant="light" size="sm" onClick={handleSignOut}>
               <LogOut /> Sign out

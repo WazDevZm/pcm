@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
-import { HavenMark, HavenWordmark } from '@/components/brand/HavenLogo'
+import { HavenMonogram, HavenWordmark } from '@/components/brand/HavenLogo'
 import { PcmEndorsement } from '@/components/brand/PcmShield'
 
 /** Split auth screen: ministry photo on wide screens, the app's sign-in layout on the right */
@@ -27,10 +27,8 @@ export function AuthLayout({ children, subtitle }: { children: React.ReactNode; 
         <div className="flex-1 flex items-center justify-center py-10">
           <div className="w-full max-w-sm">
             <div className="flex flex-col items-center text-center">
-              <span className="flex h-20 w-20 items-center justify-center rounded-3xl bg-navy shadow-lg shadow-navy/25">
-                <HavenMark tone="onDark" className="h-11 w-11" />
-              </span>
-              <HavenWordmark className="mt-5 text-4xl" />
+              <HavenMonogram className="h-20 w-20 text-[2.6rem] shadow-lg shadow-navy/25" />
+              <HavenWordmark className="mt-5 text-5xl" />
               <PcmEndorsement tone="onLight" className="mt-4 flex-col !gap-2 text-center" />
               {subtitle && <p className="mt-5 text-muted-foreground">{subtitle}</p>}
             </div>

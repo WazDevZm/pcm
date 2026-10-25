@@ -3,11 +3,11 @@ export const BRAND = {
   name: 'The Haven',
   tagline: 'A place to belong',
   description:
-    'A ministry of CBU PCM, The Copperbelt University Public Campus Ministries — a shelter for worship, Bible study, fellowship and service.',
+    'The Copperbelt University SDA Public Campus Ministries (CBU SDA PCM) — a shelter for worship, Bible study, fellowship and service.',
   /** Parent organisation — shown with the PCM shield (assets/images/pcm-shield.png) */
-  ministry: 'The Copperbelt University Public Campus Ministries',
+  ministry: 'The Copperbelt University SDA Public Campus Ministries',
   /** Short form for anything people see — the full name is too long next to other text */
-  ministryShort: 'CBU PCM',
+  ministryShort: 'CBU SDA PCM',
   location: 'Copperbelt University · Kitwe, Zambia',
   email: 'hello@thehaven.org',
 } as const;

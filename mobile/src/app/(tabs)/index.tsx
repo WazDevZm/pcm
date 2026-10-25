@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HavenLockup, PcmEndorsement, PcmShield } from '@/components/brand';
+import { HavenWordmark, PcmEndorsement, PcmShield } from '@/components/brand';
 import { LinearGradientOverlay } from '@/components/overlay';
 import { Button, Card, IconTile, Ionicons, SectionHeader, Txt, type IconName } from '@/components/ui';
 import { HERO_IMAGES } from '@/data/images';
@@ -90,7 +90,7 @@ export default function HomeScreen() {
         <HeroSlider />
         <View style={[styles.heroTop, { paddingTop: insets.top + space.sm }]}>
           <View style={styles.brandRow}>
-            <HavenLockup size={20} tone="white" />
+            <HavenWordmark size={24} tone="white" />
             <View style={styles.brandDivider} />
             <PcmShield height={34} />
           </View>

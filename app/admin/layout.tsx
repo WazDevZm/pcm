@@ -24,7 +24,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { HavenMark, HavenWordmark } from '@/components/brand/HavenLogo'
+import { HavenMonogram, HavenWordmark } from '@/components/brand/HavenLogo'
 import { OFFICE_LABEL } from '@/lib/brand'
 import { FRONTEND_ONLY } from '@/lib/config'
 import { cn } from '@/lib/utils'
@@ -97,7 +97,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className="min-h-screen bg-canvas flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <HavenMark className="h-10 w-10 animate-pulse" />
+          <HavenMonogram className="animate-pulse" />
           <p className="text-sm">{loading || !profile ? 'Loading…' : 'Redirecting…'}</p>
         </div>
       </div>
@@ -110,8 +110,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebar = (
     <div className="flex h-full flex-col">
       <Link href="/" className="flex items-center gap-2 px-5 pt-6 pb-2">
-        <HavenMark className="h-8 w-8" />
-        <HavenWordmark className="text-xl" />
+        <HavenWordmark className="text-2xl" />
       </Link>
       <p className="eyebrow px-5 text-muted-foreground">{isLeader ? 'Leadership' : 'Publicity dashboard'}</p>
 
@@ -176,8 +175,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-canvas text-ink">
       <div className="md:hidden sticky top-0 z-30 flex items-center justify-between border-b border-border bg-white/90 px-4 py-3 backdrop-blur">
         <Link href="/admin" className="flex items-center gap-2">
-          <HavenMark className="h-7 w-7" />
-          <span className="font-serif text-lg text-ink">Admin</span>
+          <HavenWordmark className="text-xl" />
+          <span className="eyebrow text-muted-foreground">Admin</span>
         </Link>
         <button onClick={() => setOpen(!open)} className="rounded-full p-2 hover:bg-muted" aria-label="Toggle menu">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

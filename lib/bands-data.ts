@@ -21,7 +21,7 @@ export const DEFAULT_BANDS: Band[] = [
       'Attend any Wednesday Bible study or speak with the band leader after Sabbath worship. No prior experience required—just a willing heart to learn.',
     important_info:
       'Bring your Bible and a notebook. Study outlines are shared each week via the announcements section below.',
-    hero_image_url: '/bands/bible-study.svg',
+    hero_image_url: 'local:kcm_0729',
     leader_name: 'Coordinator TBD',
     leader_position: 'Bible Study Band Leader',
     leader_tenure: 'Academic Year 2025–2026',
@@ -52,7 +52,7 @@ export const DEFAULT_BANDS: Band[] = [
       'Come to Thursday meetings with ideas—or skills in design, writing, or photography. We train volunteers on our tools.',
     important_info:
       'Submit event promo requests at least one week before your event date.',
-    hero_image_url: '/bands/publicity.svg',
+    hero_image_url: 'local:kcm_0669',
     leader_name: 'Coordinator TBD',
     leader_position: 'Publicity Committee Chair',
     leader_tenure: 'Academic Year 2025–2026',
@@ -83,7 +83,7 @@ export const DEFAULT_BANDS: Band[] = [
       'Speak with the welfare leader after Sabbath service or email us. A caring heart and reliability matter more than experience.',
     important_info:
       'Welfare needs can be submitted confidentially through the prayer request page or directly to the band leader.',
-    hero_image_url: '/bands/welfare.svg',
+    hero_image_url: 'local:kcm_0549',
     leader_name: 'Coordinator TBD',
     leader_position: 'Welfare Band Leader',
     leader_tenure: 'Academic Year 2025–2026',
@@ -114,7 +114,7 @@ export const DEFAULT_BANDS: Band[] = [
       'Attend a Tuesday meeting or volunteer for our next health expo. Health sciences students are especially welcome!',
     important_info:
       'Our annual Health Expo is held each spring—watch announcements for dates and volunteer sign-ups.',
-    hero_image_url: '/bands/health.svg',
+    hero_image_url: 'local:kcm_0822',
     leader_name: 'Coordinator TBD',
     leader_position: 'Health Band Leader',
     leader_tenure: 'Academic Year 2025–2026',
@@ -145,7 +145,7 @@ export const DEFAULT_BANDS: Band[] = [
       'Join Friday outreach nights—training is provided every week. Come ready to pray, learn, and share hope.',
     important_info:
       'Outreach materials are provided. Wear comfortable shoes and bring a friend!',
-    hero_image_url: '/bands/witnessing.svg',
+    hero_image_url: 'local:kcm_0741',
     leader_name: 'Coordinator TBD',
     leader_position: 'Witnessing Band Leader',
     leader_tenure: 'Academic Year 2025–2026',
@@ -283,7 +283,7 @@ export const DEFAULT_BAND_ANNOUNCEMENTS: Record<string, BandAnnouncement[]> = {
       id: 'ann-2',
       committee_id: 'band-publicity',
       title: 'Submit Event Graphics by Thursday',
-      content: 'All bands: please send event details and photos to publicity@cbusda.org by Thursday noon for weekend promotion.',
+      content: 'All bands: please send event details and photos to the Publicity Committee by Thursday noon for weekend promotion.',
       type: 'announcement',
       image_url: null,
       author_id: null,

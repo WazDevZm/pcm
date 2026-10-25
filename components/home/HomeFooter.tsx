@@ -37,7 +37,7 @@ export function HomeFooter() {
         <div className="grid grid-cols-2 md:grid-cols-12 gap-10 md:gap-8">
           <div className="col-span-2 md:col-span-5">
             <Link href="/" className="inline-flex mb-5" aria-label={`${BRAND.name} home`}>
-              <HavenLogo tone="onDark" showTagline markClassName="h-11 w-11" className="text-lg" />
+              <HavenLogo tone="onDark" showTagline className="text-lg" />
             </Link>
             <p className="text-white/65 text-sm leading-relaxed max-w-sm">
               A shelter on campus for worship, Bible study, real friendship and service that carries

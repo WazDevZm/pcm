@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { HavenSymbol, HavenWordmark, PcmEndorsement } from '@/components/brand';
+import { HavenMonogram, HavenWordmark, PcmEndorsement } from '@/components/brand';
 import { Button, Field, Notice, Screen, Txt } from '@/components/ui';
 import { sendPasswordReset, signInWithEmail, signInWithGoogle, signUpWithEmail } from '@/lib/auth';
 import { errorMessage, isValidEmail } from '@/lib/format';
@@ -80,9 +80,9 @@ export default function LoginScreen() {
       <Screen contentContainerStyle={{ gap: space.lg, paddingTop: space.xl }}>
         <View style={{ alignItems: 'center', gap: space.md }}>
           <View style={styles.mark}>
-            <HavenSymbol size={44} tone="white" />
+            <HavenMonogram size={40} />
           </View>
-          <HavenWordmark size={30} />
+          <HavenWordmark size={34} />
           <PcmEndorsement height={36} />
           <Txt color={colors.textMuted} center>
             {mode === 'signup' ? 'Create your account to join bands, RSVP and more.' : 'Sign in to RSVP, join bands and track your requests.'}

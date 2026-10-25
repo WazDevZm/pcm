@@ -25,7 +25,6 @@ import { SiteNav } from "@/components/layout/SiteNav"
 import { HomeFooter } from "@/components/home/HomeFooter"
 import { HeroSlider } from "@/components/home/HeroSlider"
 import { PcmShield } from "@/components/brand/PcmShield"
-import { HavenMark } from "@/components/brand/HavenLogo"
 import { Card, IconTile, Notice, SectionHeader, cardClass, cardHoverClass, fieldClass, labelClass } from "@/components/ui/haven"
 import { useAuth } from "@/components/auth/AuthProvider"
 import { POSTERS } from "@/lib/posters"
@@ -291,7 +290,6 @@ export default function HomePage() {
             />
             <div className="absolute inset-0 photo-overlay opacity-70" />
             <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 text-white">
-              <HavenMark tone="onDark" className="h-10 w-10 mb-3" />
               <p className="font-serif text-2xl md:text-3xl leading-tight">
                 “Come to me, all you who are weary…”
               </p>

@@ -30,7 +30,7 @@ export default function SupportPage() {
       description: "Join our music ministry as a vocalist, instrumentalist, or sound technician.",
       commitment: "2-3 hours/week",
       skills: "Musical ability, heart for worship",
-      contact: "worship@cbusda.org"
+      contact: BRAND.email
     },
     {
       title: "Bible Study Leader",
@@ -39,7 +39,7 @@ export default function SupportPage() {
       description: "Lead small group Bible studies and mentor new believers.",
       commitment: "3-4 hours/week",
       skills: "Biblical knowledge, teaching ability",
-      contact: "biblestudy@cbusda.org"
+      contact: BRAND.email
     },
     {
       title: "Campus Outreach",
@@ -48,7 +48,7 @@ export default function SupportPage() {
       description: "Share the gospel through campus events and personal evangelism.",
       commitment: "4-5 hours/week",
       skills: "People skills, evangelistic heart",
-      contact: "outreach@cbusda.org"
+      contact: BRAND.email
     },
     {
       title: "Media Ministry",
@@ -57,7 +57,7 @@ export default function SupportPage() {
       description: "Help with live streaming, social media, and digital content creation.",
       commitment: "2-3 hours/week",
       skills: "Technical skills, creativity",
-      contact: "media@cbusda.org"
+      contact: BRAND.email
     }
   ]
 

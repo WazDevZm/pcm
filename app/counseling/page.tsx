@@ -1,5 +1,6 @@
 "use client"
 
+import { BRAND } from "@/lib/brand"
 import {
   Heart,
   Shield,
@@ -476,7 +477,7 @@ export default function CounselingPage() {
             </p>
             <div className="grid grid-cols-1 max-w-xs mx-auto gap-4 mb-8">
               {[
-                { icon: Mail, label: "Email", value: "counseling@cbusda.org" },
+                { icon: Mail, label: "Email", value: BRAND.email },
               ].map((item) => (
                 <div key={item.label} className="p-4 rounded-xl bg-canvas border border-border">
                   <item.icon className="w-7 h-7 text-navy mx-auto mb-2" />

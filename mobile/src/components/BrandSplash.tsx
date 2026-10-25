@@ -21,7 +21,7 @@ export function BrandSplash({ onDone }: { onDone: () => void }) {
 
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.root, { opacity }]}>
-      <Image source={SPLASH} style={styles.image} contentFit="contain" accessibilityLabel="The Haven — a ministry of CBU PCM" />
+      <Image source={SPLASH} style={styles.image} contentFit="contain" accessibilityLabel="The Haven — CBU SDA PCM" />
     </Animated.View>
   );
 }

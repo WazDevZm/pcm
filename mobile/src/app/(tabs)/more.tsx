@@ -1,7 +1,7 @@
 import * as WebBrowser from 'expo-web-browser';
 import { StyleSheet, View } from 'react-native';
 
-import { HavenSymbol, PcmEndorsement } from '@/components/brand';
+import { HavenMonogram, PcmEndorsement } from '@/components/brand';
 import { Badge, Button, Card, ListRow, Screen, Txt, type IconName } from '@/components/ui';
 import { useAsync } from '@/hooks/useAsync';
 import { getManagedBands } from '@/lib/api';
@@ -41,7 +41,7 @@ export default function MoreScreen() {
     <Screen>
       <Card style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View style={styles.avatar}>
-          <HavenSymbol size={30} tone="white" />
+          <HavenMonogram size={26} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           {user ? (

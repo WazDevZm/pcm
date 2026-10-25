@@ -14,7 +14,6 @@ export const MINISTRY_IMAGES = [
   '/Slider/KCM_0822.jpg',
   '/Features/KCM_0729.jpg',
   '/Features/KCM_0741.jpg',
-  '/KCM_0549.jpg',
 ] as const
 
 export function ministryImage(index: number): string {

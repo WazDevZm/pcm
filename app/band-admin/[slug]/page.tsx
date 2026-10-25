@@ -20,7 +20,7 @@ import { getBandCounts } from '@/lib/data/admin'
 import type { Band, BandAnnouncement, Event } from '@/lib/supabase'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BandMembers } from '@/components/bands/BandMembers'
-import { HavenMark } from '@/components/brand/HavenLogo'
+import { HavenWordmark } from '@/components/brand/HavenLogo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -215,7 +215,7 @@ export default function BandAdminDashboard() {
             <Link href="/band-admin" className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/75 hover:text-white">
               <ArrowLeft className="h-4 w-4" /> My bands
             </Link>
-            <Link href="/" aria-label="The Haven home"><HavenMark tone="onDark" className="h-8 w-8" /></Link>
+            <Link href="/" aria-label="The Haven home"><HavenWordmark tone="onDark" className="text-xl" /></Link>
           </div>
           <p className="eyebrow text-gold mt-8">Band dashboard</p>
           <h1 className="mt-2 text-3xl md:text-4xl">{band.name}</h1>

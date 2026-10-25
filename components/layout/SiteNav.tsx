@@ -37,7 +37,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { HavenMark, HavenWordmark } from '@/components/brand/HavenLogo'
+import { HavenMonogram, HavenWordmark } from '@/components/brand/HavenLogo'
 import { PcmShield } from '@/components/brand/PcmShield'
 import { BRAND } from '@/lib/brand'
 import { MerchCartButton } from '@/components/merch/MerchCartSheet'
@@ -299,9 +299,7 @@ function MobileSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: 
 
         <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-5">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-white p-4">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy">
-              <HavenMark tone="onDark" className="h-7 w-7" />
-            </span>
+            <HavenMonogram className="h-12 w-12 text-2xl" />
             <div className="min-w-0">
               <p className="font-bold text-ink truncate">
                 {user ? `Hi, ${(profile?.name || 'friend').split(' ')[0]}` : `Welcome to ${BRAND.name}`}
@@ -374,10 +372,7 @@ function Brand() {
       className="flex items-center gap-3 shrink-0 min-w-0 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-white/40"
       aria-label={`${BRAND.name} home`}
     >
-      <span className="flex items-center gap-2">
-        <HavenMark tone="onDark" className="h-9 w-9" />
-        <HavenWordmark tone="onDark" className="text-[22px]" />
-      </span>
+      <HavenWordmark tone="onDark" className="text-[28px]" />
       <span className="h-7 w-px bg-white/25" aria-hidden />
       <PcmShield className="h-9" priority />
     </Link>

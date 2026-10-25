@@ -32,9 +32,9 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "The Haven | A ministry of CBU PCM",
+  title: "The Haven | CBU SDA PCM",
   description:
-    "The Haven is a ministry of The Copperbelt University Public Campus Ministries — a place to belong for worship, Bible study, fellowship and service.",
+    "The Haven — The Copperbelt University SDA Public Campus Ministries. A place to belong for worship, Bible study, fellowship and service.",
 }
 
 export const viewport: Viewport = {
