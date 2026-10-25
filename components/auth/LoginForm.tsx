@@ -63,11 +63,20 @@ export function LoginForm({ next, leadership = false }: LoginFormProps) {
     setError('')
     setSuccess('')
     try {
-      await signIn(email.trim(), password)
+      // Pasted logins often carry a stray space or line break; issued passwords never contain spaces
+      await signIn(email.trim().toLowerCase(), password.replace(/\s+/g, ''))
       router.push(safePath(next) ?? '/member-dashboard')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : ''
-      setError(/invalid login/i.test(message) ? 'That email and password don’t match. Check them and try again.' : message || 'Could not sign in')
+      setError(
+        /invalid login/i.test(message)
+          ? 'That email and password don’t match. Check them (passwords are case-sensitive) and try again.'
+          : /fetch|network|load failed/i.test(message)
+            ? 'We couldn’t reach the sign-in service. Check your internet connection — some Wi-Fi networks block it; try mobile data.'
+            : /email not confirmed/i.test(message)
+              ? 'This account hasn’t been confirmed yet. Ask the developer to activate it.'
+              : message || 'Could not sign in'
+      )
     } finally {
       setLoading(false)
     }
@@ -142,6 +151,9 @@ export function LoginForm({ next, leadership = false }: LoginFormProps) {
                 type="email"
                 id="email"
                 autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

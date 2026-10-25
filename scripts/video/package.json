@@ -1,0 +1,9 @@
+{
+  "name": "the-haven-video",
+  "private": true,
+  "description": "Tools for scripts/video/build.mjs (kept out of the website so Vercel never installs them)",
+  "type": "module",
+  "dependencies": {
+    "ffmpeg-static": "5.2.0"
+  }
+}

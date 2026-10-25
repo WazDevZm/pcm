@@ -53,7 +53,8 @@ export async function signInWithGoogle(): Promise<boolean> {
 
 export async function signInWithEmail(email: string, password: string) {
   if (!isSupabaseConfigured) throw new Error('Sign-in needs Supabase configured in .env.');
-  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+  // Pasted logins often carry a stray space or line break; issued passwords never contain spaces
+  const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password: password.replace(/\s+/g, '') });
   if (error) throw new Error(error.message);
 }
 
