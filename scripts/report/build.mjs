@@ -12,6 +12,7 @@
  */
 import fs from 'node:fs'
 import path from 'node:path'
+import { execFileSync } from 'node:child_process'
 import puppeteer from 'puppeteer-core'
 import { root, withPasswords } from '../admin/accounts.mjs'
 
@@ -24,11 +25,28 @@ const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'l
 
 const mime = (f) => (f.endsWith('.png') ? 'image/png' : f.endsWith('.ttf') ? 'font/ttf' : 'image/jpeg')
 const uri = (f) => (fs.existsSync(f) ? `data:${mime(f)};base64,${fs.readFileSync(f).toString('base64')}` : null)
-const asset = (name) => uri(r('reports/assets', name))
 
-const shot = (name, caption, cls = '') => {
+/** Screenshots and posters as 1600 px JPEGs (macOS sips), cached in reports/.cache — keeps the PDF small */
+function photo(f) {
+  if (!fs.existsSync(f)) return null
+  const out = r('reports/.cache', path.basename(f).replace(/\.png$/, '') + '.jpg')
+  try {
+    if (!fs.existsSync(out) || fs.statSync(out).mtimeMs < fs.statSync(f).mtimeMs) {
+      fs.mkdirSync(path.dirname(out), { recursive: true })
+      execFileSync('sips', ['-Z', '1600', '-s', 'format', 'jpeg', '-s', 'formatOptions', '78', f, '--out', out], { stdio: 'ignore' })
+    }
+    return uri(out)
+  } catch {
+    return uri(f)
+  }
+}
+const asset = (name) => photo(r('reports/assets', name))
+
+/** Screenshot with caption; maxMm crops tall images from the top so pages don't overflow */
+const shot = (name, caption, cls = '', maxMm = 0) => {
   const src = asset(name)
-  return src ? `<figure class="shot ${cls}"><img src="${src}"/><figcaption>${caption}</figcaption></figure>` : ''
+  const style = maxMm ? ` style="max-height:${maxMm}mm;object-fit:cover;object-position:top"` : ''
+  return src ? `<figure class="shot ${cls}"><img src="${src}"${style}/><figcaption>${caption}</figcaption></figure>` : ''
 }
 
 const status = (tone, text) => `<span class="pill ${tone}">${text}</span>`
@@ -37,9 +55,9 @@ function html({ withLogins }) {
   const accounts = withPasswords()
   const groups = [...new Set(accounts.map((a) => a.group))]
   const posters = ['01-welcome', '02-sabbath-worship', '03-bible-study', '04-need-prayer', '05-get-the-app']
-    .map((p) => uri(r('brand-kit/posters/png', `${p}.png`)))
+    .map((p) => photo(r('brand-kit/posters/png', `${p}.png`)))
     .filter(Boolean)
-  const launch = ['launch-3', 'launch-2', 'launch-1'].map((p) => uri(r('brand-kit/posters/launch', `${p}.png`))).filter(Boolean)
+  const launch = ['launch-3', 'launch-2', 'launch-1'].map((p) => photo(r('brand-kit/posters/launch', `${p}.png`))).filter(Boolean)
   const studioPosters = ['studio-prayer.png', 'studio-vespers.png', 'studio-sabbath.png'].map(asset).filter(Boolean)
 
   return `<!doctype html><html><head><meta charset="utf-8"><style>
@@ -50,6 +68,8 @@ function html({ withLogins }) {
 body{margin:0;font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;color:#0B0F12;font-size:10.5pt;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .page{width:210mm;min-height:297mm;padding:18mm 18mm 16mm;position:relative;page-break-after:always;background:#fff}
 .page:last-child{page-break-after:auto}
+.page{counter-increment:pg}.cover{counter-increment:none}
+.foot .n:after{content:counter(pg)}
 h1,h2,h3{font-family:FB;letter-spacing:-.01em;margin:0}
 h2{font-size:24pt;color:#0B0F12;margin:2mm 0 5mm}
 h3{font-size:13pt;margin:6mm 0 2mm}
@@ -75,7 +95,8 @@ p{margin:0 0 3mm}
 table{width:100%;border-collapse:collapse;font-size:9pt}
 th{text-align:left;font-size:7.5pt;letter-spacing:.12em;text-transform:uppercase;color:#5b6472;border-bottom:1.5px solid #e4e7ec;padding:2mm 2mm}
 td{border-bottom:1px solid #eef0f3;padding:2.2mm 2mm;vertical-align:top}
-code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radius:1.2mm;padding:.3mm 1.2mm}
+code{font-family:Menlo,monospace;font-size:8pt;background:#f1f3f6;border-radius:1.2mm;padding:.3mm 1.2mm;white-space:nowrap}
+.logins td{padding:1.6mm 1.5mm;font-size:8.5pt}.logins th{padding:1.5mm}
 .shot{margin:0}.shot img{width:100%;border-radius:3mm;border:1px solid #e4e7ec;display:block}
 .shot figcaption{font-size:8pt;color:#5b6472;margin-top:1.5mm}
 .phone img{border-radius:5mm}
@@ -121,15 +142,16 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
     <tr><th style="width:42%">Area</th><th style="width:18%">Status</th><th>Notes</th></tr>
     <tr><td>Website redesign (all public pages)</td><td>${status('ok', 'Live')}</td><td>New text-only logo, CBU SDA PCM naming, faster photos</td></tr>
     <tr><td>Live data from Supabase (events, news, bands)</td><td>${status('ok', 'Working')}</td><td>Checked on the live site</td></tr>
+    <tr><td>Dashboard logins (11) and the four new bands</td><td>${status('ok', 'Live · tested')}</td><td>Every login signed in on the live site with the right role and band</td></tr>
+    <tr><td>Admin, leadership, Publicity and band dashboards</td><td>${status('ok', 'Live · tested')}</td><td>Each role opened its dashboard; blocked pages correctly turned away</td></tr>
     <tr><td>Studio (poster templates)</td><td>${status('ok', 'Live')}</td><td>PNG export checked in portrait, square and story sizes</td></tr>
-    <tr><td>Admin, leadership, Publicity and band dashboards</td><td>${status('warn', 'Built')}</td><td>Active once the logins are switched on (one step)</td></tr>
-    <tr><td>Dashboard logins and the four new bands</td><td>${status('warn', 'One step')}</td><td>Paste one SQL file in Supabase (page 7)</td></tr>
-    <tr><td>Google sign-in for members</td><td>${status('warn', 'One setting')}</td><td>Works at Google; Supabase must allow the live site's address</td></tr>
-    <tr><td>Branded welcome and password emails</td><td>${status('warn', 'Ready')}</td><td>Paste into Supabase email templates</td></tr>
+    <tr><td>Merch store</td><td>${status('ok', 'Redesigned')}</td><td>Clean product illustrations, filters, cart above the menu</td></tr>
+    <tr><td>Google sign-in for members</td><td>${status('warn', 'Confirm')}</td><td>Switched on, and the live site is now an allowed address; a member should confirm the full round trip</td></tr>
+    <tr><td>Branded welcome and password emails</td><td>${status('warn', 'Ready')}</td><td>Paste into Supabase email templates (page 11)</td></tr>
     <tr><td>Mobile app</td><td>${status('info', 'Updated')}</td><td>Code ready; needs a new test build for the new icon and sign-in</td></tr>
-    <tr><td>Supabase on the ministry Wi-Fi</td><td>${status('bad', 'Blocked')}</td><td>Router DNS fails for supabase.co (page 9)</td></tr>
+    <tr><td>Supabase on the ministry Wi-Fi</td><td>${status('bad', 'Blocked')}</td><td>Router DNS fails for supabase.co (page 10)</td></tr>
   </table>
-  <div class="foot"><span>The Haven · Status report</span><span>Publicity Committee · Wazingwa Mugala</span></div>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 <!-- Website -->
@@ -142,7 +164,7 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
     ${shot('home-sections.png', 'Live events and latest news (managed by the Publicity Committee)')}
     ${shot('bands.png', 'Bands — each band has its own page and dashboard')}
   </div>
-  <div class="foot"><span>The Haven · Status report</span><span>2</span></div>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 <section class="page">
@@ -162,7 +184,7 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
       <p class="muted" style="margin:0">New accounts always start as members. Only an admin can give leadership access.</p>
     </div>
   </div>
-  <div class="foot"><span>The Haven · Status report</span><span>3</span></div>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 <!-- Dashboards -->
@@ -182,7 +204,29 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
   <p>Welfare Band, Witnessing Band, Stu-MM, Creativity &amp; Arts Band, Education Committee and Catering Committee each have a head login and a dashboard. Bible Study Band, Health Band and the Publicity Committee are kept. The four new bands appear on the site once the database update runs.</p>
   <h3>Privacy (checked)</h3>
   <p>Using a copy of the database, we confirmed each role sees only what it should: prayer requests are visible to the PCM executive and leaders only; band heads manage only their own band; the Publicity Committee can publish but cannot read care requests.</p>
-  <div class="foot"><span>The Haven · Status report</span><span>4</span></div>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
+</section>
+
+<!-- Dashboards in action -->
+<section class="page">
+  <p class="eyebrow">Tested on the live site</p>
+  <h2>Dashboards in action</h2>
+  <p>Each screen below was opened on ${SITE.replace('https://', '')} by signing in with that role's own login.</p>
+  <div class="grid2">
+    ${shot('admin-chair.png', 'PCM Chairperson — gold tiles show what is waiting; every band with its heads')}
+    ${shot('admin-developer.png', 'Developer — system checks all green, table counts')}
+    ${shot('admin-publicity.png', 'Publicity Committee — website content only, plus the Studio')}
+    ${shot('band-welfare.png', 'Welfare Band head — announcements, events, details, members')}
+  </div>
+  <h3>Access checks</h3>
+  <table>
+    <tr><th style="width:30%">Who</th><th>Result on the live site</th></tr>
+    <tr><td>Developer, Chairperson, Vice Chairperson</td><td>${status('ok', 'Pass')} Admin with their office; can read prayer requests</td></tr>
+    <tr><td>Publicity Committee head</td><td>${status('ok', 'Pass')} Published and removed a test post; turned away from prayer requests</td></tr>
+    <tr><td>Welfare Band head</td><td>${status('ok', 'Pass')} Runs Welfare only; cannot publish site posts; sent from Admin to their own dashboard</td></tr>
+    <tr><td>All six band and committee heads</td><td>${status('ok', 'Pass')} Each signed in and is head of exactly their own band</td></tr>
+  </table>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 <!-- Studio -->
@@ -190,7 +234,7 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
   <p class="eyebrow">For the Publicity Committee</p>
   <h2>The Studio</h2>
   <p>Anyone on the Publicity Committee can make a finished poster in a minute: pick a template, type the details, add a photo and download. The layout, colours and the <b>CBU SDA PCM logo with the ministry's full name</b> are built in, so posters always look right. The Haven logo is not used on posters.</p>
-  ${shot('studio-gallery.png', 'The Studio — choose a template')}
+  ${shot('studio-gallery.png', 'The Studio — choose a template', '', 78)}
   <h3>Templates</h3>
   <table>
     <tr><th style="width:28%">Template</th><th>What you can change</th></tr>
@@ -201,7 +245,7 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
     <tr><td><b>Launch countdown</b></td><td>3, 2 or 1 days to go (colours change each day), headline, tagline, features, launch date, phone screen</td></tr>
   </table>
   <p class="muted" style="margin-top:3mm">Every template: Portrait (feeds), Square (WhatsApp) or Story (status) size · ministry name beside or under the logo · six headline fonts · text saved on the device while you work · PNG or HD download.</p>
-  <div class="foot"><span>The Haven · Status report</span><span>5</span></div>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 <section class="page">
@@ -216,7 +260,17 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
   </ol>
   ${studioPosters.length ? `<div class="grid3" style="margin-top:4mm">${studioPosters.map((s) => `<img src="${s}" style="width:100%;border-radius:2.5mm"/>`).join('')}</div><p class="muted" style="font-size:8pt;margin-top:1.5mm">Posters exported from the Studio</p>` : ''}
   ${launch.length ? `<h3>Launch countdown posters</h3><div class="launch">${launch.map((s) => `<img src="${s}"/>`).join('')}</div><p class="muted" style="font-size:8pt;margin-top:1.5mm">Ready to post three days, two days and one day before launch. Add the launch date in the Studio if you want it on them.</p>` : ''}
-  <div class="foot"><span>The Haven · Status report</span><span>6</span></div>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
+</section>
+
+<!-- Merch -->
+<section class="page">
+  <p class="eyebrow">Store</p>
+  <h2>Merch store</h2>
+  <p>The store was cleaned up: each product now has a clear illustration in the ministry's colours (it changes with the colour chosen), with search, categories, sorting and a simple cart. Orders are paid by Mobile Money or cash and collected on campus, and appear for leaders under <b>Admin → Merch orders</b>. Swap in real product photos when they are taken.</p>
+  ${shot('merch.png', 'Merch store — best sellers and the full range', '', 105)}
+  ${shot('merch-product.png', 'Product page — colour, size, quantity and add to cart', '', 72)}
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 <!-- Logins -->
@@ -230,7 +284,7 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
   }
   ${groups
     .map(
-      (g) => `<h3>${g}</h3><table><tr><th style="width:27%">Role</th><th style="width:33%">Email</th>${withLogins ? '<th style="width:20%">Password</th>' : ''}<th>Dashboard</th></tr>${accounts
+      (g) => `<h3>${g}</h3><table class="logins"><tr><th style="width:24%">Role</th><th style="width:32%">Email</th>${withLogins ? '<th style="width:24%">Password</th>' : ''}<th>Dashboard</th></tr>${accounts
         .filter((a) => a.group === g)
         .map(
           (a) =>
@@ -240,8 +294,8 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
     )
     .join('')}
   <p class="muted" style="margin-top:4mm;font-size:8.5pt">Sign in at ${SITE}/login → <b>Leadership sign-in</b>. The same logins work in the app. They use <code>@thehaven.test</code> addresses, which are not real inboxes, so “Forgot password?” emails cannot arrive; the developer re-issues passwords instead. Switch to real ministry emails when ready.</p>
-  <div class="banner warn" style="margin-top:4mm"><b>To switch these logins on:</b> in Supabase open <b>SQL Editor → New query</b>, paste the file <code>supabase/provision.local.sql</code> (kept privately by the developer) and press <b>Run</b>. The table at the end shows every login with its role.</div>
-  <div class="foot"><span>The Haven · Status report${withLogins ? ' · CONFIDENTIAL' : ''}</span><span>7</span></div>
+  <div class="banner ok" style="margin-top:4mm"><b>Active.</b> All 11 logins were signed in on the live site on ${today} and each opened the right dashboard.</div>
+  <div class="foot"><span>The Haven · Status report${withLogins ? ' · CONFIDENTIAL' : ''}</span><span class="n"></span></div>
 </section>
 
 <!-- Working / not working -->
@@ -253,34 +307,37 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
       <h4 style="color:#067647">Working and checked</h4>
       <ul class="list">
         <li>Website live at ${SITE.replace('https://', '')}; every public page loads</li>
-        <li>Events, news and bands read live from Supabase</li>
-        <li>RSVP, join a band, prayer, counseling, volunteer, pledge and merch forms write to the same database as the app</li>
-        <li>Studio: all templates; photo upload; PNG export in three sizes</li>
-        <li>Google sign-in is switched on and completes at Google</li>
-        <li>Logins file tested on a copy of the database: all 11 passwords, roles, offices and bands correct; safe to run twice</li>
-        <li>Permissions tested per role (privacy of prayer requests, band-only access, Publicity publishing)</li>
+        <li>Events, news and bands read live from Supabase; all nine bands and committees are live</li>
+        <li>All 11 dashboard logins sign in on the live site with the right role, office and band</li>
+        <li>Each dashboard opened by its own role; pages a role may not use are refused</li>
+        <li>Privacy: only the PCM executive and leaders can read prayer requests</li>
+        <li>Publicity can publish what the site shows; band heads cannot</li>
+        <li>Studio: six templates, photo upload, fonts, PNG export in three sizes</li>
+        <li>Merch store redesigned; cart and checkout flow intact</li>
+        <li>Google sign-in is switched on (Developer checks)</li>
         <li>Mobile app code: type checks and lint pass</li>
       </ul>
     </div>
     <div class="card">
-      <h4 style="color:#b42318">Not working yet</h4>
+      <h4 style="color:#b42318">Not done or not yet confirmed</h4>
       <ul class="list">
-        <li><b>Dashboard logins and the four new bands</b> — not in the live database until the SQL file is run</li>
-        <li><b>Google sign-in and email links return to “localhost”</b> — Supabase's Site URL still points at a developer laptop</li>
+        <li><b>Google sign-in round trip</b> — the setting that sent people to “localhost” has been changed; a member still needs to sign in with Google on the live site to confirm</li>
         <li><b>Branded emails</b> — written, not yet pasted into Supabase</li>
         <li><b>Ministry Wi-Fi</b> — the router cannot look up supabase.co, so the site and app fail on that network</li>
-        <li>Dashboards not yet tested with real signed-in accounts in production (needs the logins first)</li>
+        <li>Supabase's built-in email sends only a few emails an hour; connect a mail service before relying on emails</li>
         <li>Counseling page lists sample counsellor profiles</li>
+        <li>Bible Study Band's head is still a demo account (demo.admin@example.com)</li>
+        <li>Merch uses illustrations until real product photos are taken</li>
         <li>The app needs a new test build to show the new icon, splash and sign-in</li>
       </ul>
     </div>
   </div>
   <h3>Also note</h3>
   <ul class="list">
-    <li>Supabase's built-in email service sends only a few emails an hour; connect a mail service (for example Resend) before relying on emails. Members use Google, so this mainly affects password resets.</li>
+    <li>Leadership logins use <code>@thehaven.test</code> addresses, so password-reset emails cannot reach them; the developer re-issues passwords. Move to real ministry emails when ready.</li>
     <li>The team intro deck in <code>presentation/</code> still shows the old logo.</li>
   </ul>
-  <div class="foot"><span>The Haven · Status report</span><span>8</span></div>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 <!-- Next steps -->
@@ -288,20 +345,16 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
   <p class="eyebrow">Next steps</p>
   <h2>To finish testing</h2>
   <ol class="steps">
-    <li><b>Point Supabase at the live site (2 minutes).</b> Supabase → Authentication → URL Configuration: set <b>Site URL</b> to <code>${SITE}</code>. Under <b>Redirect URLs</b> add <code>${SITE}/**</code>, <code>http://localhost:3000/**</code>, <code>thehaven://**</code> and <code>exp://**</code>. This fixes Google sign-in and email links landing on localhost.</li>
-    <li><b>Switch on the logins.</b> Run <code>supabase/provision.local.sql</code> in the SQL Editor (page 7). This also adds Stu-MM, Creativity &amp; Arts, Education and Catering.</li>
+    <li><b>Hand out the logins</b> (page 9), privately, one person at a time.</li>
+    <li><b>Members: confirm Google sign-in.</b> Ask a few students to sign in with Google on the website and in the app, RSVP to an event, join a band and send a test prayer request.</li>
     <li><b>Branded emails.</b> Supabase → Authentication → Email Templates: paste the files in <code>supabase/email-templates/</code> with their subjects.</li>
-    <li><b>Test each dashboard</b> with its login: post news as Publicity, make a poster in the Studio, post an announcement as a band head, approve a volunteer as the Chairperson, run the Developer checks.</li>
+    <li><b>Each leader tries their dashboard:</b> Publicity posts news and makes a poster in the Studio; band heads post an announcement; the Chairperson schedules a counseling request and approves a volunteer.</li>
     <li><b>Fix the Wi-Fi.</b> Set the router's DNS to 1.1.1.1 and 8.8.8.8 (or set it on each phone and laptop).</li>
-    <li><b>Members:</b> ask a few students to sign in with Google on the website and the app, RSVP, join a band and send a test prayer request.</li>
     <li><b>App test build:</b> add the Supabase settings to Expo (EAS) and build a test APK so testers can install it.</li>
-    <li><b>Before launch:</b> real emails for the leadership logins, real counsellor profiles, a mail service for emails, and the launch date on the countdown posters.</li>
+    <li><b>Assign the real Bible Study Band head</b> under Admin → Bands &amp; committees, and remove the demo account.</li>
+    <li><b>Before launch:</b> real emails for the leadership logins, real counsellor profiles, merch photos, a mail service for emails, and the launch date on the countdown posters.</li>
   </ol>
-  <div class="card" style="margin-top:6mm">
-    <h4>Faster option for steps 1–3</h4>
-    <p style="margin:0">If the developer adds a Supabase access token to the private file <code>.env.admin.local</code>, one command (<code>npm run provision</code>) does steps 1–3 automatically and switches on Google sign-in settings.</p>
-  </div>
-  <div class="foot"><span>The Haven · Status report</span><span>9</span></div>
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 <!-- Brand -->
@@ -309,10 +362,10 @@ code{font-family:Menlo,monospace;font-size:8.5pt;background:#f1f3f6;border-radiu
   <p class="eyebrow">Brand</p>
   <h2>Logo, posters and email</h2>
   <p>The Haven's logo is now text only: a gold italic <i>the</i>, <b>Haven</b> in Fraunces, and a gold full stop for the light. Posters and official material carry the <b>CBU SDA PCM</b> shield with the full name, <b>The Copperbelt University SDA Public Campus Ministries</b>.</p>
-  ${uri(r('brand-kit/brand-sheet.png')) ? `<img src="${uri(r('brand-kit/brand-sheet.png'))}" style="width:100%;border-radius:3mm;border:1px solid #e4e7ec"/>` : ''}
+  ${photo(r('brand-kit/brand-sheet.png')) ? `<img src="${photo(r('brand-kit/brand-sheet.png'))}" style="width:82%;display:block;margin:0 auto;border-radius:3mm;border:1px solid #e4e7ec"/>` : ''}
   ${posters.length ? `<h3>Ready-made posters</h3><div class="posters">${posters.map((p) => `<img src="${p}"/>`).join('')}</div>` : ''}
-  ${shot('email-welcome.png', 'Welcome email for new members (to paste into Supabase)', '')}
-  <div class="foot"><span>The Haven · Status report</span><span>10</span></div>
+  ${shot('email-welcome.png', 'Welcome email for new members (to paste into Supabase)', '', 62)}
+  <div class="foot"><span>The Haven · Status report</span><span class="n"></span></div>
 </section>
 
 </body></html>`
